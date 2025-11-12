@@ -10,7 +10,7 @@ This guide will get you running locally.
 ## 1. Clone the repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/Webistan-cloud/shereads.git
 cd she-reads-project
 ```
 
