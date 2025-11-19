@@ -42,7 +42,7 @@ const estedad = localFont({
 export default function RootLayout({ children }) {
   return (
     <html lang="fa" dir="rtl">
-      <body className={`${estedad.variable} ${geistSans.variable} ${geistMono.variable} max-w-[1440px] mx-auto font-estedad`}>
+      <body className={`${estedad.variable} ${geistSans.variable} ${geistMono.variable} max-w-[1680px] mx-auto font-estedad`}>
         <main>{children}</main>
       </body>
     </html>

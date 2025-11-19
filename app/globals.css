@@ -256,7 +256,7 @@
 
 @layer components {
   .page {
-    @apply h-screen relative overflow-hidden;
+    @apply min-h-screen relative overflow-hidden;
   }
 
 
