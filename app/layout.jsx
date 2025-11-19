@@ -20,7 +20,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="fa">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+        <main>{children}</main>
       </body>
     </html>
   );
