@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { RegisterSchema } from "@/app/services/registerSchema";
 import { hashPassword, signToken } from "@/lib/auth";
 import { cookies } from "next/headers";
+import { scoreBook } from "@/lib/recommender";
 
 export async function POST(req) {
   try {
@@ -32,6 +33,30 @@ export async function POST(req) {
     // Hash password
     const passwordHash = await hashPassword(data.password);
 
+    //recomendation logic
+    let recommendedIds = [];
+
+    const hasPreferences =
+      data.Genre ||
+      data.mood ||
+      data.Motivation ||
+      data.Age ||
+      data.author ||
+      data.book_length;
+
+    if (hasPreferences) {
+      const books = await prisma.book.findMany();
+
+      const scoredBooks = books.map((book) => {
+        const score = scoreBook(book, data);
+        return { id: book.id, score };
+      });
+
+      recommendedIds = scoredBooks
+        .filter((b) => b.score >= 10)
+        .map((b) => b.id);
+    }
+
     // Create user
     const user = await prisma.user.create({
       data: {
@@ -47,7 +72,7 @@ export async function POST(req) {
         Age: data.Age ?? null,
         author: data.author ?? null,
         book_length: data.book_length ?? null,
-        recommendedBooksIds: data.recommendedBooksIds ?? null,
+        recommendedBooksIds: recommendedIds.length > 0 ? recommendedIds : null,
       },
     });
 
