@@ -6,6 +6,7 @@ import {
   MoodEnum,
   MotivationEnum,
   LengthEnum,
+  AgeEnum,
 } from '@/app/services/answersSchema'; 
 
 export const RegisterSchema = z.object({
@@ -13,7 +14,6 @@ export const RegisterSchema = z.object({
   gender: GenderEnum, // uses your zod enum
   email: z.string().email(),
   password: z.string().min(6),
-  profileImgURL: z.string().url().optional().nullable(),
 
   // optional role but validate if provided
   role: RoleEnum.optional().default('user'),
@@ -22,7 +22,7 @@ export const RegisterSchema = z.object({
   Genre: z.array(GenreEnum).optional().nullable(),
   mood: MoodEnum.optional().nullable(),
   Motivation: z.array(MotivationEnum).optional().nullable(),
-  Age: z.number().int().positive().optional().nullable(),
+  Age: AgeEnum.optional().nullable(),
   author: z.array(z.number().int().positive()).optional().nullable(),
   book_length: z.array(LengthEnum).optional().nullable(),
   recommendedBooksIds: z.array(z.number().int().positive()).optional().nullable(),

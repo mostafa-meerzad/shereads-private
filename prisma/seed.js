@@ -37,7 +37,7 @@ async function main() {
         Genre: ["ادبیات", "داستان"],
         mood: ["احساسی", "احساس_خوب"],
         Motivation: ["سرگرمی", "یادگیری"],
-        Age: "متوسط",
+        Age: "۱۲–۱۷",
         length: 220
       },
       {
@@ -49,7 +49,7 @@ async function main() {
         Genre: ["تاریخی", "ادبیات"],
         mood: ["پرهیجان"],
         Motivation: ["یادگیری", "رشد_فردی"],
-        Age: "بلند",
+        Age: "۱۲–۱۷",
         length: 1200
       },
       {
@@ -61,7 +61,7 @@ async function main() {
         Genre: ["توسعه_فردی", "ادبیات"],
         mood: ["الهام_بخش"],
         Motivation: ["رشد_فردی"],
-        Age: "متوسط",
+        Age: "۱۸–۲۵",
         length: 200
       },
       {
@@ -73,7 +73,7 @@ async function main() {
         Genre: ["ادبیات", "معلوماتی"],
         mood: ["آرام"],
         Motivation: ["یادگیری"],
-        Age: "کوتاه",
+        Age: "۲۶–۳۵",
         length: 160
       },
       {
@@ -85,7 +85,7 @@ async function main() {
         Genre: ["تاریخی", "ادبیات"],
         mood: ["احساسی", "پرهیجان"],
         Motivation: ["یادگیری"],
-        Age: "بلند",
+        Age: "۵۰+",
         length: 700
       },
       {
@@ -97,7 +97,7 @@ async function main() {
         Genre: ["تخیلی", "تاریخی"],
         mood: ["معلوماتی"],
         Motivation: ["یادگیری", "رشد_فردی"],
-        Age: "متوسط",
+        Age: "۳۶–۵۰",
         length: 328
       },
       {
@@ -109,7 +109,7 @@ async function main() {
         Genre: ["فانتزی", "ادبیات"],
         mood: ["پرهیجان"],
         Motivation: ["سرگرمی"],
-        Age: "بلند",
+        Age: "۳۶–۵۰",
         length: 480
       },
       {
@@ -121,7 +121,7 @@ async function main() {
         Genre: ["رمانتیک", "ادبیات"],
         mood: ["احساس_خوب"],
         Motivation: ["سرگرمی"],
-        Age: "متوسط",
+        Age: "۳۶–۵۰",
         length: 300
       },
       {
@@ -133,7 +133,7 @@ async function main() {
         Genre: ["معلوماتی"],
         mood: ["آرام"],
         Motivation: ["یادگیری"],
-        Age: "کوتاه",
+        Age: "۳۶–۵۰",
         length: 150
       },
       {
@@ -145,7 +145,7 @@ async function main() {
         Genre: ["ادبیات"],
         mood: ["احساسی"],
         Motivation: ["سرگرمی"],
-        Age: "متوسط",
+        Age: "۲۶–۳۵",
         length: 400
       }
     ]
@@ -166,7 +166,7 @@ async function main() {
         Genre: ["ادبیات", "توسعه_فردی"],
         mood: "آرام",
         Motivation: ["یادگیری"],
-        Age: 22,
+        Age: "۱۸–۲۵",
         author: [1, 6],
         book_length: ["کوتاه", "متوسط"],
         recommendedBooksIds: [1, 3, 6]
@@ -181,7 +181,7 @@ async function main() {
         Genre: ["رمانتیک", "داستان"],
         mood: "احساس_خوب",
         Motivation: ["سرگرمی"],
-        Age: 20,
+        Age: "۱۸–۲۵",
         author: [10],
         book_length: ["متوسط"],
         recommendedBooksIds: [8]
@@ -196,7 +196,7 @@ async function main() {
         Genre: ["معلوماتی", "تاریخی"],
         mood: "معلوماتی",
         Motivation: ["یادگیری"],
-        Age: 30,
+        Age: "۲۶–۳۵",
         author: [5, 7],
         book_length: ["بلند"],
         recommendedBooksIds: [5, 6]
@@ -211,7 +211,7 @@ async function main() {
         Genre: ["فانتزی"],
         mood: "پرهیجان",
         Motivation: ["سرگرمی"],
-        Age: 19,
+        Age: "۳۶–۵۰",
         author: [9],
         book_length: ["بلند"],
         recommendedBooksIds: [7]
@@ -226,7 +226,7 @@ async function main() {
         Genre: ["ادبیات", "بیوگرافی"],
         mood: "الهام_بخش",
         Motivation: ["رشد_فردی"],
-        Age: 26,
+        Age: "۳۶–۵۰",
         author: [6, 3],
         book_length: ["متوسط", "بلند"],
         recommendedBooksIds: [3, 10]

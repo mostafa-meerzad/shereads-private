@@ -64,7 +64,6 @@ export async function POST(req) {
         gender: data.gender,
         email: data.email,
         passwordHash,
-        profileImgURL: data.profileImgURL ?? null,
         role: data.role,
         Genre: data.Genre ?? null,
         mood: data.mood ?? null,

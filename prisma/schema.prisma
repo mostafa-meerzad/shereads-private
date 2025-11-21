@@ -14,7 +14,6 @@ model User {
   gender              String   // ENUM in MySQL, validated by Zod
   email               String   @unique
   passwordHash        String
-  profileImgURL       String?
   isActive            Boolean  @default(true)
   role                String   @default("user") // ENUM in MySQL
   createdAt           DateTime @default(now())
@@ -23,7 +22,7 @@ model User {
   Genre               Json?    // Genre[]
   mood                String?  // ENUM in MySQL
   Motivation          Json?    // MotivationType[]
-  Age                 Int?
+  Age                 String?    // Age categories
   author              Json?    // Int[]
   book_length              Json?    // Length[]
   recommendedBooksIds Json?    // Int[]
