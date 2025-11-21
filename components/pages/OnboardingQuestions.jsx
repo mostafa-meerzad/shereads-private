@@ -1,0 +1,372 @@
+"use client";
+import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
+import { useState } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
+
+// Image imports placeholder (user will replace)
+import img2 from "@/assets/onboarding-img-2.png";
+import img3 from "@/assets/onboarding-img-3.png";
+import img4 from "@/assets/onboarding-img-4.png";
+import img5 from "@/assets/onboarding-img-5.png";
+import img6 from "@/assets/onboarding-img-6.png";
+import img8 from "@/assets/onboarding-img-8.png";
+import { Button } from "../ui/button";
+
+const formData = [
+  {
+    question: " کدام ژانرها را بیشتر دوست دارید ؟",
+    answers: [
+      "داستان",
+      "ادبیات",
+      "رمانتیک",
+      "تخیلی",
+      "تاریخی",
+      "توسعه فردی",
+      "بیوگرافی",
+      "فانتزی",
+      "آموزش مهارت",
+    ],
+    img: img6,
+  },
+  {
+    question: " حالت مورد نظرتان برای خواندن چیست؟",
+    answers: [
+      "آرام",
+      "الهام بخش",
+      "احساسی",
+      "معلوماتی",
+      "پرهیجان",
+      "احساس خوب",
+    ],
+    img: img2,
+  },
+  {
+    question: "در کدام گروه سنی قرار دارید؟",
+    answers: ["۱۷-۱۲", "۲۵-۱۸", "۳۵-۲۶", "۵۰-۳۶", "۵۰+"],
+    img: img3,
+  },
+  {
+    question: "طول کتاب مورد علاقه تان چیست؟",
+    answers: [
+      "کوتاه کمتر از ۲۰۰ صفحه",
+      "متوسط ۲۰۰ تا ۴۰۰ صفحه",
+      "بلند ۴۰۰ صفحه به بالا",
+    ],
+    img: img4,
+  },
+  {
+    question: "هدف شما از کتاب خوانی چیست؟",
+    answers: ["سرگرمی", "یادگیری", "رشد فردی", "بهبود مهارت ها"],
+    img: img5,
+  },
+];
+
+const containerVariants = {
+  enter: { opacity: 0, x: 20 },
+  center: {
+    opacity: 1,
+    x: 0,
+    transition: { when: "beforeChildren", staggerChildren: 0.06 },
+  },
+  exit: { opacity: 0, x: -20 },
+};
+
+const answerVariants = {
+  enter: { opacity: 0, y: 8 },
+  center: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 300, damping: 22 },
+  },
+  exit: { opacity: 0, y: 8 },
+};
+
+const OnboardingQuestions = ({ onComplete }) => {
+  const [colletedAnswers, setCollectedAnswers] = useState({});
+  const { control, handleSubmit } = useForm({
+    defaultValues: { answers: {} },
+  });
+  const [step, setStep] = useState(0);
+  const selected =
+    useWatch({ control, name: `answers.${step}`, defaultValue: [] }) || [];
+  const onSubmit = (data) => {
+    console.log("Final submitted data", data);
+    setStep(formData.length); // Go to final page
+    setCollectedAnswers(data);
+  };
+
+  // FINAL STEP UI
+ if (step === formData.length) {
+  return (
+    <div className=" w-full  bg-white shadow p-10 grid  md:grid-cols-2 gap-10 max-md:gap-0 items-center ">
+      {/* Image animation */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.6 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{
+          duration: 0.6,
+          type: "spring",
+          stiffness: 110,
+          damping: 20,
+        }}
+        className="relative w-full h-120 md:h-full max-md:order-1"
+      >
+        <Image
+          src={img8}
+          alt="Final"
+          width={500}
+          height={500}
+          className="object-contain size-full "
+        />
+      </motion.div>
+
+      {/* Right side */}
+      <div className="flex flex-col items-center md:items-end gap-10 md:gap-16 lg:gap-20 text-right  h-full max-md:pb-10 py-32 max-md:order-0 ">
+        
+        {/* Progress bullets animation (staggered) */}
+        <motion.div
+          className="relative flex justify-center gap-6 sm:gap-8 md:gap-8 w-full  lg:justify-between"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            visible: {
+              transition: { staggerChildren: 0.15 },
+            },
+          }}
+        >
+          {Array(6)
+            .fill(undefined)
+            .map((_, i) => (
+              <motion.div
+                key={i}
+                variants={{
+                  hidden: { opacity: 0, scale: 0.5, y: 10 },
+                  visible: {
+                    opacity: 1,
+                    scale: 1,
+                    y: 0,
+                    transition: { type: "spring", stiffness: 200, damping: 15 },
+                  },
+                }}
+                className={`relative size-8 sm:size-10 md:size-9 lg:size-10 rounded-full border-2 flex items-center justify-center text-sm bg-green-700 text-white border-green-700`}
+              >
+                {i + 1}
+                {i < 5 && (
+                  <div
+                    className={`absolute w-10 lg:w-16 xl:w-24  h-0.5 left-full bg-green-700`}
+                  ></div>
+                )}
+              </motion.div>
+            ))}
+        </motion.div>
+
+        {/* Text */}
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="text-lg text-center max-md:px-5 md:text-xl lg:text-2xl lg:text-end font-medium text-gray-800  leading-loose"
+        >
+          ما پاسخ‌های شما را دریافت کردیم و آماده‌ایم که بهترین کتاب‌ها را
+          برایتان پیدا کنیم
+        </motion.h2>
+
+        {/* Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.7 }}
+        >
+          <Button className="bg-green-700 hover:text-gray-200 hover:scale-105 hover:bg-green-900 text-white px-8 py-5 rounded-full transition-all lg:text-lg lg:py-6 lg:px-13" onClick={()=>(onComplete())}>
+            پیدا کردن کتاب‌های من
+          </Button>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
+
+  return (
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="grid w-full  max-md:max-w-4xl bg-white p-10  md:grid-cols-2 gap-20 md:items-center md:p-0 md:pr-8"
+    >
+      {/* Left image */}
+      <div className="hidden col-start-1 md:block relative h-full min-h-screen">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={formData[step].img.src}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="absolute inset-0"
+          >
+            <Image
+              src={formData[step].img}
+              alt="Step"
+              fill
+              className="object-cover"
+            />
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Right section */}
+      <div className="md:col-start-2  flex flex-col w-full md:px-5 justify-between  py-32 md:max-w-xl h-full lg:justify-start lg:gap-16">
+        {/* Step indicator */}
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="relative flex justify-center gap-6 sm:gap-8 md:gap-8 w-full  lg:justify-between mb-20 lg:mb-10"
+        >
+          {Array(6)
+            .fill(undefined)
+            .map((_, i) => (
+              <motion.div
+                key={i}
+                animate={{ scale: i === step ? 1.03 : 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className={`relative size-10 md:size-8 lg:size-10 rounded-full border-2 flex items-center justify-center text-sm ${
+                  i === step
+                    ? "bg-green-700 text-white border-green-700"
+                    : i < step
+                    ? "bg-green-100 text-green-700 border-green-600"
+                    : "bg-white text-gray-400 border-gray-300"
+                }`}
+              >
+                {i + 1}
+                {i < 5 && (
+                  <div
+                    className={`absolute w-10 lg:w-16 xl:w-24  h-0.5 left-full transition-all duration-500 ${
+                      i === step
+                        ? "bg-green-700 text-white border-green-700"
+                        : i < step
+                        ? "bg-green-600 text-green-700 border-green-600"
+                        : "bg-gray-300 text-gray-400 border-gray-300"
+                    }`}
+                  ></div>
+                )}
+              </motion.div>
+            ))}
+        </motion.div>
+
+        {/* Question + answers */}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={step}
+            variants={containerVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+          >
+            <motion.h2 className="text-xl lg:text-[1.4rem] text-center font-medium text-gray-800 mb-6 md:text-right">
+              {formData[step].question}
+            </motion.h2>
+
+            <Controller
+              control={control}
+              name={`answers.${step}`}
+              rules={{ required: true }}
+              render={({ field }) => {
+                const values = field.value || [];
+
+                const isAgeQuestion = step === 2;
+
+                const handleSelect = (answer) => {
+                  if (isAgeQuestion) {
+                    // SINGLE SELECT
+                    field.onChange([answer]);
+                  } else {
+                    // MULTI SELECT
+                    if (values.includes(answer)) {
+                      field.onChange(values.filter((v) => v !== answer));
+                    } else {
+                      field.onChange([...values, answer]);
+                    }
+                  }
+                };
+
+                return (
+                  <div className="flex flex-col items-end ml-auto gap-4 mb-8 mt-10 lg:max-w-2/3">
+                    {formData[step].answers.map((answer, idx) => {
+                      const isSelected = values.includes(answer);
+
+                      return (
+                        <motion.button
+                          key={idx}
+                          type="button"
+                          onClick={() => handleSelect(answer)}
+                          variants={answerVariants}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className={`w-full border rounded-full py-3 px-6 text-right transition ${
+                            isSelected
+                              ? "bg-green-700 text-white border-green-700"
+                              : "border-green-700 text-green-700 bg-white hover:bg-green-50"
+                          }`}
+                        >
+                          {answer}
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                );
+              }}
+            />
+
+            {/* Navigation */}
+            <div className="flex justify-between mt-18">
+              {step > 0 ? (
+                <motion.button
+                  type="button"
+                  onClick={() => setStep(step - 1)}
+                  whileHover={{ y: -2 }}
+                  className="px-6 py-2 rounded-full border border-gray-400 text-gray-600 hover:bg-gray-100"
+                >
+                  قبلی
+                </motion.button>
+              ) : (
+                <div />
+              )}
+
+              {step < formData.length - 1 ? (
+                <motion.button
+                  type="button"
+                  onClick={() => selected && setStep(step + 1)}
+                  disabled={selected.length === 0}
+                  whileHover={selected.length > 0 ? { y: -2 } : {}}
+                  className={`px-6 py-2 rounded-full border ${
+                    selected.length > 0
+                      ? "bg-green-700 text-white border-green-700"
+                      : "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"
+                  }`}
+                >
+                  بعدی
+                </motion.button>
+              ) : (
+                <motion.button
+                  type="submit"
+                  disabled={selected.length === 0}
+                  whileHover={selected.length > 0 ? { y: -2 } : {}}
+                  className={`px-6 py-2 rounded-full border ${
+                    selected.length > 0
+                      ? "bg-green-700 text-white border-green-700"
+                      : "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"
+                  }`}
+                >
+                  تایید
+                </motion.button>
+              )}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </form>
+  );
+};
+
+export default OnboardingQuestions;

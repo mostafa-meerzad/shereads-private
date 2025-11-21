@@ -6,8 +6,11 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import TextType from "../TextType";
+import { useRouter } from "next/navigation";
 
 const Welcome = () => {
+
+  const router = useRouter()
   return (
     <section className="page bg-[#E6F0EC] text-black flex flex-col  md:flex-row justify-start lg:justify-center items-center  md:gap-1 lg:gap-10 py-10 md:py-32 lg:py-20">
       <motion.div
@@ -60,6 +63,7 @@ const Welcome = () => {
             className={
               "rounded-full bg-[#E7B944] hover:bg-green-700 hover:text-white text-black w-fit px-24 py-6 transition-all hover:scale-105 active:scale-95"
             }
+            onClick={ ()=> router.push('/onboarding')}
           >
             شروع کنید
           </Button>
