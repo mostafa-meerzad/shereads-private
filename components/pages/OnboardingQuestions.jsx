@@ -191,7 +191,7 @@ const OnboardingQuestions = ({ onComplete }) => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="grid   w-full  max-md:max-w-4xl bg-white max-md:rounded-3xl shadow p-10  md:grid-cols-2 gap-20 md:items-center md:p-0 md:pr-8"
+      className="grid w-full  max-md:max-w-4xl bg-white p-10  md:grid-cols-2 gap-20 md:items-center md:p-0 md:pr-8"
     >
       {/* Left image */}
       <div className="hidden col-start-1 md:block relative h-full min-h-screen">

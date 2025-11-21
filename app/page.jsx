@@ -1,12 +1,12 @@
 import React from "react";
 import Welcome from "../components/pages/Welcome";
-import OnBoardingForm from "./onboaring/page";
+import OnBoardingForm from "./onboarding/page";
 
 const page = () => {
   return (
     <div>
-      {/* <Welcome /> */}
-      <OnBoardingForm/>
+      <Welcome />
+      {/* <OnBoardingForm/> */}
     </div>
   );
   
