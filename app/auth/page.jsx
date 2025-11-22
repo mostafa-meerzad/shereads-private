@@ -14,11 +14,15 @@ import {
 import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import img from "@/assets/sign-up-img.png";
+import {  useSearchParams } from "next/navigation";
 
 export default function AuthPage() {
   const [mode, setMode] = useState("signup");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const searchParams = useSearchParams();
+  const dataParam = searchParams.get('data');
+
 
   const {
     register,
