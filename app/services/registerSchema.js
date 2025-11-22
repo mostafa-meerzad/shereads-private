@@ -1,0 +1,29 @@
+import z from "zod";
+import {
+  GenderEnum,
+  RoleEnum,
+  GenreEnum,
+  MoodEnum,
+  MotivationEnum,
+  LengthEnum,
+  AgeEnum,
+} from '@/app/services/answersSchema'; 
+
+export const RegisterSchema = z.object({
+  name: z.string().min(1),
+  gender: GenderEnum, // uses your zod enum
+  email: z.string().email(),
+  password: z.string().min(6),
+
+  // optional role but validate if provided
+  role: RoleEnum.optional().default('user'),
+
+  // JSON array fields (optional)
+  Genre: z.array(GenreEnum).optional().nullable(),
+  mood: MoodEnum.optional().nullable(),
+  Motivation: z.array(MotivationEnum).optional().nullable(),
+  Age: AgeEnum.optional().nullable(),
+  author: z.array(z.number().int().positive()).optional().nullable(),
+  book_length: z.array(LengthEnum).optional().nullable(),
+  recommendedBooksIds: z.array(z.number().int().positive()).optional().nullable(),
+});
