@@ -19,7 +19,10 @@ const Onboarding = () => {
   };
 
   const handleGoToAuth = () => {
-    router.push("/auth");
+    const jsonString = JSON.stringify(formAnswers);
+    const params = new URLSearchParams();
+    params.set("data", jsonString);
+    router.push(`/auth?${params.toString()}`);
   };
 
   return (

@@ -82,8 +82,15 @@ const answerVariants = {
   exit: { opacity: 0, y: 8 },
 };
 
+const backendKeys = {
+  0: "Genre",
+  1: "mood",
+  2: "Age",
+  3: "book_length",
+  4: "Motivation",
+};
+
 const OnboardingQuestions = ({ onComplete }) => {
-  const [colletedAnswers, setCollectedAnswers] = useState({});
   const { control, handleSubmit } = useForm({
     defaultValues: { answers: {} },
   });
@@ -91,107 +98,126 @@ const OnboardingQuestions = ({ onComplete }) => {
   const selected =
     useWatch({ control, name: `answers.${step}`, defaultValue: [] }) || [];
   const onSubmit = (data) => {
-    console.log("Final submitted data", data);
-    setStep(formData.length); // Go to final page
-    setCollectedAnswers(data);
+    const transformed = {};
+
+    Object.keys(data.answers).forEach((key) => {
+      const backendKey = backendKeys[key];
+      const value = data.answers[key];
+
+      // age & mood are SINGLE SELECT, so send as string
+      if (backendKey === "Age" || backendKey === "mood") {
+        transformed[backendKey] = value[0] || null;
+      } else {
+        // everything else MULTI SELECT
+        transformed[backendKey] = value;
+      }
+    });
+
+    setStep(formData.length);
+    onComplete(transformed);
   };
 
   // FINAL STEP UI
- if (step === formData.length) {
-  return (
-    <div className=" w-full  bg-white shadow p-10 grid  md:grid-cols-2 gap-10 max-md:gap-0 items-center ">
-      {/* Image animation */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.6 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{
-          duration: 0.6,
-          type: "spring",
-          stiffness: 110,
-          damping: 20,
-        }}
-        className="relative w-full h-120 md:h-full max-md:order-1"
-      >
-        <Image
-          src={img8}
-          alt="Final"
-          width={500}
-          height={500}
-          className="object-contain size-full "
-        />
-      </motion.div>
-
-      {/* Right side */}
-      <div className="flex flex-col items-center md:items-end gap-10 md:gap-16 lg:gap-20 text-right  h-full max-md:pb-10 py-32 max-md:order-0 ">
-        
-        {/* Progress bullets animation (staggered) */}
+  if (step === formData.length) {
+    return (
+      <div className=" w-full  bg-white shadow p-10 grid  md:grid-cols-2 gap-10 max-md:gap-0 items-center ">
+        {/* Image animation */}
         <motion.div
-          className="relative flex justify-center gap-6 sm:gap-8 md:gap-8 w-full  lg:justify-between"
-          initial="hidden"
-          animate="visible"
-          variants={{
-            visible: {
-              transition: { staggerChildren: 0.15 },
-            },
+          initial={{ opacity: 0, scale: 0.6 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{
+            duration: 0.6,
+            type: "spring",
+            stiffness: 110,
+            damping: 20,
           }}
+          className="relative w-full h-120 md:h-full max-md:order-1"
         >
-          {Array(6)
-            .fill(undefined)
-            .map((_, i) => (
-              <motion.div
-                key={i}
-                variants={{
-                  hidden: { opacity: 0, scale: 0.5, y: 10 },
-                  visible: {
-                    opacity: 1,
-                    scale: 1,
-                    y: 0,
-                    transition: { type: "spring", stiffness: 200, damping: 15 },
-                  },
-                }}
-                className={`relative size-8 sm:size-10 md:size-9 lg:size-10 rounded-full border-2 flex items-center justify-center text-sm bg-green-700 text-white border-green-700`}
-              >
-                {i + 1}
-                {i < 5 && (
-                  <div
-                    className={`absolute w-10 lg:w-16 xl:w-24  h-0.5 left-full bg-green-700`}
-                  ></div>
-                )}
-              </motion.div>
-            ))}
+          <Image
+            src={img8}
+            alt="Final"
+            width={500}
+            height={500}
+            className="object-contain size-full "
+          />
         </motion.div>
 
-        {/* Text */}
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          className="text-lg text-center max-md:px-5 md:text-xl lg:text-2xl lg:text-end font-medium text-gray-800  leading-loose"
-        >
-          ما پاسخ‌های شما را دریافت کردیم و آماده‌ایم که بهترین کتاب‌ها را
-          برایتان پیدا کنیم
-        </motion.h2>
+        {/* Right side */}
+        <div className="flex flex-col items-center md:items-end gap-10 md:gap-16 lg:gap-20 text-right  h-full max-md:pb-10 py-32 max-md:order-0 ">
+          {/* Progress bullets animation (staggered) */}
+          <motion.div
+            className="relative flex justify-center gap-6 sm:gap-8 md:gap-8 w-full  lg:justify-between"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              visible: {
+                transition: { staggerChildren: 0.15 },
+              },
+            }}
+          >
+            {Array(6)
+              .fill(undefined)
+              .map((_, i) => (
+                <motion.div
+                  key={i}
+                  variants={{
+                    hidden: { opacity: 0, scale: 0.5, y: 10 },
+                    visible: {
+                      opacity: 1,
+                      scale: 1,
+                      y: 0,
+                      transition: {
+                        type: "spring",
+                        stiffness: 200,
+                        damping: 15,
+                      },
+                    },
+                  }}
+                  className={`relative size-8 sm:size-10 md:size-9 lg:size-10 rounded-full border-2 flex items-center justify-center text-sm bg-green-700 text-white border-green-700`}
+                >
+                  {i + 1}
+                  {i < 5 && (
+                    <div
+                      className={`absolute w-10 lg:w-16 xl:w-24  h-0.5 left-full bg-green-700`}
+                    ></div>
+                  )}
+                </motion.div>
+              ))}
+          </motion.div>
 
-        {/* Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 10, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.7 }}
-        >
-          <Button className="bg-green-700 hover:text-gray-200 hover:scale-105 hover:bg-green-900 text-white px-8 py-5 rounded-full transition-all lg:text-lg lg:py-6 lg:px-13" onClick={()=>(onComplete())}>
-            پیدا کردن کتاب‌های من
-          </Button>
-        </motion.div>
+          {/* Text */}
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="text-lg text-center max-md:px-5 md:text-xl lg:text-2xl lg:text-end font-medium text-gray-800  leading-loose"
+          >
+            ما پاسخ‌های شما را دریافت کردیم و آماده‌ایم که بهترین کتاب‌ها را
+            برایتان پیدا کنیم
+          </motion.h2>
+
+          {/* Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.7 }}
+          >
+            <Button
+              className="bg-green-700 hover:text-gray-200 hover:scale-105 hover:bg-green-900 text-white px-8 py-5 rounded-full transition-all lg:text-lg lg:py-6 lg:px-13"
+              type="submit"
+            >
+              پیدا کردن کتاب‌های من
+            </Button>
+          </motion.div>
+        </div>
       </div>
-    </div>
-  );
-}
-
+    );
+  }
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="grid w-full  max-md:max-w-4xl bg-white p-10  md:grid-cols-2 gap-20 md:items-center md:p-0 md:pr-8"
+      className="grid w-full  max-md:max-w-4xl bg-white p-10  md:grid-cols-2 gap-20 lg:gap-40 md:items-center md:p-0 md:pr-8"
     >
       {/* Left image */}
       <div className="hidden col-start-1 md:block relative h-full min-h-screen">
@@ -215,7 +241,7 @@ const OnboardingQuestions = ({ onComplete }) => {
       </div>
 
       {/* Right section */}
-      <div className="md:col-start-2  flex flex-col w-full md:px-5 justify-between  py-32 md:max-w-xl h-full lg:justify-start lg:gap-16">
+      <div className="md:col-start-2 flex flex-col w-full md:px-5 justify-between  py-32 md:max-w-xl h-fit lg:justify-start lg:gap-16   justify-self-start">
         {/* Step indicator */}
         <motion.div
           initial={{ opacity: 0, y: -6 }}
@@ -255,13 +281,14 @@ const OnboardingQuestions = ({ onComplete }) => {
         </motion.div>
 
         {/* Question + answers */}
-        <AnimatePresence mode="wait" initial={false}>
+        <AnimatePresence mode="wait" initial={false} >
           <motion.div
             key={step}
             variants={containerVariants}
             initial="enter"
             animate="center"
             exit="exit"
+            className=" relative top-0"
           >
             <motion.h2 className="text-xl lg:text-[1.4rem] text-center font-medium text-gray-800 mb-6 md:text-right">
               {formData[step].question}
@@ -274,14 +301,15 @@ const OnboardingQuestions = ({ onComplete }) => {
               render={({ field }) => {
                 const values = field.value || [];
 
-                const isAgeQuestion = step === 2;
+                // step 1 = mood, step 2 = age
+                const isSingleSelect = step === 1 || step === 2;
 
                 const handleSelect = (answer) => {
-                  if (isAgeQuestion) {
-                    // SINGLE SELECT
+                  if (isSingleSelect) {
+                    // Always replace with a single selected value
                     field.onChange([answer]);
                   } else {
-                    // MULTI SELECT
+                    // Multi-select as usual
                     if (values.includes(answer)) {
                       field.onChange(values.filter((v) => v !== answer));
                     } else {
@@ -291,7 +319,7 @@ const OnboardingQuestions = ({ onComplete }) => {
                 };
 
                 return (
-                  <div className="flex flex-col items-end ml-auto gap-4 mb-8 mt-10 lg:max-w-2/3">
+                  <div dir="rtl" className="grid md:grid-cols-2 flex-col items-end ml-auto gap-4 mb-8 mt-10 ">
                     {formData[step].answers.map((answer, idx) => {
                       const isSelected = values.includes(answer);
 
