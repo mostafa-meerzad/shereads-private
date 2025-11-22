@@ -12,5 +12,3 @@ export default function HomePage() {
   );
   
 };
-
-export default HomePage;
