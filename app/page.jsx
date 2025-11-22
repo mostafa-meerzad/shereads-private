@@ -1,15 +1,16 @@
-import React from "react";
-import Welcome from "../components/pages/Welcome";
-import OnBoardingForm from "./onboarding/page";
+import { requireUser } from "@/lib/serverAuth";
+import Welcome from "@/components/pages/Welcome";
 
-const page = () => {
+export default function HomePage() {
+  // Server-side: redirect to /login if not authenticated
+  requireUser();
+
   return (
     <div>
       <Welcome />
-      {/* <OnBoardingForm/> */}
     </div>
   );
   
 };
 
-export default page;
+export default HomePage;

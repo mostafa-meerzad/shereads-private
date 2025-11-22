@@ -1,9 +1,11 @@
-import React from 'react'
+import React from "react";
+import { requireUser } from "@/lib/serverAuth";
 
 const page = () => {
-  return (
-    <div>page</div>
-  )
-}
+  // Server-side protection
+  requireUser();
 
-export default page
+  return <div>page</div>;
+};
+
+export default page;
