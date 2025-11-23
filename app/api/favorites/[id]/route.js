@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-
-
 export async function GET(req, { params }) {
   try {
-
     const awaitedParams = await params;
     const userId = Number(awaitedParams.id);
 
@@ -22,7 +19,7 @@ export async function GET(req, { params }) {
 
     // Count total favorites for pagination
     const total = await prisma.favorite.count({
-      where: { userId }
+      where: { userId },
     });
 
     // Fetch paginated favorites
@@ -31,10 +28,10 @@ export async function GET(req, { params }) {
       include: { book: true },
       skip,
       take: limit,
-      orderBy: { id: "desc" } // optional: newest favorites first
+      orderBy: { id: "desc" }, // optional: newest favorites first
     });
 
-    const favoriteBooks = favorites.map(f => f.book);
+    const favoriteBooks = favorites.map((f) => f.book);
 
     return NextResponse.json(
       {
@@ -42,11 +39,10 @@ export async function GET(req, { params }) {
         limit,
         total,
         totalPages: Math.ceil(total / limit),
-        favorites: favoriteBooks
+        favorites: favoriteBooks,
       },
       { status: 200 }
     );
-
   } catch (err) {
     console.error("GET Favorites Error:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
@@ -82,7 +78,7 @@ export async function POST(req, { params }) {
       include: { book: true },
     });
 
-    const favoriteBooks = favorites.map(f => f.book);
+    const favoriteBooks = favorites.map((f) => f.book);
 
     return NextResponse.json({ favorites: favoriteBooks }, { status: 201 });
   } catch (err) {
@@ -117,7 +113,7 @@ export async function DELETE(req, { params }) {
       include: { book: true },
     });
 
-    const favoriteBooks = favorites.map(f => f.book);
+    const favoriteBooks = favorites.map((f) => f.book);
 
     return NextResponse.json({ favorites: favoriteBooks }, { status: 200 });
   } catch (err) {
