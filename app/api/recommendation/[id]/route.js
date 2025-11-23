@@ -4,57 +4,86 @@ import { scoreBook } from "@/lib/recommender";
 import { verifyApiRequest } from "@/lib/serverAuth";
 import { PreferencesSchema } from "@/app/services/preferencesSchema";
 
-
-
 // ------------------------------
 // GET RECOMMENDATIONS
 // ------------------------------
 export async function GET(req, { params }) {
-    verifyApiRequest();
+  verifyApiRequest();
   try {
     const awaitedParams = await params;
     const userId = Number(awaitedParams.id);
 
     if (!userId) {
-        console.log(userId)
+      console.log(userId);
       return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: userId }
+      where: { id: userId },
     });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // Extract pagination queries
+    const url = new URL(req.url);
+    const page = parseInt(url.searchParams.get("page")) || 1;
+    const limit = parseInt(url.searchParams.get("limit")) || 20;
+
+    const skip = (page - 1) * limit;
+
+    // Get book IDs
     const bookIds = Array.isArray(user.recommendedBooksIds)
       ? user.recommendedBooksIds
       : [];
 
     if (bookIds.length === 0) {
-      return NextResponse.json({ books: [] }, { status: 200 });
+      return NextResponse.json(
+        {
+          page,
+          limit,
+          total: 0,
+          totalPages: 0,
+          books: [],
+        },
+        { status: 200 }
+      );
     }
 
+    // Count total recommended books
+    const total = bookIds.length;
+
+    // Get paginated books
     const books = await prisma.book.findMany({
-      where: { id: { in: bookIds } }
+      where: { id: { in: bookIds } },
+      skip,
+      take: limit,
+      include: { author: true }, // optional — remove if you don't want
+      orderBy: { publish_date: "desc" }, // optional
     });
 
-    return NextResponse.json({ books }, { status: 200 });
-
+    return NextResponse.json(
+      {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        books,
+      },
+      { status: 200 }
+    );
   } catch (err) {
     console.error("GET Recommendation Error:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
 
-
-
 // ------------------------------
 // POST → UPDATE USER PREFS + RECOMMEND
 // ------------------------------
 export async function POST(req, { params }) {
-    verifyApiRequest();
+  verifyApiRequest();
   try {
     const awaitedParams = await params;
     const userId = Number(awaitedParams.id);
@@ -100,14 +129,13 @@ export async function POST(req, { params }) {
         Age: data.Age ?? null,
         author: data.author ?? null,
         book_length: data.book_length ?? null,
-        recommendedBooksIds:
-          recommendedIds.length > 0 ? recommendedIds : null,
+        recommendedBooksIds: recommendedIds.length > 0 ? recommendedIds : null,
       },
     });
 
     // Now fetch the actual books to return to the frontend
     const booksFinal = await prisma.book.findMany({
-      where: { id: { in: recommendedIds } }
+      where: { id: { in: recommendedIds } },
     });
 
     return NextResponse.json(
@@ -117,7 +145,6 @@ export async function POST(req, { params }) {
       },
       { status: 200 }
     );
-
   } catch (err) {
     console.error("POST Recommendation Error:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
