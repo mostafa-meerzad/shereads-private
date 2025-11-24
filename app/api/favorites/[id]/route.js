@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-
-
 export async function GET(req, { params }) {
   try {
-
     const awaitedParams = await params;
     const userId = Number(awaitedParams.id);
 
@@ -13,15 +10,39 @@ export async function GET(req, { params }) {
       return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
     }
 
+    // Extract pagination from query params
+    const url = new URL(req.url);
+    const page = parseInt(url.searchParams.get("page")) || 1;
+    const limit = parseInt(url.searchParams.get("limit")) || 20;
+
+    const skip = (page - 1) * limit;
+
+    // Count total favorites for pagination
+    const total = await prisma.favorite.count({
+      where: { userId },
+    });
+
+    // Fetch paginated favorites
     const favorites = await prisma.favorite.findMany({
       where: { userId },
       include: { book: true },
+      skip,
+      take: limit,
+      orderBy: { id: "desc" }, // optional: newest favorites first
     });
 
-    // Return array of books
-    const favoriteBooks = favorites.map(f => f.book);
+    const favoriteBooks = favorites.map((f) => f.book);
 
-    return NextResponse.json({ favorites: favoriteBooks }, { status: 200 });
+    return NextResponse.json(
+      {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        favorites: favoriteBooks,
+      },
+      { status: 200 }
+    );
   } catch (err) {
     console.error("GET Favorites Error:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
@@ -57,7 +78,7 @@ export async function POST(req, { params }) {
       include: { book: true },
     });
 
-    const favoriteBooks = favorites.map(f => f.book);
+    const favoriteBooks = favorites.map((f) => f.book);
 
     return NextResponse.json({ favorites: favoriteBooks }, { status: 201 });
   } catch (err) {
@@ -92,7 +113,7 @@ export async function DELETE(req, { params }) {
       include: { book: true },
     });
 
-    const favoriteBooks = favorites.map(f => f.book);
+    const favoriteBooks = favorites.map((f) => f.book);
 
     return NextResponse.json({ favorites: favoriteBooks }, { status: 200 });
   } catch (err) {
