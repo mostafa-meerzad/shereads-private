@@ -9,12 +9,15 @@ import {
 import { useAuthClient } from "@/hooks/useAuthClient";
 import {
   LogOut,
-  Settings
+  Settings,
+  Shield
 } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const SidebarUi = ({ tabs, selected, onSelect, isCollapsed, onOpenSettings }) => {
-  const { logout } = useAuthClient();
+  const { logout, user } = useAuthClient();
+  const router = useRouter();
 
   return (
     <Sidebar
@@ -94,6 +97,19 @@ const SidebarUi = ({ tabs, selected, onSelect, isCollapsed, onOpenSettings }) =>
 
       <SidebarFooter className="bg-[#05653D] pb-10 text-white px-0">
         <div className="max-md:hidden">
+          {user?.role === "admin" && (
+            <div
+              className={`cursor-pointer mb-3 flex items-center gap-4  hover:bg-gray-200/30 rounded-md  ${
+                isCollapsed
+                  ? "p-2 items-center justify-center text-white "
+                  : "py-2 px-5 justify-end "
+              } `}
+              onClick={() => router.push("/admin")}
+            >
+              {!isCollapsed && <span>پنل ادمین</span>}
+              <Shield className="size-5" />
+            </div>
+          )}
           <div
             className={`cursor-pointer mb-3 flex items-center gap-4  hover:bg-gray-200/30 rounded-md  ${
               isCollapsed
@@ -122,6 +138,15 @@ const SidebarUi = ({ tabs, selected, onSelect, isCollapsed, onOpenSettings }) =>
           </button>
         </div>
         <div className="md:hidden  ">
+          {user?.role === "admin" && (
+            <div
+              className="cursor-pointer mb-3 flex items-center gap-4 justify-end  hover:bg-gray-200/30 rounded-md py-2 px-5 "
+              onClick={() => router.push("/admin")}
+            >
+              {<span>پنل ادمین</span>}
+              <Shield className="size-5" />
+            </div>
+          )}
           <div
             className="cursor-pointer mb-3 flex items-center gap-4 justify-end  hover:bg-gray-200/30 rounded-md py-2 px-5 "
             onClick={() => onOpenSettings && onOpenSettings()}
