@@ -9,7 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthClient } from "@/hooks/useAuthClient";
+// import { useAuth } from "@/hooks/useAuth";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
@@ -21,9 +22,9 @@ import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 
 export default function Signup() {
-  const { user, login } = useAuth();
+  const { user, login } = useAuthClient();
   const router = useRouter();
-  console.log("checking if the user is logged in: ", user);
+  // console.log("checking if the user is logged in: ", user);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const searchParams = useSearchParams();

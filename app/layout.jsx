@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+import ReactQueryProvider from "@/lib/reactQueryClient";
 // import {} from "../public/fonts/es"
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,7 +46,9 @@ export default function RootLayout({ children }) {
     <html lang="fa" >
       <body className={`${estedad.variable} ${geistSans.variable} ${geistMono.variable} mx-auto font-estedad`}>
         <Toaster/>
+        <ReactQueryProvider>
         <main>{children}</main>
+        </ReactQueryProvider>
       </body>
     </html>
   );

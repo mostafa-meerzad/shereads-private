@@ -2,7 +2,8 @@
 
 import img from "@/assets/onboarding-img-2.png";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthClient } from "@/hooks/useAuthClient";
+// import { useAuth } from "@/hooks/useAuth";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
@@ -15,11 +16,11 @@ import toast from "react-hot-toast";
 
 export default function Login() {
   const router = useRouter();
-  const { user, login } = useAuth();
+  const { user, login } = useAuthClient();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  console.log("checking if the user is logged in", user);
+  // console.log("checking if the user is logged in", user);
   const {
     register,
     handleSubmit,

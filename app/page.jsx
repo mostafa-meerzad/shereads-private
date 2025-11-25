@@ -1,14 +1,19 @@
-import { requireUser } from "@/lib/serverAuth";
-import Welcome from "@/components/pages/Welcome";
+import React from "react";
+import Welcome from "../components/pages/Welcome";
+import OnBoardingForm from "./onboarding/page";
+import DashboardApp from "./dashboard/page";
+import Sidebar from "./reading/page";
 
-export default function HomePage() {
-  // Server-side: redirect to /login if not authenticated
-  requireUser();
-
+const page = () => {
   return (
     <div>
       <Welcome />
+      {/* <DashboardApp/> */}
+      {/* <Sidebar/> */}
+      {/* <OnBoardingForm/> */}
     </div>
   );
   
 };
+
+export default page

@@ -1,11 +1,14 @@
-import React from "react";
-import { requireUser } from "@/lib/serverAuth";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/app-sidebar"
 
-const page = () => {
-  // Server-side protection
-  requireUser();
-
-  return <div>page</div>;
-};
-
-export default page;
+export default function Sidebar({ children }) {
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <main>
+        <SidebarTrigger />
+        {children}
+      </main>
+    </SidebarProvider>
+  )
+}

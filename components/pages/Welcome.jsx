@@ -7,19 +7,22 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import TextType from "../TextType";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
+// import { useAuth } from "@/hooks/useAuth";
+import { useAuthClient } from "@/hooks/useAuthClient";
 
 const Welcome = () => {
-  const { user } = useAuth();
+  const { user } = useAuthClient();
+
+  console.log("here is user object, ", user)
   const router = useRouter();
 
   const handleGetStarted = () => {
 
-    if(user?.user.token){
-      router.push("/dashboard")
+    if(!user){
+      router.push("/onboarding")
     }
     else{
-      router.push("/onboarding");
+      router.push("/dashboard");
     }
   };
 
@@ -86,7 +89,7 @@ const Welcome = () => {
           <div>
             <span className="text-[#05653D] text-md ml-1">حساب دارید؟</span>
             <Link
-              href={""}
+              href={"/login"}
               className="hover:text-green-700 active:text-gray-500 transition-all"
             >
               <span>وارد شوید</span>
