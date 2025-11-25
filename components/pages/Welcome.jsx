@@ -7,40 +7,59 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import TextType from "../TextType";
 import { useRouter } from "next/navigation";
+// import { useAuth } from "@/hooks/useAuth";
+import { useAuthClient } from "@/hooks/useAuthClient";
 
 const Welcome = () => {
+  const { user } = useAuthClient();
 
-  const router = useRouter()
+  console.log("here is user object, ", user)
+  const router = useRouter();
+
+  const handleGetStarted = () => {
+
+    if(!user){
+      router.push("/onboarding")
+    }
+    else{
+      router.push("/dashboard");
+    }
+  };
+
   return (
     <section className="page bg-[#E6F0EC] text-black flex flex-col  md:flex-row justify-start lg:justify-center items-center  md:gap-1 lg:gap-10 py-10 md:py-32 lg:py-20">
       <motion.div
         initial={{ scale: 0.5, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{delay: .4}}
+        transition={{ delay: 0.4 }}
         className="absolute top-[-20rem] md:top-[-20rem] lg:top-[-20rem] right-[-10rem] md:right-[-15rem] size-[25rem] md:size-[30rem] rounded-full bg-[#bfe9d7] "
       />
-      <motion.div initial={{opacity:0, scale:0.5}} animate={{scale:1, opacity: 1, }} transition={{delay: 1, damping:10, stiffness:120, type:"spring"}} className="absolute bottom-[-17rem] mb:bottom-[-30rem] lg:bottom-[-15rem] left-[-5rem] md:left-[-13rem] lg:left-[-5%] size-[25rem] md:size-[32rem] rounded-full bg-[#FDF8EC] md:z-20 " />
       <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{
-        duration: 0.6,
-        type: "spring",
-        stiffness: 120,
-        damping: 10,
-        delay: 0.2
-
-      }}
-      className="w-[20rem] md:w-[25rem] lg:w-[28rem] xl:w-[30rem] z-10 relative md:ml-8"
-    >
-      <Image
-        src={welcomeImg}
-        alt="welcome image"
-        width={900}
-        height={900}
-        className="w-full"
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 1, damping: 10, stiffness: 120, type: "spring" }}
+        className="absolute bottom-[-17rem] mb:bottom-[-30rem] lg:bottom-[-15rem] left-[-5rem] md:left-[-13rem] lg:left-[-5%] size-[25rem] md:size-[32rem] rounded-full bg-[#FDF8EC] md:z-20 "
       />
-    </motion.div>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{
+          duration: 0.6,
+          type: "spring",
+          stiffness: 120,
+          damping: 10,
+          delay: 0.2,
+        }}
+        className="w-[20rem] md:w-[25rem] lg:w-[28rem] xl:w-[30rem] z-10 relative md:ml-8"
+      >
+        <Image
+          src={welcomeImg}
+          alt="welcome image"
+          width={900}
+          height={900}
+          className="w-full"
+        />
+      </motion.div>
 
       <div className="md:absolute lg:relative md:right-0 md:min-w-[35rem] flex flex-col p-10  items-center md:items-end gap-10 max-w-[30rem] z-10">
         <h1 className="text-[#05653D] text-center md:text-end text-3xl sm:text-4xl md:text-5xl leading-[1.4] ">
@@ -61,15 +80,18 @@ const Welcome = () => {
         >
           <Button
             className={
-              "rounded-full bg-[#E7B944] hover:bg-green-700 hover:text-white text-black w-fit px-24 py-6 transition-all hover:scale-105 active:scale-95"
+              "rounded-full bg-green-700 hover:bg-green-800 hover:text-white text-gray-200 w-fit px-24 py-6 transition-all hover:scale-105 active:scale-95"
             }
-            onClick={ ()=> router.push('/onboarding')}
+            onClick={handleGetStarted}
           >
             شروع کنید
           </Button>
           <div>
             <span className="text-[#05653D] text-md ml-1">حساب دارید؟</span>
-            <Link href={""} className="hover:text-green-700 active:text-gray-500 transition-all">
+            <Link
+              href={"/login"}
+              className="hover:text-green-700 active:text-gray-500 transition-all"
+            >
               <span>وارد شوید</span>
             </Link>
           </div>

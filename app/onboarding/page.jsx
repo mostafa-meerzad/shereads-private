@@ -4,12 +4,14 @@ import CollectPreferences from "@/components/pages/CollectPreferences";
 import CreateAccount from "@/components/pages/CreatAccount";
 import OnboardingQuestions from "@/components/pages/OnboardingQuestions";
 import OnboardingStart from "@/components/pages/OnboardingStart";
+// import { useAuth } from "@/hooks/useAuth";
+import { useAuthClient } from "@/hooks/useAuthClient";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const Onboarding = () => {
+  const {user} = useAuthClient()
   const router = useRouter();
-
   const [stage, setStage] = useState("start");
   const [formAnswers, setFormAnswers] = useState(null);
 
@@ -22,7 +24,7 @@ const Onboarding = () => {
     const jsonString = JSON.stringify(formAnswers);
     const params = new URLSearchParams();
     params.set("data", jsonString);
-    router.push(`/auth?${params.toString()}`);
+    router.push(`/register?${params.toString()}`);
   };
 
   return (

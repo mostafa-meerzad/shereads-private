@@ -1,27 +1,21 @@
+import logoWhiteShort from "@/assets/logo-white-short.svg";
+import logoWhite from "@/assets/logo-white.svg";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarHeader,
-  SidebarProvider,
-  SidebarTrigger,
-  useSidebar,
+  SidebarHeader
 } from "@/components/ui/sidebar";
+import { useAuthClient } from "@/hooks/useAuthClient";
 import {
-  BookMarked,
-  CircleArrowOutUpRight,
-  Component,
-  Heart,
-  Library,
   LogOut,
-  Settings,
+  Settings
 } from "lucide-react";
-import logoWhiteShort from "@/assets/logo-white-short.svg";
-import logoWhite from "@/assets/logo-white.svg";
 import Image from "next/image";
 
 const SidebarUi = ({ tabs, selected, onSelect, isCollapsed }) => {
+  const { logout } = useAuthClient();
+
   return (
     <Sidebar
       side="right"
@@ -111,8 +105,12 @@ const SidebarUi = ({ tabs, selected, onSelect, isCollapsed }) => {
             <Settings className="size-5" />
           </div>
 
-          <div
-            className={`cursor-pointer mb-3 flex items-center gap-4  hover:bg-gray-200/30 rounded-md  ${
+          <button
+            onClick={() => {
+              console.log("logging out");
+              logout();
+            }}
+            className={`w-full cursor-pointer mb-3 flex items-center gap-4  hover:bg-gray-200/30 rounded-md  ${
               isCollapsed
                 ? "p-2 items-center justify-center text-white "
                 : "py-2 px-5 justify-end "
@@ -120,7 +118,7 @@ const SidebarUi = ({ tabs, selected, onSelect, isCollapsed }) => {
           >
             {!isCollapsed && <span>خروج</span>}
             <LogOut className="size-5" />
-          </div>
+          </button>
         </div>
         <div className="md:hidden  ">
           <div className="cursor-pointer mb-3 flex items-center gap-4 justify-end  hover:bg-gray-200/30 rounded-md py-2 px-5 ">
@@ -128,10 +126,16 @@ const SidebarUi = ({ tabs, selected, onSelect, isCollapsed }) => {
             <Settings className="size-5" />
           </div>
 
-          <div className="cursor-pointer flex items-center gap-4 justify-end hover:bg-gray-200/30 rounded-md py-2 px-5 ">
+          <button
+            onClick={() => {
+              console.log("logging out");
+              logout();
+            }}
+            className="cursor-pointer flex items-center gap-4 justify-end hover:bg-gray-200/30 rounded-md py-2 px-5 "
+          >
             {<span>خروج</span>}
             <LogOut className="size-5" />
-          </div>
+          </button>
         </div>
       </SidebarFooter>
     </Sidebar>

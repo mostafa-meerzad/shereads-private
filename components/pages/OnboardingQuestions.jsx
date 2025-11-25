@@ -22,42 +22,35 @@ const formData = [
       "رمانتیک",
       "تخیلی",
       "تاریخی",
-      "توسعه فردی",
+      "توسعه_فردی",
       "بیوگرافی",
       "فانتزی",
-      "آموزش مهارت",
+      "آموزش_مهارت",
     ],
     img: img6,
   },
   {
     question: " حالت مورد نظرتان برای خواندن چیست؟",
     answers: [
-      "آرام",
-      "الهام بخش",
-      "احساسی",
-      "معلوماتی",
-      "پرهیجان",
-      "احساس خوب",
+    
+  "آرام", "الهام_بخش", "احساسی", "معلوماتی", "پرهیجان", "احساس_خوب"
+
     ],
     img: img2,
   },
   {
     question: "در کدام گروه سنی قرار دارید؟",
-    answers: ["۱۷-۱۲", "۲۵-۱۸", "۳۵-۲۶", "۵۰-۳۶", "۵۰+"],
+    answers: ["۱۲–۱۷", "۱۸–۲۵", "۲۶–۳۵", "۳۶–۵۰", "۵۰+"],
     img: img3,
   },
   {
     question: "طول کتاب مورد علاقه تان چیست؟",
-    answers: [
-      "کوتاه کمتر از ۲۰۰ صفحه",
-      "متوسط ۲۰۰ تا ۴۰۰ صفحه",
-      "بلند ۴۰۰ صفحه به بالا",
-    ],
+    answers: ["کوتاه", "متوسط", "بلند"],
     img: img4,
   },
   {
     question: "هدف شما از کتاب خوانی چیست؟",
-    answers: ["سرگرمی", "یادگیری", "رشد فردی", "بهبود مهارت ها"],
+    answers: [  "سرگرمی", "یادگیری", "رشد_فردی", "بهبود_مهارت_ها"],
     img: img5,
   },
 ];
@@ -281,7 +274,7 @@ const OnboardingQuestions = ({ onComplete }) => {
         </motion.div>
 
         {/* Question + answers */}
-        <AnimatePresence mode="wait" initial={false} >
+        <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={step}
             variants={containerVariants}
@@ -319,7 +312,10 @@ const OnboardingQuestions = ({ onComplete }) => {
                 };
 
                 return (
-                  <div dir="rtl" className="grid md:grid-cols-2 flex-col items-end ml-auto gap-4 mb-8 mt-10 ">
+                  <div
+                    dir="rtl"
+                    className="grid md:grid-cols-2 flex-col items-end ml-auto gap-4 mb-8 mt-10 "
+                  >
                     {formData[step].answers.map((answer, idx) => {
                       const isSelected = values.includes(answer);
 

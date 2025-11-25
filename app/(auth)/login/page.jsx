@@ -1,103 +1,186 @@
 "use client";
 
-import { useState } from "react";
+import img from "@/assets/onboarding-img-2.png";
+import { Input } from "@/components/ui/input";
+import { useAuthClient } from "@/hooks/useAuthClient";
+// import { useAuth } from "@/hooks/useAuth";
+import axios from "axios";
+import { motion } from "framer-motion";
+import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 
-export default function SignInPage() {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+export default function Login() {
+  const router = useRouter();
+  const { user, login } = useAuthClient();
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  // console.log("checking if the user is logged in", user);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const fadeIn = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Form Data:", formData);
+  const onSubmit = async (data) => {
+    try {
+      const res = await axios.post("/api/login", data);
+
+      if (res.status === 200 && res.data) {
+        // Store full user + token
+        login(res.data);
+
+        toast.success("ثبت‌نام با موفقیت انجام شد!");
+
+        // Redirect after small delay so toast can be seen
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 300); // 0.3s delay
+      } else {
+        // Unexpected success response
+        toast.error("مشکل در دریافت اطلاعات کاربر از سرور");
+        console.warn("Unexpected register response:", res);
+      }
+    } catch (err) {
+      const status = err.response?.status;
+      const result = err.response?.data;
+
+      // Zod validation error
+      if (status === 422) {
+        toast.error("ورودی‌ها معتبر نیستند");
+        console.log("Validation Details:", result.details.password._errors);
+        return;
+      }
+
+      // Email already exists
+      if (status === 409) {
+        toast.error(result?.error || "این ایمیل قبلاً ثبت شده است");
+        return;
+      }
+
+      // Other server errors
+      toast.error(result?.error || "خطای سرور");
+      console.error("Register Error:", err);
+    }
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
-      {/* Left Side - Image (Hidden on mobile) */}
-      <div className="hidden md:block relative md:w-2/5 h-screen">
+    <div className="min-h-screen  md:py-0 flex flex-col md:flex-row bg-white">
+      <div className="hidden md:block md:w-1/2 h-full">
         <Image
-          src="/young-girl-reading.png"
-          alt="Stack of books"
-          fill
-          className="object-contain object-left"
-          priority
+          src={img}
+          width={500}
+          height={900}
+          alt="stack of books"
+          className="h-full w-full object-cover object-top"
         />
       </div>
 
-      {/* Right Side - Form */}
-      <div className="flex flex-col justify-center items-center w-full md:w-3/5 px-6 md:px-16 py-8 md:py-0">
-        <div className="max-w-md w-full">
-          {/* Logo */}
-          <div className="mb-10 text-center">
-            <div className="flex items-center justify-center space-x-2">
-              <Image
-                src="/Polygon.png"
-                alt="She Reads Logo"
-                width={24}
-                height={24}
-                priority
-              />
-              <span className="text-[#0B6535] text-lg font-medium">
-                She Reads
-              </span>
-            </div>
-          </div>
-
-          {/* Form Header */}
-          <h2 className="text-2xl font-bold text-green-800 mb-2 text-center">
+      <div
+        dir="rtl"
+        className="w-full md:w-1/2 flex items-center justify-center p-8 h-fit py-32"
+      >
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeIn}
+          className="w-full max-w-md rtl text-right"
+        >
+          <h1 className="text-4xl font-bold text-green-700 text-center mb-8 leading-normal">
             دوباره خوش آمدید
-          </h2>
-          <p className="text-sm text-gray-600 text-center mb-6">
+          </h1>
+
+          <p className="text-center text-gray-600 mb-8">
             برای ادامه سفر مطالعه خود وارد شوید
           </p>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <input
-              type="email"
-              name="email"
-              placeholder="ایمیل آدرس"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-700 text-right"
-            />
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-9">
+            {/* Email */}
+            <div className="relative">
+              <Input
+                type="email"
+                placeholder="ایمیل"
+                className="text-right rounded-full py-5 pr-5"
+                {...register("email", {
+                  required: "لطفاً ایمیل را وارد کنید",
+                  pattern: {
+                    value: /\S+@\S+\.\S+/,
+                    message: "ایمیل معتبر نیست",
+                  },
+                })}
+              />
 
-            <input
-              type="password"
-              name="password"
-              placeholder="گزرواژه"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-700 text-right"
-            />
+              {errors.email && (
+                <p className="text-red-600 text-xs mt-1 absolute right-0">
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
 
-            <button
+            {/* Password */}
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                placeholder="رمز عبور"
+                className="text-right pr-5 rounded-full py-5"
+                {...register("password", {
+                  required: "لطفاً رمز عبور را وارد کنید",
+                  minLength: {
+                    value: 6,
+                    message: "رمز عبور باید حداقل ۶ حرف باشد",
+                  },
+                })}
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+              >
+                {showPassword ? <EyeOff /> : <Eye />}
+              </button>
+
+              {errors.password && (
+                <p className="text-red-600 text-xs mt-1 absolute right-0">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
+
+            {/* Submit */}
+            <motion.button
               type="submit"
-              className="w-full bg-green-700 text-white py-2 rounded-full font-semibold hover:bg-green-800 transition"
+              disabled={loading}
+              whileHover={!loading ? { scale: 1.03 } : {}}
+              whileTap={!loading ? { scale: 0.97 } : {}}
+              className={`w-full bg-green-700 text-white py-3 rounded-lg mt-2
+    ${loading ? "opacity-50 cursor-not-allowed" : ""}
+  `}
             >
-              ورود
-            </button>
+              {loading ? "در حال ورود..." : "ورود"}
+            </motion.button>
           </form>
 
-          {/* Sign up link */}
-          <p className="text-center text-sm text-gray-600 mt-4">
-            هیچ حسابی ندارید؟{" "}
+          <p className="text-center mt-4 text-sm text-gray-700">
+            حساب ندارید؟{" "}
             <Link
-              href="/sign-up"
-              className="text-green-700 font-medium hover:underline"
+              href={"/register"}
+              className="text-green-700 hover:underline mr-1"
             >
-              ایجاد حساب کاربری
+              ثبت‌نام کنید
             </Link>
           </p>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

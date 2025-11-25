@@ -1,0 +1,198 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { useInView } from "react-intersection-observer";
+
+import { useToggleFavorite } from "@/hooks/useAddFavorite";
+import useFavorites from "@/hooks/useFavorites";
+import useInfiniteBooks from "@/hooks/useInfiniteBooks";
+
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Spinner } from "../ui/shadcn-io/spinner";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import Book from "../Book";
+
+// Genres
+const genres = [
+  "داستان",
+  "ادبیات",
+  "رمانتیک",
+  "تخیلی",
+  "تاریخی",
+  "توسعه_فردی",
+  "بیوگرافی",
+  "فانتزی",
+  "آموزش_مهارت",
+];
+
+const AllBooks = () => {
+  const userId = 21;
+  const [inputSearch, setInputSearch] = useState(""); // controlled input
+  const [filters, setFilters] = useState({
+    title: "",
+    genre: "",
+  });
+
+  const applySearch = () => {
+    setFilters((prev) => ({
+      ...prev,
+      title: inputSearch.trim(),
+    }));
+  };
+
+  const handleGenreChange = (value) => {
+    setFilters((prev) => ({
+      ...prev,
+      genre: value === "all" ? "" : value,
+    }));
+  };
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
+    useInfiniteBooks({ limit: 20, filters });
+
+  console.log("books: ", data);
+  const { ref, inView } = useInView({ rootMargin: "200px" });
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage]);
+
+  // -------------------------------------------------------
+  // Favorites
+  // -------------------------------------------------------
+  const favoritesQuery = useFavorites(userId);
+  const toggleFav = useToggleFavorite(userId);
+
+  const favIds = new Set(
+    (favoritesQuery?.data?.favorites || []).map((b) => b.id)
+  );
+
+  function onToggleFav(bookId, isFav) {
+    if (!userId) {
+      alert("Please login to favorite books");
+      return;
+    }
+    if (isFav) toggleFav.remove.mutate({ userId, bookId });
+    else toggleFav.add.mutate({ userId, bookId });
+  }
+
+  // -------------------------------------------------------
+
+  if (status === "loading")
+    return (
+      <div className="size-full h-[75vh] flex justify-center items-center bg-radial from-gray-300 animate-pulse rounded-xl to-gray-300/20">
+        <Spinner variant="circle" className="size-16 text-gray-500" />
+      </div>
+    );
+
+  if (status === "error") {
+    toast.error("بارگذاری کتاب‌ها انجام نشد");
+    return null;
+  }
+
+  const pages = data?.pages || [];
+  const books = pages.flatMap((p) => p.books || []);
+
+  return (
+    <div dir="rtl" className="space-y-10">
+      <div className="flex flex-row-reverse items-center gap-2 w-full">
+        <motion.div whileHover={{ scale: 1.02 }}>
+          {/* Genre Filter */}
+          <Select
+            onValueChange={handleGenreChange}
+            value={filters.genre === "" ? "all" : filters.genre}
+          >
+            <SelectTrigger
+              dir="rtl"
+              className="rounded-full w-full border-2 border-emerald-700 text-emerald-700 text-md py-2 px-7"
+            >
+              <SelectValue placeholder="ژانر" />
+            </SelectTrigger>
+
+            <SelectContent dir="rtl">
+              <SelectItem value="all">همه ژانرها</SelectItem>
+
+              {genres.map((g) => (
+                <SelectItem key={g} value={g}>
+                  {g}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {/* Search Input + Button */}
+        </motion.div>
+        <div className="relative w-full">
+          <Input
+            dir="rtl"
+            type="search"
+            placeholder="جستجوی کتاب، نویسنده، ژانر..."
+            value={inputSearch}
+            onChange={(e) => {
+              const v = e.target.value;
+              setInputSearch(v);
+              if (v === "") {
+                // auto-show all books
+                setFilters((prev) => ({ ...prev, title: "" }));
+              }
+            }}
+            className="pl-5 pr-12 rounded-full w-full"
+          />
+          <Search className="absolute right-5 top-2.5 h-4 w-4 text-muted-foreground" />
+        </div>
+
+        <Button
+          onClick={applySearch}
+          className="rounded-full h-8 px-5 bg-emerald-700 text-white hover:bg-emerald-900"
+        >
+          جستجو
+        </Button>
+      </div>
+
+      {/* Book Grid */}
+
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.33 }}
+        className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))]  gap-4 min-h-screen"
+      >
+        {books.map((book) => (
+          <Book
+            key={book.id}
+            book={book}
+            favIds={favIds}
+            onToggleFav={onToggleFav}
+          />
+        ))}
+
+        {/* Infinite Scroll Sentinel */}
+        <div className="col-span-full flex justify-center py-8">
+          {isFetchingNextPage ? (
+            <Spinner className="size-10" />
+          ) : hasNextPage ? (
+            <div ref={ref} className="p-2 rounded text-gray-500">
+              بارگذاری بیشتر...
+            </div>
+          ) : (
+            <div className="text-gray-400">به انتها رسیدید</div>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+export default AllBooks;
