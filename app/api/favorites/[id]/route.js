@@ -25,7 +25,10 @@ export async function GET(req, { params }) {
     // Fetch paginated favorites
     const favorites = await prisma.favorite.findMany({
       where: { userId },
-      include: { book: true },
+      include: { book: {
+      include: {
+        author: true,   // <-- include author here
+      }}},
       skip,
       take: limit,
       orderBy: { id: "desc" }, // optional: newest favorites first

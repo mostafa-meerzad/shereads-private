@@ -84,7 +84,6 @@ model Reading_Progress {
 model Author {
   id        Int     @id @default(autoincrement())
   name      String
-  biography String?
 
   books     Book[]  
 }
