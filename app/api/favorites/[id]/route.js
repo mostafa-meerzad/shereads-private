@@ -25,7 +25,10 @@ export async function GET(req, { params }) {
     // Fetch paginated favorites
     const favorites = await prisma.favorite.findMany({
       where: { userId },
-      include: { book: true },
+      include: { book: {
+      include: {
+        author: true,   // <-- include author here
+      }}},
       skip,
       take: limit,
       orderBy: { id: "desc" }, // optional: newest favorites first
@@ -75,7 +78,10 @@ export async function POST(req, { params }) {
     // Fetch all favorites again
     const favorites = await prisma.favorite.findMany({
       where: { userId },
-      include: { book: true },
+      include: { book: {
+      include: {
+        author: true,   // <-- include author here
+      }}},
     });
 
     const favoriteBooks = favorites.map((f) => f.book);
@@ -110,7 +116,10 @@ export async function DELETE(req, { params }) {
     // Return updated list
     const favorites = await prisma.favorite.findMany({
       where: { userId },
-      include: { book: true },
+      include: { book: {
+      include: {
+        author: true,   // <-- include author here
+      }}},
     });
 
     const favoriteBooks = favorites.map((f) => f.book);
