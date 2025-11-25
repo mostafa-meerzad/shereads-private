@@ -49,5 +49,14 @@ export function useAuthClient() {
     isLoggedIn: !!auth.token,
     login,
     logout,
+    setUser: (nextUser) => {
+      setAuth((prev) => {
+        const next = { ...prev, user: nextUser };
+        try {
+          localStorage.setItem("auth-shereads", JSON.stringify(next));
+        } catch {}
+        return next;
+      });
+    },
   };
 }

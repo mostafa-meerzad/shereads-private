@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 
-const SidebarUi = ({ tabs, selected, onSelect, isCollapsed }) => {
+const SidebarUi = ({ tabs, selected, onSelect, isCollapsed, onOpenSettings }) => {
   const { logout } = useAuthClient();
 
   return (
@@ -100,6 +100,7 @@ const SidebarUi = ({ tabs, selected, onSelect, isCollapsed }) => {
                 ? "p-2 items-center justify-center text-white "
                 : "py-2 px-5 justify-end "
             } `}
+            onClick={() => onOpenSettings && onOpenSettings()}
           >
             {!isCollapsed && <span>تنظیمات</span>}
             <Settings className="size-5" />
@@ -121,7 +122,10 @@ const SidebarUi = ({ tabs, selected, onSelect, isCollapsed }) => {
           </button>
         </div>
         <div className="md:hidden  ">
-          <div className="cursor-pointer mb-3 flex items-center gap-4 justify-end  hover:bg-gray-200/30 rounded-md py-2 px-5 ">
+          <div
+            className="cursor-pointer mb-3 flex items-center gap-4 justify-end  hover:bg-gray-200/30 rounded-md py-2 px-5 "
+            onClick={() => onOpenSettings && onOpenSettings()}
+          >
             {<span>تنظیمات</span>}
             <Settings className="size-5" />
           </div>

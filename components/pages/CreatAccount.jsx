@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import logo from "@/assets/logo.png";
 
-const CreateAccount = ({ onContinue }) => {
+const CreateAccount = ({ onContinue, buttonLabel }) => {
   return (
     <div className="grid grid-rows-[.8fr_1fr] md:grid-rows-[.7fr_1fr] bottom-0">
 
@@ -63,7 +63,7 @@ const CreateAccount = ({ onContinue }) => {
               onClick={onContinue}
               className="rounded-full bg-green-700 hover:bg-green-800 hover:text-gray-200 text-white w-fit px-18 py-3 lg:px-24 lg:py-6 transition-all hover:scale-105 active:scale-95"
             >
-              ثبت‌نام برای دسترسی به لیست کامل{" "}
+              {buttonLabel || "ثبت‌نام برای دسترسی به لیست کامل"}
             </Button>
           </motion.div>
         </motion.div>
