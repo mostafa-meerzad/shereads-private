@@ -130,7 +130,7 @@ const SidebarUi = ({ tabs, selected, onSelect, isCollapsed, onOpenSettings }) =>
             <Settings className="size-5" />
           </div>
 
-          <button
+          <div
             onClick={() => {
               console.log("logging out");
               logout();
@@ -139,7 +139,7 @@ const SidebarUi = ({ tabs, selected, onSelect, isCollapsed, onOpenSettings }) =>
           >
             {<span>خروج</span>}
             <LogOut className="size-5" />
-          </button>
+          </div>
         </div>
       </SidebarFooter>
     </Sidebar>
