@@ -29,7 +29,7 @@ async function fetchReadingProgressPage({ userId, pageParam = 1, limit = 20 }) {
 }
 
 export default function useInfiniteReading(userId, { limit = 20, enabled = true } = {}) {
-  const key = queryKeys.recommendations.byUser(userId); // keep your existing key or use a new one
+  const key = queryKeys.reading.byUser(userId);
 
   return useInfiniteQuery({
     queryKey: key,
