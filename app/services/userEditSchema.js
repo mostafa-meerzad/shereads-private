@@ -6,5 +6,6 @@ export const UserEditSchema = z.object({
   gender: GenderEnum.optional(), 
   email: z.string().email().optional(),
   password: z.string().min(6).optional(),
-  Age: AgeEnum.optional().nullable()
+  Age: AgeEnum.optional().nullable(),
+  isActive: z.boolean().nullable().optional(),
 });
