@@ -27,14 +27,21 @@ export function middleware(req) {
   // Publicly allowed paths for unauthenticated users
   const publicPaths = new Set([
     "/login",
+    "/",
+    "/welcome",
     "/register",
     "/dashboard",
     "/api/login",
     "/api/register",
   ]);
 
-  // Allow public paths
-  if (publicPaths.has(pathname) || pathname.startsWith("/api/public")) {
+  // Allow public paths and onboarding routes
+  if (
+    publicPaths.has(pathname) ||
+    pathname.startsWith("/api/public") ||
+    pathname === "/onboarding" ||
+    pathname.startsWith("/onboarding/")
+  ) {
     return NextResponse.next();
   }
 

@@ -36,12 +36,27 @@ export function useAuthClient() {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+  try {
+    // Hit your backend logout route
+    await axios.post("/api/logout");
+
+    // Remove client-side storage
     localStorage.removeItem("auth-shereads");
     setAuth({ user: null, token: null });
     delete axios.defaults.headers.common["Authorization"];
+
+    // Redirect to login page
     router.push("/login");
-  };
+  } catch (err) {
+    console.error("Logout failed", err);
+
+    // Even if backend fails, still remove client auth
+    localStorage.removeItem("auth-shereads");
+    setAuth({ user: null, token: null });
+    router.push("/login");
+  }
+};
 
   return {
     user: auth.user,
