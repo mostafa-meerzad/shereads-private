@@ -10,7 +10,7 @@ export async function GET(req) {
     const limit = parseInt(url.searchParams.get("limit")) || 20;
     const genre = url.searchParams.get("genre");
     const author = url.searchParams.get("author");
-    const date = url.searchParams.get("date");
+    // const date = url.searchParams.get("date");
     const title = url.searchParams.get("title");
 
     const skip = (page - 1) * limit;
@@ -29,15 +29,15 @@ export async function GET(req) {
       };
     }
 
-    if (date) {
-      const year = parseInt(date);
-      if (!isNaN(year)) {
-        where.publish_date = {
-          gte: new Date(year, 0, 1),
-          lt: new Date(year + 1, 0, 1),
-        };
-      }
-    }
+    // if (date) {
+    //   const year = parseInt(date);
+    //   if (!isNaN(year)) {
+    //     where.publish_date = {
+    //       gte: new Date(year, 0, 1),
+    //       lt: new Date(year + 1, 0, 1),
+    //     };
+    //   }
+    // }
 
     if (title) {
       where.title = { contains: title };

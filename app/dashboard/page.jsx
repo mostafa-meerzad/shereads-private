@@ -12,7 +12,8 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuthClient } from "@/hooks/useAuthClient";
 import { BookMarked, Component, Heart, Library } from "lucide-react";
 import { useRouter } from "next/navigation";
-
+import dynamic from "next/dynamic";
+import SettingsModal from "@/components/SettingsModal";
 
 const tabs = [
   { key: "dashboard", label: "داشبورد", icon: Component },
@@ -27,6 +28,7 @@ export default function Dashboard() {
   const [selected, setSelected] = useState("dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [openSettings, setOpenSettings] = useState(false);
   const router = useRouter()
   const { user } = useAuthClient();
 
@@ -44,6 +46,7 @@ export default function Dashboard() {
           selected={selected}
           onSelect={setSelected}
           isCollapsed={isCollapsed}
+          onOpenSettings={() => setOpenSettings(true)}
         />
         <div className="flex-1 p-4 md:p-8 ">
           <header
@@ -55,7 +58,7 @@ export default function Dashboard() {
               className={"size-10 text-lg"}
             />
 
-            <h1 className="text-4xl font-semibold text-emerald-800">
+            <h1 className=" text-2xl md:text-3xl lg:text-4xl font-semibold text-emerald-800">
               به کتابخانه She Reads خوش آمدید!
             </h1>
           </header>
@@ -75,6 +78,10 @@ export default function Dashboard() {
                     setSelected(k);
                     setMobileOpen(false);
                   }}
+                  onOpenSettings={() => {
+                    setOpenSettings(true);
+                    setMobileOpen(false);
+                  }}
                 />
               </motion.div>
             )}
@@ -91,8 +98,11 @@ export default function Dashboard() {
               <AllBooks />
             )}
           </section>
+
+          {/*<PdfReader bookId={1} pdfUrl={"test.pdf"} userId={21}/>*/}
         </div>
       </section>
+      <SettingsModal open={openSettings} onOpenChange={setOpenSettings} />
     </SidebarProvider>
   );
 }

@@ -9,12 +9,15 @@ import {
 import { useAuthClient } from "@/hooks/useAuthClient";
 import {
   LogOut,
-  Settings
+  Settings,
+  Shield
 } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
-const SidebarUi = ({ tabs, selected, onSelect, isCollapsed }) => {
-  const { logout } = useAuthClient();
+const SidebarUi = ({ tabs, selected, onSelect, isCollapsed, onOpenSettings }) => {
+  const { logout, user } = useAuthClient();
+  const router = useRouter();
 
   return (
     <Sidebar
@@ -94,12 +97,26 @@ const SidebarUi = ({ tabs, selected, onSelect, isCollapsed }) => {
 
       <SidebarFooter className="bg-[#05653D] pb-10 text-white px-0">
         <div className="max-md:hidden">
+          {user?.role === "admin" && (
+            <div
+              className={`cursor-pointer mb-3 flex items-center gap-4  hover:bg-gray-200/30 rounded-md  ${
+                isCollapsed
+                  ? "p-2 items-center justify-center text-white "
+                  : "py-2 px-5 justify-end "
+              } `}
+              onClick={() => router.push("/admin")}
+            >
+              {!isCollapsed && <span>پنل ادمین</span>}
+              <Shield className="size-5" />
+            </div>
+          )}
           <div
             className={`cursor-pointer mb-3 flex items-center gap-4  hover:bg-gray-200/30 rounded-md  ${
               isCollapsed
                 ? "p-2 items-center justify-center text-white "
                 : "py-2 px-5 justify-end "
             } `}
+            onClick={() => onOpenSettings && onOpenSettings()}
           >
             {!isCollapsed && <span>تنظیمات</span>}
             <Settings className="size-5" />
@@ -121,12 +138,24 @@ const SidebarUi = ({ tabs, selected, onSelect, isCollapsed }) => {
           </button>
         </div>
         <div className="md:hidden  ">
-          <div className="cursor-pointer mb-3 flex items-center gap-4 justify-end  hover:bg-gray-200/30 rounded-md py-2 px-5 ">
+          {user?.role === "admin" && (
+            <div
+              className="cursor-pointer mb-3 flex items-center gap-4 justify-end  hover:bg-gray-200/30 rounded-md py-2 px-5 "
+              onClick={() => router.push("/admin")}
+            >
+              {<span>پنل ادمین</span>}
+              <Shield className="size-5" />
+            </div>
+          )}
+          <div
+            className="cursor-pointer mb-3 flex items-center gap-4 justify-end  hover:bg-gray-200/30 rounded-md py-2 px-5 "
+            onClick={() => onOpenSettings && onOpenSettings()}
+          >
             {<span>تنظیمات</span>}
             <Settings className="size-5" />
           </div>
 
-          <button
+          <div
             onClick={() => {
               console.log("logging out");
               logout();
@@ -135,7 +164,7 @@ const SidebarUi = ({ tabs, selected, onSelect, isCollapsed }) => {
           >
             {<span>خروج</span>}
             <LogOut className="size-5" />
-          </button>
+          </div>
         </div>
       </SidebarFooter>
     </Sidebar>
