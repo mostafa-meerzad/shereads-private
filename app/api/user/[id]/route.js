@@ -54,12 +54,13 @@ export async function PATCH(req, { params }) {
 
     const dataToUpdate = {};
 
-    const { name, gender, email, password, Age } = parsed.data;
+    const { name, gender, email, password, Age, isActive } = parsed.data;
 
     // --- Conditionally add fields to update ----
     if (name !== undefined) dataToUpdate.name = name;
     if (gender !== undefined) dataToUpdate.gender = gender;
     if (Age !== undefined) dataToUpdate.Age = Age;
+    if (isActive !== undefined) dataToUpdate.isActive = isActive; 
 
     // Email update with uniqueness check
     if (email !== undefined) {
@@ -91,6 +92,7 @@ export async function PATCH(req, { params }) {
         name: true,
         email: true,
         gender: true,
+        isActive: true, 
         Age: true,
         createdAt: true,
       },
@@ -101,6 +103,50 @@ export async function PATCH(req, { params }) {
     console.error("PATCH USER ERROR:", error);
     return Response.json(
       { error: "Failed to update user", details: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req, { params }) {
+
+  try {
+    const awaitedParams = await params;
+    const userId = Number(awaitedParams.id);
+
+    if (!userId || isNaN(userId)) {
+      return NextResponse.json(
+        { error: "Invalid user ID" },
+        { status: 400 }
+      );
+    }
+
+    // Check if user exists
+    const existing = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!existing) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    // Deactivate user
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: { isActive: false },
+    });
+
+    return NextResponse.json({
+      message: "User deactivated successfully",
+      user: updated,
+    });
+  } catch (error) {
+    console.error("DEACTIVATE USER ERROR:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

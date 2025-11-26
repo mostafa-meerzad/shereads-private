@@ -1,6 +1,8 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { verifyApiRequest } from "@/lib/serverAuth";
+import { AddBookSchema, AddAuthorSchema } from "@/app/services/bookSchema";
+import { enforceAdminApi } from "@/lib/adminAuth";
 
 export async function GET(req) {
   verifyApiRequest();
@@ -65,3 +67,94 @@ export async function GET(req) {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
+
+export async function POST(req) {
+  const admin = await enforceAdminApi();
+  if (admin instanceof NextResponse) return admin;
+  try {
+    const body = await req.json();
+
+    // Validate book input
+    const parsedBook = AddBookSchema.safeParse(body);
+
+    if (!parsedBook.success) {
+      return NextResponse.json(
+        {
+          error: "Invalid book input",
+          details: parsedBook.error.flatten(),
+        },
+        { status: 400 }
+      );
+    }
+
+    const data = parsedBook.data;
+
+    // 1️⃣ Check if author already exists
+    let author = await prisma.author.findFirst({
+      where: { name: data.authorName },
+    });
+
+    // 2️⃣ If not → create author
+    if (!author) {
+      const authorCheck = AddAuthorSchema.safeParse({ name: data.authorName });
+
+      if (!authorCheck.success) {
+        return NextResponse.json(
+          { error: "Invalid author name" },
+          { status: 400 }
+        );
+      }
+
+      author = await prisma.author.create({
+        data: { name: data.authorName },
+      });
+    }
+
+    // Author ID ready to use
+    const authorId = author.id;
+
+    // 3️⃣ Duplicate check: Same title + author
+    const existingBook = await prisma.book.findFirst({
+      where: {
+        title: data.title,
+        authorId: authorId,
+      },
+    });
+
+    if (existingBook) {
+      return NextResponse.json(
+        { error: "این کتاب قبلاً توسط این نویسنده ثبت شده است" },
+        { status: 409 }
+      );
+    }
+
+    // 4️⃣ Create the book
+    const newBook = await prisma.book.create({
+      data: {
+        title: data.title,
+        description: data.description,
+        authorId,
+        publish_date: data.publish_date ? new Date(data.publish_date) : null,
+        pdfURL: data.pdfURL,
+        coverURL: data.coverURL,
+        Genre: data.Genre,
+        mood: data.mood,
+        Motivation: data.Motivation,
+        Age: data.Age,
+        length: data.length,
+      },
+      include: {
+        author: true,
+      },
+    });
+
+    return NextResponse.json(newBook, { status: 201 });
+  } catch (error) {
+    console.error("Error creating book:", error);
+    return NextResponse.json(
+      { error: "Failed to create book" },
+      { status: 500 }
+    );
+  }
+}
+
