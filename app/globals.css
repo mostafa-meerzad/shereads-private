@@ -4,6 +4,7 @@
 /* Explicit @font-face declarations so editors (and non-Next tooling) can
    detect the font-family name for autocomplete and fallbacks. Files are
    served from /public/fonts/estedad — keep paths in sync with your layout.jsx */
+
 @font-face {
   font-family: 'Estedad';
   src: url('/fonts/estedad/Estedad-Regular.ttf') format('truetype');
