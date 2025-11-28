@@ -21,7 +21,7 @@ export async function PATCH(req, { params }) {
     const parsed = EditBookSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid input", details: parsed.error.flatten() },
+        { error: "Invalid input", details: parsed.error.format() },
         { status: 400 }
       );
     }
@@ -36,6 +36,8 @@ export async function PATCH(req, { params }) {
     if (!existing) {
       return NextResponse.json({ error: "Book not found" }, { status: 404 });
     }
+
+    const previousAuthorId = existing.authorId;
 
     let authorId = existing.authorId;
 
@@ -104,6 +106,18 @@ export async function PATCH(req, { params }) {
       data: updateData,
       include: { author: true },
     });
+
+    if (previousAuthorId !== authorId) {
+      const count = await prisma.book.count({
+        where: { authorId: previousAuthorId },
+      });
+
+      if (count === 0) {
+        await prisma.author.delete({
+          where: { id: previousAuthorId },
+        });
+      }
+    }
 
     return NextResponse.json(updatedBook, { status: 200 });
   } catch (error) {

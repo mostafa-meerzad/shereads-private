@@ -10,7 +10,7 @@ import { Spinner } from "@/components/ui/shadcn-io/spinner";
 
 function useAdminBooks({ page, title }) {
   return useQuery({
-    queryKey: ["admin", "books", { page, title }],
+    queryKey: ["admin", "book", { page, title }],
     queryFn: async () => {
       const qs = new URLSearchParams();
       qs.set("page", String(page || 1));
@@ -32,10 +32,10 @@ export default function AdminBooks() {
   const books = data?.books || [];
 
   const softDelete = useMutation({
-    mutationFn: async (bookId) => api.patch(`/admin/books/${bookId}/soft-delete`),
+    mutationFn: async (bookId) => api.patch(`/book/${bookId}/soft-delete`),
     onSuccess: () => {
       toast.success("کتاب حذف شد (نرمی)");
-      qc.invalidateQueries({ queryKey: ["admin", "books"] });
+      qc.invalidateQueries({ queryKey: ["admin", "book"] });
     },
     onError: (e) => toast.error(e?.error || "خطا در حذف کتاب"),
   });
@@ -138,7 +138,7 @@ export default function AdminBooks() {
           onClose={() => setOpenCreate(false)}
           onCreated={() => {
             setOpenCreate(false);
-            qc.invalidateQueries({ queryKey: ["admin", "books"] });
+            qc.invalidateQueries({ queryKey: ["admin", "book"] });
           }}
         />
       )}
@@ -170,7 +170,7 @@ function CreateBookModal({ onClose, onCreated }) {
       fd.append("author", author);
       if (cover) fd.append("cover", cover);
       fd.append("pdf", pdf);
-      await api.post("/admin/books", fd, {
+      await api.post("/book", fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       toast.success("کتاب با موفقیت افزوده شد");

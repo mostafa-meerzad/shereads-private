@@ -8,23 +8,23 @@ import { motion } from "framer-motion";
 import TextType from "../TextType";
 import { useRouter } from "next/navigation";
 // import { useAuth } from "@/hooks/useAuth";
-import { useAuthClient } from "@/hooks/useAuthClient";
+// import { useAuthClient } from "@/hooks/useAuthClient";
 
 const Welcome = () => {
-  const { user } = useAuthClient();
+  // const { user } = useAuthClient();
 
-  console.log("here is user object, ", user)
-  const router = useRouter();
+  // console.log("here is user object, ", user)
+  // const router = useRouter();
 
-  const handleGetStarted = () => {
+  // const handleGetStarted = () => {
 
-    if(!user){
-      router.push("/onboarding")
-    }
-    else{
-      router.push("/dashboard");
-    }
-  };
+  //   if(!user){
+  //     router.push("/onboarding")
+  //   }
+  //   else{
+  //     router.push("/dashboard");
+  //   }
+  // };
 
   return (
     <section className="page bg-[#E6F0EC] text-black flex flex-col  md:flex-row justify-start lg:justify-center items-center  md:gap-1 lg:gap-10 py-10 md:py-32 lg:py-20">
@@ -82,10 +82,13 @@ const Welcome = () => {
             className={
               "rounded-full bg-green-700 hover:bg-green-800 hover:text-white text-gray-200 w-fit px-24 py-6 transition-all hover:scale-105 active:scale-95"
             }
-            onClick={handleGetStarted}
           >
+            <Link
+              href={"/onboarding"}
+            >
             شروع کنید
-          </Button>
+           
+          </Link> </Button>
           <div>
             <span className="text-[#05653D] text-md ml-1">حساب دارید؟</span>
             <Link

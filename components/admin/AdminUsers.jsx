@@ -10,12 +10,12 @@ import { Spinner } from "@/components/ui/shadcn-io/spinner";
 
 function useAdminUsers({ page, search }) {
   return useQuery({
-    queryKey: ["admin", "users", { page, search }],
+    queryKey: ["admin", "user", { page, search }],
     queryFn: async () => {
       const qs = new URLSearchParams();
       if (page) qs.set("page", String(page));
       if (search) qs.set("search", search);
-      const { data } = await api.get(`/admin/users?${qs.toString()}`);
+      const { data } = await api.get(`/user?${qs.toString()}`);
       return data; // { users, page, totalPages, total }
     },
   });
@@ -29,17 +29,17 @@ export default function AdminUsers() {
   const { data, status, isFetching } = useAdminUsers({ page, search });
 
   const softDelete = useMutation({
-    mutationFn: async (userId) => api.patch(`/admin/users/${userId}/soft-delete`),
+    mutationFn: async (userId) => api.patch(`/user/${userId}/soft-delete`),
     onSuccess: () => {
       toast.success("کاربر حذف شد");
-      qc.invalidateQueries({ queryKey: ["admin", "users"] });
+      qc.invalidateQueries({ queryKey: ["admin", "user"] });
     },
     onError: (e) => toast.error(e?.error || "خطا در حذف کاربر"),
   });
 
   const resetPassword = useMutation({
     mutationFn: async ({ userId, password }) =>
-      api.patch(`/admin/users/${userId}/password`, { password }),
+      api.patch(`/user/${userId}/password`, { password }),
     onSuccess: () => {
       toast.success("رمز عبور بروزرسانی شد");
     },
