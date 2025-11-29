@@ -21,9 +21,9 @@ export default function AdminPage() {
   if (user.role !== "admin") return null;
 
   return (
-    <section className="min-h-screen w-full bg-white" dir="rtl">
-      <header className="border-b sticky top-0 bg-white z-10">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+    <section className="min-h-screen w-full bg-white px-10" dir="rtl">
+      <header className="sticky top-0 bg-white z-10">
+        <div className=" mx-auto px-4 py-3 flex items-center justify-between">
           <div className="font-bold text-emerald-800 text-xl">پنل مدیریت</div>
           <div className="flex items-center gap-2">
             <Button
@@ -34,7 +34,7 @@ export default function AdminPage() {
             </Button>
           </div>
         </div>
-        <div className="max-w-6xl mx-auto px-4 pb-3 pt-1 flex gap-2 border-t">
+        <div className=" mx-auto px-4 pb-3  flex gap-2 border-t  pt-4">
           <button
             className={`px-4 py-2 rounded-full text-sm ${
               tab === "users"
@@ -58,7 +58,7 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6">
+      <main className=" mx-auto px-4 p-10">
         {tab === "users" ? <AdminUsers /> : <AdminBooks />}
       </main>
     </section>
