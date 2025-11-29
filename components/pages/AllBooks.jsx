@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Book from "../Book";
+import { useAuthClient } from "@/hooks/useAuthClient";
 
 // Genres
 const genres = [
@@ -37,7 +38,8 @@ const genres = [
 ];
 
 const AllBooks = () => {
-  const userId = 21;
+  const {user }= useAuthClient();
+  const userId = user.id
   const [inputSearch, setInputSearch] = useState(""); // controlled input
   const [filters, setFilters] = useState({
     title: "",
