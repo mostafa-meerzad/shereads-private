@@ -38,8 +38,8 @@ const genres = [
 ];
 
 const AllBooks = () => {
-  const {user }= useAuthClient();
-  const userId = user.id
+  const { user } = useAuthClient();
+  const userId = user?.id;
   const [inputSearch, setInputSearch] = useState(""); // controlled input
   const [filters, setFilters] = useState({
     title: "",

@@ -24,6 +24,15 @@ export function middleware(req) {
     return NextResponse.next();
   }
 
+  // Allow any direct static file requests (public/*) EXCEPT protected folders
+  // Protect only book and cover files under `/books` and `/covers`.
+  // e.g. allow `/test-img.png`, `/images/logo.svg`, etc.
+  const isProtectedAssetFolder = pathname.startsWith("/books") || pathname.startsWith("/covers");
+  const looksLikeFile = /\.[a-z0-9]+$/i.test(pathname);
+  if (looksLikeFile && !isProtectedAssetFolder) {
+    return NextResponse.next();
+  }
+
   // Publicly allowed paths for unauthenticated users
   const publicPaths = new Set([
     "/login",
