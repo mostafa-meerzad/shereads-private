@@ -14,7 +14,7 @@ import { useAuthClient } from "@/hooks/useAuthClient";
 
 const ReadingBooks = () => {
   const { user } = useAuthClient();
-  const userId = user.id;
+  const userId = user?.id;
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteReading(userId);

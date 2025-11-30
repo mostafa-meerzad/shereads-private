@@ -15,7 +15,7 @@ import { useAuthClient } from "@/hooks/useAuthClient";
 
 const RecommendedBooks = () => {
   const { user } = useAuthClient();
-  const userId = user.id;
+  const userId = user?.id;
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteFavorites(userId, { limit: 20 });
 
