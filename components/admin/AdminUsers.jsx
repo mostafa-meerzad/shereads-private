@@ -135,7 +135,7 @@ export default function AdminUsers() {
       <div className="p-4 border-b bg-white" dir="rtl">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium">ایجاد کاربر جدید</h3>
-          <Button size="sm" onClick={() => setShowCreate((s) => !s)}>
+          <Button className={"bg-green-600 hover:bg-green-700"} size="sm" onClick={() => setShowCreate((s) => !s)}>
             {showCreate ? "بستن" : "ایجاد کاربر جدید"}
           </Button>
         </div>
@@ -227,7 +227,7 @@ export default function AdminUsers() {
               >
                 انصراف
               </Button>
-              <Button size="sm" type="submit" disabled={createUser.isPending}>
+              <Button className={"bg-green-500 hover:bg-green-600"} size="sm" type="submit" disabled={createUser.isPending}>
                 {createUser.isPending ? (
                   <Spinner className="h-4 w-4" />
                 ) : (

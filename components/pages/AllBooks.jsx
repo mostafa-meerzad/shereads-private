@@ -45,11 +45,16 @@ const AllBooks = () => {
     title: "",
     genre: "",
   });
+  // searchScope: 'both' | 'title' | 'author'
+  const [searchScope, setSearchScope] = useState("title");
 
   const applySearch = () => {
+    const q = inputSearch.trim();
     setFilters((prev) => ({
       ...prev,
-      title: inputSearch.trim(),
+      // depending on scope, set title and/or author
+      title: searchScope === "author" ? "" : q,
+      author: searchScope === "title" ? "" : q,
     }));
   };
 
@@ -58,6 +63,10 @@ const AllBooks = () => {
       ...prev,
       genre: value === "all" ? "" : value,
     }));
+  };
+
+  const handleScopeChange = (value) => {
+    setSearchScope(value);
   };
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
@@ -70,7 +79,7 @@ const AllBooks = () => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [inView, hasNextPage, isFetchingNextPage]);
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // -------------------------------------------------------
   // Favorites
@@ -110,57 +119,74 @@ const AllBooks = () => {
 
   return (
     <div dir="rtl" className="space-y-10">
-      <div className="flex flex-row-reverse items-center gap-2 w-full">
-        <motion.div whileHover={{ scale: 1.02 }}>
-          {/* Genre Filter */}
-          <Select
-            onValueChange={handleGenreChange}
-            value={filters.genre === "" ? "all" : filters.genre}
-          >
-            <SelectTrigger
-              dir="rtl"
-              className="rounded-full w-full border-2 border-emerald-700 text-emerald-700 text-md py-2 px-7"
+      <div className="flex flex-col lg:flex-row-reverse lg:items-center gap-2 w-full">
+        <motion.div whileHover={{ scale: 1.02 }} className="flex flex-row-reverse gap-4 justify-end">
+          
+            {/* Genre Filter */}
+            <Select
+              onValueChange={handleGenreChange}
+              value={filters.genre === "" ? "all" : filters.genre}
             >
-              <SelectValue placeholder="ژانر" />
-            </SelectTrigger>
-
-            <SelectContent dir="rtl">
-              <SelectItem value="all">همه ژانرها</SelectItem>
-
-              {genres.map((g) => (
-                <SelectItem key={g} value={g}>
-                  {g}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+              <SelectTrigger
+                dir="rtl"
+                className="rounded-full  w-40  border-2 border-emerald-700 text-emerald-700 text-md py-2 px-7"
+              >
+                <SelectValue placeholder="ژانر" />
+              </SelectTrigger>
+              <SelectContent dir="rtl">
+                <SelectItem value="all">همه ژانرها</SelectItem>
+                {genres.map((g) => (
+                  <SelectItem key={g} value={g}>
+                    {g}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {/* Search Scope Select (both/title/author) */}
+            <div className="mr-2">
+              <Select onValueChange={handleScopeChange} value={searchScope}>
+                <SelectTrigger
+                  dir="rtl"
+                  className="rounded-full w-40 border-2 border-emerald-700 text-emerald-700 text-sm py-2 px-3"
+                >
+                  <SelectValue placeholder="جستجو در" />
+                </SelectTrigger>
+                <SelectContent dir="rtl">
+                  {/* <SelectItem value="both">عنوان و نویسنده</SelectItem> */}
+                  <SelectItem value="title">عنوان</SelectItem>
+                  <SelectItem value="author">نویسنده</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          
           {/* Search Input + Button */}
         </motion.div>
-        <div className="relative w-full">
-          <Input
-            dir="rtl"
-            type="search"
-            placeholder="جستجوی کتاب، نویسنده، ژانر..."
-            value={inputSearch}
-            onChange={(e) => {
-              const v = e.target.value;
-              setInputSearch(v);
-              if (v === "") {
-                // auto-show all books
-                setFilters((prev) => ({ ...prev, title: "" }));
-              }
-            }}
-            className="pl-5 pr-12 rounded-full w-full"
-          />
-          <Search className="absolute right-5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <div className="flex flex-row-reverse gap-4">
+          <div className="relative w-full">
+            <Input
+              dir="rtl"
+              type="search"
+              placeholder="جستجوی کتاب، نویسند..."
+              value={inputSearch}
+              onChange={(e) => {
+                const v = e.target.value;
+                setInputSearch(v);
+                if (v === "") {
+                  // auto-show all books
+                  setFilters((prev) => ({ ...prev, title: "", author: "" }));
+                }
+              }}
+              className="pl-5 pr-12 rounded-full w-full border-green-800"
+            />
+            <Search className="absolute right-5 top-2.5 h-4 w-4 text-muted-foreground" />
+          </div>
+          <Button
+            onClick={applySearch}
+            className="rounded-full h-8 px-5 bg-emerald-700 text-white hover:bg-emerald-900"
+          >
+            جستجو
+          </Button>
         </div>
-
-        <Button
-          onClick={applySearch}
-          className="rounded-full h-8 px-5 bg-emerald-700 text-white hover:bg-emerald-900"
-        >
-          جستجو
-        </Button>
       </div>
 
       {/* Book Grid */}

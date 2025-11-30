@@ -2,23 +2,17 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthClient } from "@/hooks/useAuthClient";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 import AdminUsers from "@/components/admin/AdminUsers";
 import AdminBooks from "@/components/admin/AdminBooks";
 import { Button } from "@/components/ui/button";
 
 export default function AdminPage() {
-  const { user } = useAuthClient();
+  const { user } = useRequireAuth({ requireAdmin: true });
   const router = useRouter();
   const [tab, setTab] = useState("users");
 
-  useEffect(() => {
-    if (!user) return; // login guard handled at dashboard; we still wait for user to load
-    if (user && user.role !== "admin") router.replace("/dashboard");
-  }, [user, router]);
-
   if (!user) return null;
-  if (user.role !== "admin") return null;
 
   return (
     <section className="min-h-screen w-full bg-white px-10" dir="rtl">

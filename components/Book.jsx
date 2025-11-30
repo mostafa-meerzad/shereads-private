@@ -5,9 +5,11 @@ import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuthClient } from "@/hooks/useAuthClient";
+import BookModal from "./BookModal";
 
 const Book = ({ book, favIds, onToggleFav }) => {
   const router = useRouter();
+  console.log("book date: ", book)
 
   // Resolve first available value among multiple possible backend field names
   const pickPath = (obj, keys) => {
@@ -48,6 +50,7 @@ const Book = ({ book, favIds, onToggleFav }) => {
   // Read persisted reading meta (lastPage/numPages) to display a progress bar
   const { user } = useAuthClient();
   const [readingMeta, setReadingMeta] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -77,9 +80,12 @@ const Book = ({ book, favIds, onToggleFav }) => {
     <motion.div
       layout
       whileHover={{ y: -6 }}
-      className="bg-white dark:bg-slate-800 rounded-md shadow-md p-4 flex flex-col items-center"
+      className="bg-white h-fit dark:bg-slate-800 rounded-md shadow-md p-4 flex flex-col items-center"
     >
-      <div className="w-full h-80 bg-linear-to-b from-gray-500/20 to-gray-200 rounded-md mb-2 flex justify-center items-center overflow-hidden">
+      <div
+        onClick={() => setModalOpen(true)}
+        className="w-full h-80 bg-linear-to-b from-gray-500/20 to-gray-200 rounded-md mb-2 flex justify-center items-center overflow-hidden cursor-pointer"
+      >
         {coverUrl ? (
           // Using a plain <img> so relative public paths work out of the box
           // If you prefer next/image, ensure the domain/config allows external hosts
@@ -94,7 +100,9 @@ const Book = ({ book, favIds, onToggleFav }) => {
         )}
       </div>
 
-      {progressPercent > 0 && (
+      <BookModal book={book} open={modalOpen} onOpenChange={setModalOpen} />
+
+      {progressPercent > 0 ? (
         <div className="w-full mb-2" title={`${progressPercent}% خوانده شده`}>
           <div className="h-2 w-full rounded-full bg-gray-200 overflow-hidden">
             <div
@@ -104,7 +112,7 @@ const Book = ({ book, favIds, onToggleFav }) => {
           </div>
           {/*<div className="mt-1 text-[10px] text-gray-600">{progressPercent}% خوانده شده</div>*/}
         </div>
-      )}
+      ): <div className="h-4"></div>}
 
       <div className="flex flex-col items-start gap-2 w-full mt-1 mb-4">
         <h4 className="font-semibold text-sm text-emerald-700">{book.title}</h4>

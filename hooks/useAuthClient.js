@@ -3,6 +3,7 @@
 
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import api from "@/lib/apiClient";
 import { useEffect, useState } from "react";
 
 export function useAuthClient() {
@@ -20,8 +21,15 @@ export function useAuthClient() {
   useEffect(() => {
     if (auth.token) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${auth.token}`;
+      // keep api instance in sync as some modules use it
+      if (api && api.defaults && api.defaults.headers) {
+        api.defaults.headers.common["Authorization"] = `Bearer ${auth.token}`;
+      }
     } else {
       delete axios.defaults.headers.common["Authorization"];
+      if (api && api.defaults && api.defaults.headers) {
+        delete api.defaults.headers.common["Authorization"];
+      }
     }
   }, [auth.token]);
 
@@ -39,12 +47,16 @@ export function useAuthClient() {
   const logout = async () => {
   try {
     // Hit your backend logout route
-    await axios.post("/api/logout");
+    // prefer api instance so baseURL and interceptors are honored
+    try { await api.post("/logout"); } catch (e) { await axios.post("/api/logout"); }
 
     // Remove client-side storage
     localStorage.removeItem("auth-shereads");
     setAuth({ user: null, token: null });
     delete axios.defaults.headers.common["Authorization"];
+    if (api && api.defaults && api.defaults.headers) {
+      delete api.defaults.headers.common["Authorization"];
+    }
 
     // Redirect to login page
     router.push("/login");
@@ -54,7 +66,11 @@ export function useAuthClient() {
     // Even if backend fails, still remove client auth
     localStorage.removeItem("auth-shereads");
     setAuth({ user: null, token: null });
-    router.push("/login");
+      delete axios.defaults.headers.common["Authorization"];
+      if (api && api.defaults && api.defaults.headers) {
+        delete api.defaults.headers.common["Authorization"];
+      }
+      router.push("/login");
   }
 };
 

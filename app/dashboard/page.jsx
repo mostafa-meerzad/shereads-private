@@ -9,14 +9,14 @@ import ReadingBooks from "@/components/pages/ReadingBooks";
 import RecommendedBooks from "@/components/pages/RecommendedBooks";
 import SidebarUi from "@/components/SideBar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { useAuthClient } from "@/hooks/useAuthClient";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { BookMarked, Component, Heart, Library } from "lucide-react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import SettingsModal from "@/components/SettingsModal";
 
 const tabs = [
-  { key: "dashboard", label: "داشبورد", icon: Component },
+  { key: "dashboard", label: "کتاب‌ها ", icon: Component },
   { key: "recommendations", label: "پیشنهادی", icon: Library },
   { key: "favorites", label: "موردعلاقه‌", icon: Heart },
   { key: "reading", label: "مطالعه", icon: BookMarked },
@@ -30,13 +30,8 @@ export default function Dashboard() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openSettings, setOpenSettings] = useState(false);
   const router = useRouter()
-  const { user } = useAuthClient();
+  const { user } = useRequireAuth();
 
-
-
-  useEffect(() => {
-    if (!user) router.push("/login");
-  }, [user, router]);
 
   return (
     <SidebarProvider>
