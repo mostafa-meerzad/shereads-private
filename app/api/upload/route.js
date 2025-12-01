@@ -66,7 +66,8 @@ export async function POST(req) {
       const buffer = Buffer.from(await pdf.arrayBuffer());
       detectedLength = getPdfPageCountFromBuffer(buffer);
       await fs.writeFile(filePath, buffer);
-      finalPdfURL = `${origin}/books/${fileName}`;
+      // finalPdfURL = `${origin}/books/${fileName}`;
+      finalPdfURL = `/books/${fileName}`;
     }
 
     if (cover && typeof cover === "object" && cover.arrayBuffer) {
@@ -76,7 +77,8 @@ export async function POST(req) {
       const filePath = path.join(coversDir, fileName);
       const buffer = Buffer.from(await cover.arrayBuffer());
       await fs.writeFile(filePath, buffer);
-      finalCoverURL = `${origin}/covers/${fileName}`;
+      // finalCoverURL = `${origin}/covers/${fileName}`;
+      finalCoverURL = `/covers/${fileName}`;
     }
 
     return NextResponse.json({ pdfPath: finalPdfURL, coverPath: finalCoverURL, length: detectedLength });
