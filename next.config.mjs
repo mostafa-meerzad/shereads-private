@@ -1,7 +1,8 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  /* config options here */
-  reactCompiler: true,
-};
 
-export default nextConfig;
+const nextConfig = {
+  experimental: {
+    proxyClientMaxBodySize: '200mb',
+  },
+}
+ 
+export default nextConfig
