@@ -42,6 +42,7 @@ export function middleware(req) {
     "/dashboard",
     "/api/login",
     "/api/register",
+    "/api/author"
   ]);
 
   // Allow public paths and onboarding routes

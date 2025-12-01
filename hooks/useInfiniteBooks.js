@@ -19,7 +19,7 @@ async function fetchBooksPage({ pageParam = 1, limit = 20, filters = {} }) {
 export default function useInfiniteBooks({ limit = 20, filters = {}, enabled = true } = {}) {
   const key = queryKeys.books.lists({ limit, ...filters });
 
-  return useInfiniteQuery({
+  const query = useInfiniteQuery({
     queryKey: key,
     queryFn: ({ pageParam = 1 }) => fetchBooksPage({ pageParam, limit, filters }),
     enabled,
@@ -33,4 +33,15 @@ export default function useInfiniteBooks({ limit = 20, filters = {}, enabled = t
     staleTime: 1000 * 60 * 3,
     cacheTime: 1000 * 60 * 30,
   });
+
+  // Return explicit fields so consumers can reliably destructure what they need
+  return {
+    data: query.data,
+    fetchNextPage: query.fetchNextPage,
+    hasNextPage: query.hasNextPage,
+    isFetchingNextPage: query.isFetchingNextPage,
+    status: query.status,
+    // include the full query in case callers need more
+    query,
+  };
 }

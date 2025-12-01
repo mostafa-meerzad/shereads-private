@@ -110,7 +110,7 @@ export async function POST(req) {
     // Validate book input
     const parsedBook = AddBookSchema.safeParse(payload);
 
-    console.log("parsed book: ", parsedBook)
+
     if (!parsedBook.success) {
       return NextResponse.json(
         {

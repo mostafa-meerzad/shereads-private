@@ -74,7 +74,7 @@ export default function Login() {
 
   return (
     <div className=" md:py-0 grid md:grid-cols-2 bg-white  min-h-screen lg:max-h-screen" >
-      {/* <div className="hidden md:block h-full lg:h-screen overflow-hidden "> */}
+      <div className="hidden md:block h-full lg:h-screen overflow-hidden ">
         <Image
           src={img}
           width={500}
@@ -82,7 +82,7 @@ export default function Login() {
           alt="girl reading books"
           className="hidden md:block h-full w-full object-cover object-top"
         />
-      {/* </div> */}
+      </div>
 
       <div
         dir="rtl"
@@ -108,7 +108,7 @@ export default function Login() {
               <Input
                 type="email"
                 placeholder="ایمیل"
-                className="text-right rounded-full py-5 pr-5"
+                className="text-right rounded-full py-4 pr-5"
                 {...register("email", {
                   required: "لطفاً ایمیل را وارد کنید",
                   pattern: {
@@ -130,7 +130,7 @@ export default function Login() {
               <Input
                 type={showPassword ? "text" : "password"}
                 placeholder="رمز عبور"
-                className="text-right pr-5 rounded-full py-5"
+                className="text-right pr-5 rounded-full py-4"
                 {...register("password", {
                   required: "لطفاً رمز عبور را وارد کنید",
                   minLength: {
@@ -161,7 +161,7 @@ export default function Login() {
               disabled={loading}
               whileHover={!loading ? { scale: 1.03 } : {}}
               whileTap={!loading ? { scale: 0.97 } : {}}
-              className={`w-full bg-green-700 text-white py-3 rounded-lg mt-2
+              className={`w-full bg-green-700 text-white py-2 rounded-lg mt-2
     ${loading ? "opacity-50 cursor-not-allowed" : ""}
   `}
             >

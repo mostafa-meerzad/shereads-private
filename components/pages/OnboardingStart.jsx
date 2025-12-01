@@ -8,9 +8,9 @@ import Link from "next/link";
 
 const OnboardingStart = ({ onStart }) => {
   return (
-    <div className="grid grid-rows-[.5fr_1fr] md:grid-rows-[.7fr_1fr] ">
+    <div className="grid  md:grid-rows-[auto_1fr] ">
       {/* Top Section */}
-      <div className="row-start-1 flex flex-col lg:flex-row justify-between p-6 lg:p-10">
+      <div className="row-start-1 flex flex-col lg:flex-row justify-between p-6 lg:p-10 ">
         {/* Logo */}
         <motion.div
           initial={{ opacity: 0, y: -15 }}
@@ -44,7 +44,7 @@ const OnboardingStart = ({ onStart }) => {
               visible: { opacity: 1, y: 0 },
             }}
             transition={{ duration: 0.7 }}
-            className="text-2xl text-center lg:text-[1.8rem] font-medium text-gray-800 lg:text-right md:w-2/3 lg:w-fit md:text-center leading-loose max-lg:mt-16"
+            className="text-2xl text-center  font-medium text-gray-800 lg:text-right md:w-2/3 lg:w-fit md:text-center leading-loose max-lg:mt-16"
           >
             چند سوال کوتاه را پاسخ دهید تا تجربه‌ی مطالعه‌ی شما شخصی‌سازی شود
           </motion.h1>
@@ -61,14 +61,14 @@ const OnboardingStart = ({ onStart }) => {
           >
             <Button
               onClick={onStart}
-              className="rounded-full bg-green-700 hover:bg-green-800 hover:text-gray-200 text-white w-fit px-18 py-3 lg:px-24 lg:py-6 transition-all hover:scale-105 active:scale-95"
+              className="rounded-full bg-green-700 hover:bg-green-800 hover:text-gray-200 text-white w-fit px-18 py-3 lg:px-24 lg:py-5 transition-all hover:scale-105 active:scale-95"
             >
               شروع کنید
             </Button>
             <Link href={"/register"}>
               <Button
                 variant={"outline"}
-                className="text-sm text-gray-500 hover:text-gray-700 w-fit px-4 py-3 lg:px-6 rounded-full lg:py-6 transition-all hover:scale-105 active:scale-95"
+                className="text-sm text-gray-500 hover:text-gray-700 w-fit px-4 py-3 lg:px- rounded-full lg:py-5 transition-all hover:scale-105 active:scale-95"
               >
                 رد کردن
               </Button>
@@ -98,14 +98,14 @@ const OnboardingStart = ({ onStart }) => {
         initial={{ opacity: 0, y: 25 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.3 }}
-        className="max-lg:hidden "
+        className="max-lg:hidden overflow-hidden h-auto relative"
       >
         <Image
           src={desktopImg}
           width={800}
           height={500}
           alt="girl reading a book with ducks around her"
-          className="w-full object-cover object-top row-start-2 max-h-[60vh] row-span-2 "
+          className="absolute w-full object-cover inset-0 object-top row-start-2 row-span-2 "
         />
       </motion.div>
     </div>

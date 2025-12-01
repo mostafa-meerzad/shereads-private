@@ -1,3 +1,6 @@
+
+"use client"
+
 import logoWhiteShort from "@/assets/logo-white-short.svg";
 import logoWhite from "@/assets/logo-white.svg";
 import {
@@ -33,7 +36,7 @@ const SidebarUi = ({ tabs, selected, onSelect, isCollapsed, onOpenSettings }) =>
               height={40}
               src={logoWhiteShort}
               alt="logo"
-              className="size-6 object-cover "
+              className={`size-6 object-cover  ${!isCollapsed ? "hidden" : "block"}`}
             />
           ) : (
             <Image
@@ -41,7 +44,7 @@ const SidebarUi = ({ tabs, selected, onSelect, isCollapsed, onOpenSettings }) =>
               height={80}
               src={logoWhite}
               alt="logo"
-              className=" h-full object-contain"
+              className={` h-full object-contain  ${!!isCollapsed ? "hidden" : "block"}`}
             />
           )}
         </div>

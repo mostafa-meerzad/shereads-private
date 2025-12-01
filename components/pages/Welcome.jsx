@@ -9,7 +9,7 @@ import TextType from "../TextType";
 
 const Welcome = () => {
   return (
-    <section className="page bg-[#E6F0EC] text-black flex flex-col  md:flex-row justify-start lg:justify-center items-center  md:gap-1 lg:gap-10 py-10 md:py-32 lg:py-20">
+    <section className="page bg-[#E6F0EC] text-black flex flex-col  md:flex-row justify-start lg:justify-center items-center  md:gap-1 lg:gap-10 py-10  lg:py-0">
       <motion.div
         initial={{ scale: 0.5, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -20,7 +20,7 @@ const Welcome = () => {
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 1, damping: 10, stiffness: 120, type: "spring" }}
-        className="absolute bottom-[-17rem] mb:bottom-[-30rem] lg:bottom-[-15rem] left-[-5rem] md:left-[-13rem] lg:left-[-5%] size-[25rem] md:size-[32rem] rounded-full bg-[#FDF8EC] md:z-20 "
+        className="absolute bottom-[-17rem] mb:bottom-[-30rem] lg:top-[70%] right-[50vw] md:right-[60vw] lg:right-[80vw]  size-[25rem] md:size-[32rem] rounded-full bg-[#FDF8EC] md:z-20 "
       />
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
@@ -32,7 +32,7 @@ const Welcome = () => {
           damping: 10,
           delay: 0.2,
         }}
-        className="w-[20rem] md:w-[25rem] lg:w-[28rem] xl:w-[30rem] z-10 relative md:ml-8"
+        className="w-[20rem] md:w-[25rem] lg:w-[28rem] xl:w-[30rem] z-10 relative md:ml-8 "
       >
         <Image
           src={welcomeImg}
@@ -63,14 +63,14 @@ const Welcome = () => {
           <Link href={"/onboarding"}>
             <Button
               className={
-                "rounded-full bg-green-700 hover:bg-green-800 hover:text-white text-gray-200 w-fit px-24 py-6 transition-all hover:scale-105 active:scale-95"
+                "rounded-full bg-green-700 hover:bg-green-800 hover:text-white text-gray-200 w-fit px-24 py-5 transition-all hover:scale-105 active:scale-95"
               }
             >
               شروع کنید
             </Button>
           </Link>
           <div>
-            <span className="text-[#05653D] text-md ml-1">حساب دارید؟</span>
+            <span className="text-[#05653D] text-sm ml-1">حساب دارید؟</span>
             <Link
               href={"/login"}
               className="hover:text-green-700 active:text-gray-500 transition-all"

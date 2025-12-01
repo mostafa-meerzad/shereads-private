@@ -109,7 +109,6 @@ const OnboardingQuestions = ({ onComplete }) => {
     useWatch({ control, name: `answers.${step}`, defaultValue: [] }) || [];
 
   // Hook for authors step (pageable)
-  // Note: we fetch 8 authors per page - adjust limit as you like
   const {
     data: authorsData = [],
     page: authorsPage,
@@ -246,7 +245,7 @@ const OnboardingQuestions = ({ onComplete }) => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="grid w-full  max-md:max-w-4xl bg-white p-10  md:grid-cols-[1fr_1fr] gap-20 lg:gap-40 md:items-center md:p-0 md:pr-8"
+      className="grid w-full  max-md:max-w-4xl bg-white p-10  md:grid-cols-[1fr_1fr] gap-20 lg:gap-40 md:items-center md:p-0 md:pr-8 border-2 border-red-500"
     >
       {/* Left image */}
       <div className="hidden col-start-1 md:block relative h-full min-h-screen">
@@ -270,13 +269,13 @@ const OnboardingQuestions = ({ onComplete }) => {
       </div>
 
       {/* Right section */}
-      <div className="md:col-start-2 flex flex-col w-full md:px-5 justify-between  py-32 md:max-w-xl h-fit lg:justify-start lg:gap-16   justify-self-start">
+      <div className="md:col-start-2 flex flex-col w-full md:px-5 justify-between  py-16 md:max-w-xl h-fit lg:justify-start lg:gap-16   justify-self-start">
         {/* Step indicator */}
         <motion.div
           initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="relative flex justify-center gap-6 sm:gap-8 md:gap-8 w-full  lg:justify-between mb-20 lg:mb-10"
+          className="relative flex justify-center gap-6 sm:gap-8 md:gap-8 w-full  lg:justify-between mb-20 lg:mb-0"
         >
           {Array(totalQuestions + 1) // questions + final
             .fill(undefined)
@@ -318,8 +317,9 @@ const OnboardingQuestions = ({ onComplete }) => {
             animate="center"
             exit="exit"
             className=" relative top-0"
+            
           >
-            <motion.h2 className="text-xl lg:text-[1.4rem] text-center font-medium text-gray-800 mb-6 md:text-right">
+            <motion.h2 className="text-xl text-center font-medium text-gray-800 mb-6 md:text-right">
               {formData[step].question}
             </motion.h2>
 
@@ -349,6 +349,7 @@ const OnboardingQuestions = ({ onComplete }) => {
 
                 // If we're on the authors step, render the paginated authors list
                 if (isAuthorsStep) {
+
                   return (
                     <div dir="rtl" className="flex flex-col gap-6">
                       <div className="grid md:grid-cols-2 gap-4">
@@ -368,7 +369,7 @@ const OnboardingQuestions = ({ onComplete }) => {
                                   handleSelect(author.id);
                                 }}
                              
-                                className={`w-full border rounded-full py-3 px-6 text-right flex items-center justify-between transition-all duration-300 hover:scale-105  ${
+                                className={`lg:w-4/5 border rounded-full py-2 px-6 text-right flex items-center justify-between transition-all duration-300 hover:scale-105  ${
                                   isSelected
                                     ? "bg-green-700 text-white border-green-700"
                                     : "border-green-700 text-green-700 bg-white hover:bg-green-50"
@@ -393,10 +394,6 @@ const OnboardingQuestions = ({ onComplete }) => {
 
                       {/* Pagination controls */}
                       <div className="flex items-center justify-between mt-4">
-                        <div className="text-sm text-gray-500">
-                          صفحه {authorsPage} از {authorsPages || 1}
-                        </div>
-
                         <div className="flex gap-3">
                           <button
                             type="button"
@@ -406,9 +403,9 @@ const OnboardingQuestions = ({ onComplete }) => {
                               }
                             }}
                             disabled={authorsPage <= 1}
-                            className="px-4 py-2 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+                            className="px-5 py-1 text-sm rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
                           >
-                            قبلی
+                        صفحه    قبلی
                           </button>
 
                           <button
@@ -419,9 +416,9 @@ const OnboardingQuestions = ({ onComplete }) => {
                               }
                             }}
                             disabled={authorsPage >= (authorsPages || 1)}
-                            className="px-4 py-2 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+                            className="px-4 py-1 text-sm rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
                           >
-                            بعدی
+                        صفحه    بعدی
                           </button>
                         </div>
                       </div>
@@ -431,7 +428,7 @@ const OnboardingQuestions = ({ onComplete }) => {
                   );
                 }
 
-                // Default (non-author) rendering (same as you had)
+                // Default (non-author) rendering 
                 return (
                   <div
                     dir="rtl"
@@ -448,7 +445,7 @@ const OnboardingQuestions = ({ onComplete }) => {
                           variants={answerVariants}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
-                          className={`w-full border rounded-full py-3 px-6 text-right transition ${
+                          className={`lg:w-4/5 border rounded-full py-2 text-sm px-6 text-right transition ${
                             isSelected
                               ? "bg-green-700 text-white border-green-700"
                               : "border-green-700 text-green-700 bg-white hover:bg-green-50"
@@ -464,13 +461,13 @@ const OnboardingQuestions = ({ onComplete }) => {
             />
 
             {/* Navigation */}
-            <div className="flex justify-between mt-18">
+            <div className="flex justify-between mt-18 lg:pl-12">
               {step > 0 ? (
                 <motion.button
                   type="button"
                   onClick={() => setStep(step - 1)}
                   whileHover={{ y: -2 }}
-                  className="px-6 py-2 rounded-full border border-gray-400 text-gray-600 hover:bg-gray-100"
+                  className="px-6 py-1 tex-xs rounded-full border border-gray-400 text-gray-600 hover:bg-gray-100"
                 >
                   قبلی
                 </motion.button>
@@ -484,7 +481,7 @@ const OnboardingQuestions = ({ onComplete }) => {
                   onClick={() => selected && setStep(step + 1)}
                   disabled={selected.length === 0}
                   whileHover={selected.length > 0 ? { y: -2 } : {}}
-                  className={`px-6 py-2 rounded-full border ${
+                  className={`px-6 py-1 tex-xs rounded-full border ${
                     selected.length > 0
                       ? "bg-green-700 text-white border-green-700"
                       : "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"
@@ -497,7 +494,7 @@ const OnboardingQuestions = ({ onComplete }) => {
                   type="submit"
                   disabled={selected.length === 0}
                   whileHover={selected.length > 0 ? { y: -2 } : {}}
-                  className={`px-6 py-2 rounded-full border ${
+                  className={`px-6 py-1 tex-xs rounded-full border ${
                     selected.length > 0
                       ? "bg-green-700 text-white border-green-700"
                       : "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"

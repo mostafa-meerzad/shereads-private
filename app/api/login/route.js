@@ -25,7 +25,7 @@ export async function POST(req) {
 
     if (!user) {
       return NextResponse.json(
-        { error: "Invalid email or password" },
+        { error: "ایمیل یا رمز عبور نامعتبر است" },
         { status: 401 }
       );
     }
@@ -34,7 +34,7 @@ export async function POST(req) {
     const isValid = await verifyPassword(password, user.passwordHash);
     if (!isValid) {
       return NextResponse.json(
-        { error: "Invalid email or password" },
+        { error: "ایمیل یا رمز عبور نامعتبر است" },
         { status: 401 }
       );
     }
