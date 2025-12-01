@@ -132,13 +132,13 @@ export default function AdminUsers() {
   return (
     <div className="overflow-x-auto rounded-xl">
       {/* Create User Section */}
-      <div className="p-4 border-b bg-white" dir="rtl">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium">ایجاد کاربر جدید</h3>
-          <Button className={"bg-green-600 hover:bg-green-700"} size="sm" onClick={() => setShowCreate((s) => !s)}>
+      <div className="mb-8 py-4  border-b bg-white " dir="rtl">
+        {/* <div className="flex items-center justify-between"> */}
+        
+          <Button className={"bg-green-700 hover:bg-green-800 rounded-full px-8 py-3"} size="sm" onClick={() => setShowCreate((s) => !s)}>
             {showCreate ? "بستن" : "ایجاد کاربر جدید"}
           </Button>
-        </div>
+        {/* </div> */}
 
         {showCreate && (
           <form
@@ -157,7 +157,7 @@ export default function AdminUsers() {
                 gender:newGender
               });
             }}
-            className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3"
+            className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3 "
           >
             <Input
               placeholder="نام"
@@ -218,21 +218,22 @@ export default function AdminUsers() {
               </label>
             </div>
 
-            <div className="md:col-span-3 flex gap-2 justify-end">
-              <Button
-                size="sm"
-                type="button"
-                variant="outline"
-                onClick={() => setShowCreate(false)}
-              >
-                انصراف
-              </Button>
+            <div className="md:col-span-3 flex gap-2 justify-start  mt-4 ">
+           
               <Button className={"bg-green-500 hover:bg-green-600"} size="sm" type="submit" disabled={createUser.isPending}>
                 {createUser.isPending ? (
                   <Spinner className="h-4 w-4" />
                 ) : (
                   "ایجاد"
                 )}
+              </Button>
+                 <Button
+                size="sm"
+                type="button"
+                variant="outline"
+                onClick={() => setShowCreate(false)}
+              >
+                انصراف
               </Button>
             </div>
           </form>
