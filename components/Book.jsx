@@ -9,8 +9,7 @@ import BookModal from "./BookModal";
 
 const Book = ({ book, favIds, onToggleFav }) => {
   const router = useRouter();
-  console.log("book date: ", book)
-
+  
   // Resolve first available value among multiple possible backend field names
   const pickPath = (obj, keys) => {
     for (const k of keys) {

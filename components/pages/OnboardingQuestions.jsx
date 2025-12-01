@@ -1,8 +1,10 @@
+// OnboardingQuestions.jsx
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
+import usePaginatedAuthors from "@/hooks/usePaginatedAuthors"; // adjust path if needed
 
 // Image imports placeholder (user will replace)
 import img2 from "@/assets/onboarding-img-2.png";
@@ -32,9 +34,12 @@ const formData = [
   {
     question: " حالت مورد نظرتان برای خواندن چیست؟",
     answers: [
-    
-  "آرام", "الهام_بخش", "احساسی", "معلوماتی", "پرهیجان", "احساس_خوب"
-
+      "آرام",
+      "الهام_بخش",
+      "احساسی",
+      "معلوماتی",
+      "پرهیجان",
+      "احساس_خوب",
     ],
     img: img2,
   },
@@ -50,8 +55,15 @@ const formData = [
   },
   {
     question: "هدف شما از کتاب خوانی چیست؟",
-    answers: [  "سرگرمی", "یادگیری", "رشد_فردی", "بهبود_مهارت_ها"],
+    answers: ["سرگرمی", "یادگیری", "رشد_فردی", "بهبود_مهارت_ها"],
     img: img5,
+  },
+  // NEW: authors step (answers will be fetched from backend)
+  {
+    question: "نویسندگانی که دوست دارید را انتخاب کنید",
+    answers: [], // populated by hook at runtime
+    img: img6, // choose an appropriate image; you can replace with a different one
+    isAuthorsStep: true,
   },
 ];
 
@@ -81,15 +93,35 @@ const backendKeys = {
   2: "Age",
   3: "book_length",
   4: "Motivation",
+  5: "author", 
 };
 
 const OnboardingQuestions = ({ onComplete }) => {
+  const totalQuestions = formData.length; // now includes authors
+  const finalStepIndex = totalQuestions; // final screen after all questions
   const { control, handleSubmit } = useForm({
     defaultValues: { answers: {} },
   });
   const [step, setStep] = useState(0);
+
+  // useWatch for currently selected answers on current step
   const selected =
     useWatch({ control, name: `answers.${step}`, defaultValue: [] }) || [];
+
+  // Hook for authors step (pageable)
+  // Note: we fetch 8 authors per page - adjust limit as you like
+  const {
+    data: authorsData = [],
+    page: authorsPage,
+    setPage: setAuthorsPage,
+    pages: authorsPages,
+    isLoading: authorsLoading,
+    isFetching: authorsFetching,
+    nextPage: authorsNextPage,
+    prevPage: authorsPrevPage,
+    refetch: refetchAuthors,
+  } = usePaginatedAuthors({ initialPage: 1, limit: 8 });
+
   const onSubmit = (data) => {
     const transformed = {};
 
@@ -99,19 +131,20 @@ const OnboardingQuestions = ({ onComplete }) => {
 
       // age & mood are SINGLE SELECT, so send as string
       if (backendKey === "Age" || backendKey === "mood") {
-        transformed[backendKey] = value[0] || null;
+        transformed[backendKey] = value && value.length > 0 ? value[0] : null;
       } else {
-        // everything else MULTI SELECT
-        transformed[backendKey] = value;
+        // everything else MULTI SELECT (including Authors)
+        transformed[backendKey] = value || [];
       }
     });
 
-    setStep(formData.length);
+    // move to final and call onComplete
+    setStep(finalStepIndex);
     onComplete(transformed);
   };
 
   // FINAL STEP UI
-  if (step === formData.length) {
+  if (step === finalStepIndex) {
     return (
       <div className=" w-full  bg-white shadow p-10 grid  md:grid-cols-2 gap-10 max-md:gap-0 items-center ">
         {/* Image animation */}
@@ -148,7 +181,7 @@ const OnboardingQuestions = ({ onComplete }) => {
               },
             }}
           >
-            {Array(6)
+            {Array(totalQuestions + 1) // questions + final
               .fill(undefined)
               .map((_, i) => (
                 <motion.div
@@ -169,7 +202,7 @@ const OnboardingQuestions = ({ onComplete }) => {
                   className={`relative size-8 sm:size-10 md:size-9 lg:size-10 rounded-full border-2 flex items-center justify-center text-sm bg-green-700 text-white border-green-700`}
                 >
                   {i + 1}
-                  {i < 5 && (
+                  {i < totalQuestions && (
                     <div
                       className={`absolute w-10 lg:w-16 xl:w-24  h-0.5 left-full bg-green-700`}
                     ></div>
@@ -207,16 +240,19 @@ const OnboardingQuestions = ({ onComplete }) => {
     );
   }
 
+  // helper: is current step the authors step?
+  const isAuthorsStep = formData[step]?.isAuthorsStep === true;
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="grid w-full  max-md:max-w-4xl bg-white p-10  md:grid-cols-2 gap-20 lg:gap-40 md:items-center md:p-0 md:pr-8"
+      className="grid w-full  max-md:max-w-4xl bg-white p-10  md:grid-cols-[1fr_1fr] gap-20 lg:gap-40 md:items-center md:p-0 md:pr-8"
     >
       {/* Left image */}
       <div className="hidden col-start-1 md:block relative h-full min-h-screen">
         <AnimatePresence mode="wait">
           <motion.div
-            key={formData[step].img.src}
+            key={formData[step].img.src + String(step)} // ensure unique key when authors step updates
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
@@ -242,7 +278,7 @@ const OnboardingQuestions = ({ onComplete }) => {
           transition={{ duration: 0.4 }}
           className="relative flex justify-center gap-6 sm:gap-8 md:gap-8 w-full  lg:justify-between mb-20 lg:mb-10"
         >
-          {Array(6)
+          {Array(totalQuestions + 1) // questions + final
             .fill(undefined)
             .map((_, i) => (
               <motion.div
@@ -258,9 +294,9 @@ const OnboardingQuestions = ({ onComplete }) => {
                 }`}
               >
                 {i + 1}
-                {i < 5 && (
+                {i < totalQuestions && (
                   <div
-                    className={`absolute w-10 lg:w-16 xl:w-24  h-0.5 left-full transition-all duration-500 ${
+                    className={`absolute w-10 lg:w-16 xl:w-16  h-0.5 left-full transition-all duration-500 ${
                       i === step
                         ? "bg-green-700 text-white border-green-700"
                         : i < step
@@ -297,20 +333,105 @@ const OnboardingQuestions = ({ onComplete }) => {
                 // step 1 = mood, step 2 = age
                 const isSingleSelect = step === 1 || step === 2;
 
-                const handleSelect = (answer) => {
+                const handleSelect = (answerValue) => {
                   if (isSingleSelect) {
                     // Always replace with a single selected value
-                    field.onChange([answer]);
+                    field.onChange([answerValue]);
                   } else {
                     // Multi-select as usual
-                    if (values.includes(answer)) {
-                      field.onChange(values.filter((v) => v !== answer));
+                    if (values.includes(answerValue)) {
+                      field.onChange(values.filter((v) => v !== answerValue));
                     } else {
-                      field.onChange([...values, answer]);
+                      field.onChange([...values, answerValue]);
                     }
                   }
                 };
 
+                // If we're on the authors step, render the paginated authors list
+                if (isAuthorsStep) {
+                  return (
+                    <div dir="rtl" className="flex flex-col gap-6">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {authorsLoading ? (
+                          <div className="col-span-2 text-center py-8">
+                            در حال بارگیری نویسندگان...
+                          </div>
+                        ) : (
+                          authorsData.map((author) => {
+                            const isSelected = values.includes(author.id);
+                            return (
+                              <button
+                                key={author.id}
+                                type="button"
+                                onClick={() => {
+                                  // toggle author.id
+                                  handleSelect(author.id);
+                                }}
+                             
+                                className={`w-full border rounded-full py-3 px-6 text-right flex items-center justify-between transition-all duration-300 hover:scale-105  ${
+                                  isSelected
+                                    ? "bg-green-700 text-white border-green-700"
+                                    : "border-green-700 text-green-700 bg-white hover:bg-green-50"
+                                }`}
+                              >
+                                <div className="flex flex-col items-end">
+                                  <span className="text-sm font-medium">
+                                    {author.name}
+                                  </span>
+                                  {author.bioShort && (
+                                    <span className="text-xs text-gray-500">
+                                      {author.bioShort}
+                                    </span>
+                                  )}
+                                </div>
+                                
+                              </button>
+                            );
+                          })
+                        )}
+                      </div>
+
+                      {/* Pagination controls */}
+                      <div className="flex items-center justify-between mt-4">
+                        <div className="text-sm text-gray-500">
+                          صفحه {authorsPage} از {authorsPages || 1}
+                        </div>
+
+                        <div className="flex gap-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (authorsPage > 1) {
+                                setAuthorsPage(authorsPage - 1);
+                              }
+                            }}
+                            disabled={authorsPage <= 1}
+                            className="px-4 py-2 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+                          >
+                            قبلی
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (authorsPage < (authorsPages || 1)) {
+                                setAuthorsPage(authorsPage + 1);
+                              }
+                            }}
+                            disabled={authorsPage >= (authorsPages || 1)}
+                            className="px-4 py-2 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
+                          >
+                            بعدی
+                          </button>
+                        </div>
+                      </div>
+
+                      
+                    </div>
+                  );
+                }
+
+                // Default (non-author) rendering (same as you had)
                 return (
                   <div
                     dir="rtl"
@@ -357,7 +478,7 @@ const OnboardingQuestions = ({ onComplete }) => {
                 <div />
               )}
 
-              {step < formData.length - 1 ? (
+              {step < totalQuestions - 1 ? (
                 <motion.button
                   type="button"
                   onClick={() => selected && setStep(step + 1)}

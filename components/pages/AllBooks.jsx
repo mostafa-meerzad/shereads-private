@@ -45,7 +45,7 @@ const AllBooks = () => {
     title: "",
     genre: "",
   });
-  // searchScope: 'both' | 'title' | 'author'
+  // searchScope: 'both' | 'title' | 'author' | 'genre'
   const [searchScope, setSearchScope] = useState("title");
 
   const applySearch = () => {
@@ -53,8 +53,10 @@ const AllBooks = () => {
     setFilters((prev) => ({
       ...prev,
       // depending on scope, set title and/or author
-      title: searchScope === "author" ? "" : q,
-      author: searchScope === "title" ? "" : q,
+      // when searching by genre, set genre and clear title/author
+      title: searchScope === "author" || searchScope === "genre" ? "" : q,
+      author: searchScope === "title" || searchScope === "genre" ? "" : q,
+      genre: searchScope === "genre" ? q : prev.genre,
     }));
   };
 
@@ -72,7 +74,6 @@ const AllBooks = () => {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteBooks({ limit: 20, filters });
 
-  console.log("books: ", data);
   const { ref, inView } = useInView({ rootMargin: "200px" });
 
   useEffect(() => {
@@ -119,8 +120,8 @@ const AllBooks = () => {
 
   return (
     <div dir="rtl" className="space-y-10">
-      <div className="flex flex-col lg:flex-row-reverse lg:items-center gap-2 w-full">
-        <motion.div whileHover={{ scale: 1.02 }} className="flex flex-row-reverse gap-4 justify-end">
+      <div className="flex justify-between flex-col lg:flex-row-reverse lg:items-center gap-2 w-full">
+        <motion.div whileHover={{ scale: 1.02 }} className="flex flex-row-reverse gap-4 justify-end ">
           
             {/* Genre Filter */}
             <Select
@@ -147,21 +148,22 @@ const AllBooks = () => {
               <Select onValueChange={handleScopeChange} value={searchScope}>
                 <SelectTrigger
                   dir="rtl"
-                  className="rounded-full w-40 border-2 border-emerald-700 text-emerald-700 text-sm py-2 px-3"
+                  className="rounded-full w-40 border-2 border-emerald-700 text-emerald-700 text-md py-2 px-3"
                 >
                   <SelectValue placeholder="جستجو در" />
                 </SelectTrigger>
                 <SelectContent dir="rtl">
-                  {/* <SelectItem value="both">عنوان و نویسنده</SelectItem> */}
-                  <SelectItem value="title">عنوان</SelectItem>
-                  <SelectItem value="author">نویسنده</SelectItem>
+                  {/* <SelectItem value="empty">جستجو بر اساس</SelectItem> */}
+                  <SelectItem value="title">جستجوی عنوان</SelectItem>
+                  <SelectItem value="genre">جستجوی ژانر</SelectItem>
+                  <SelectItem value="author">جستجوی نویسنده</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           
           {/* Search Input + Button */}
         </motion.div>
-        <div className="flex flex-row-reverse gap-4">
+        <div className="flex flex-row-reverse gap-4 w-full">
           <div className="relative w-full">
             <Input
               dir="rtl"

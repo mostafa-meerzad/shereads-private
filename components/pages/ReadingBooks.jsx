@@ -19,7 +19,6 @@ const ReadingBooks = () => {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteReading(userId);
 
-  // console.log("books in reading page: ", data);
   const { ref, inView } = useInView({ rootMargin: "200px" });
 
   useEffect(() => {

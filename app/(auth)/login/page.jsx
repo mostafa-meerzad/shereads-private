@@ -20,7 +20,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // console.log("checking if the user is logged in", user);
   const {
     register,
     handleSubmit,
@@ -40,7 +39,7 @@ export default function Login() {
         // Store full user + token
         login(res.data);
 
-        toast.success("ثبت‌نام با موفقیت انجام شد!");
+        toast.success("ورود با موفقیت انجام شد");
 
         // Redirect after small delay so toast can be seen
         setTimeout(() => {
@@ -58,7 +57,6 @@ export default function Login() {
       // Zod validation error
       if (status === 422) {
         toast.error("ورودی‌ها معتبر نیستند");
-        console.log("Validation Details:", result.details.password._errors);
         return;
       }
 
@@ -75,20 +73,20 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen  md:py-0 flex flex-col md:flex-row bg-white">
-      <div className="hidden md:block md:w-1/2 h-full">
+    <div className=" md:py-0 grid md:grid-cols-2 bg-white  min-h-screen lg:max-h-screen" >
+      {/* <div className="hidden md:block h-full lg:h-screen overflow-hidden "> */}
         <Image
           src={img}
           width={500}
-          height={900}
-          alt="stack of books"
-          className="h-full w-full object-cover object-top"
+          height={600}
+          alt="girl reading books"
+          className="hidden md:block h-full w-full object-cover object-top"
         />
-      </div>
+      {/* </div> */}
 
       <div
         dir="rtl"
-        className="w-full md:w-1/2 flex items-center justify-center p-8 h-fit py-32"
+        className="w-full h-full flex items-center justify-center p-8  py-32 "
       >
         <motion.div
           initial="hidden"

@@ -20,7 +20,6 @@ const LoadingTexts = ({ onComplete }) => {
 
   useEffect(() => {
     if (index === texts.length - 1) {
-      console.log("end of the array reached");
       onComplete();
       return;
     }

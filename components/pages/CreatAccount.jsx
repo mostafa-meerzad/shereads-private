@@ -74,7 +74,7 @@ const CreateAccount = ({ onContinue, buttonLabel }) => {
         initial={{ opacity: 0, y: 25 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.3 }}
-        className="w-full object-cover object-center row-start-2 max-h-[60vh] row-span-2 min-h-[35rem] bg-[url(/test-img.png)] bg-top bg-no-repeat bg-cover"
+        className="w-full object-cover object-center row-start-2  row-span-2  bg-[url(/create-account.png)] bg-top bg-no-repeat bg-cover"
       />
     </div>
   );

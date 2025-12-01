@@ -124,7 +124,6 @@ const SidebarUi = ({ tabs, selected, onSelect, isCollapsed, onOpenSettings }) =>
 
           <button
             onClick={() => {
-              console.log("logging out");
               logout();
             }}
             className={`w-full cursor-pointer mb-3 flex items-center gap-4  hover:bg-gray-200/30 rounded-md  ${
@@ -157,7 +156,6 @@ const SidebarUi = ({ tabs, selected, onSelect, isCollapsed, onOpenSettings }) =>
 
           <div
             onClick={() => {
-              console.log("logging out");
               logout();
             }}
             className="cursor-pointer flex items-center gap-4 justify-end hover:bg-gray-200/30 rounded-md py-2 px-5 "

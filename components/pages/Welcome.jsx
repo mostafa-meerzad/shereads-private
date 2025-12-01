@@ -6,26 +6,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import TextType from "../TextType";
-import { useRouter } from "next/navigation";
-// import { useAuth } from "@/hooks/useAuth";
-// import { useAuthClient } from "@/hooks/useAuthClient";
 
 const Welcome = () => {
-  // const { user } = useAuthClient();
-
-  // console.log("here is user object, ", user)
-  // const router = useRouter();
-
-  // const handleGetStarted = () => {
-
-  //   if(!user){
-  //     router.push("/onboarding")
-  //   }
-  //   else{
-  //     router.push("/dashboard");
-  //   }
-  // };
-
   return (
     <section className="page bg-[#E6F0EC] text-black flex flex-col  md:flex-row justify-start lg:justify-center items-center  md:gap-1 lg:gap-10 py-10 md:py-32 lg:py-20">
       <motion.div
@@ -78,17 +60,15 @@ const Welcome = () => {
           animate={{ opacity: 1, transition: { duration: 0.9, delay: 1 } }}
           className="flex flex-col justify-center gap-2 items-center"
         >
-          <Button
-            className={
-              "rounded-full bg-green-700 hover:bg-green-800 hover:text-white text-gray-200 w-fit px-24 py-6 transition-all hover:scale-105 active:scale-95"
-            }
-          >
-            <Link
-              href={"/onboarding"}
+          <Link href={"/onboarding"}>
+            <Button
+              className={
+                "rounded-full bg-green-700 hover:bg-green-800 hover:text-white text-gray-200 w-fit px-24 py-6 transition-all hover:scale-105 active:scale-95"
+              }
             >
-            شروع کنید
-           
-          </Link> </Button>
+              شروع کنید
+            </Button>
+          </Link>
           <div>
             <span className="text-[#05653D] text-md ml-1">حساب دارید؟</span>
             <Link

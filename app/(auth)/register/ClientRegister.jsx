@@ -24,7 +24,6 @@ import { toast } from "react-hot-toast";
 export default function ClientRegister() {
   const { user, login } = useAuthClient();
   const router = useRouter();
-  // console.log("checking if the user is logged in: ", user);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const searchParams = useSearchParams();
@@ -47,9 +46,17 @@ export default function ClientRegister() {
   };
 
   const onSubmit = async (data) => {
-    const { Age, Genre, Motivation, book_length, mood } = JSON.parse(
-      collectedAnswers
-    );
+    let Age, Genre, Motivation, book_length, mood, author;
+
+    // If collectedAnswers exists, parse it
+    if (collectedAnswers) {
+      try {
+        const parsedData = JSON.parse(collectedAnswers);
+        ({ Age, Genre, Motivation, book_length, mood, author } = parsedData);
+      } catch (e) {
+        console.error("Invalid JSON in collectedAnswers", e);
+      }
+    }
 
     try {
       const res = await axios.post("/api/register", {
@@ -63,6 +70,7 @@ export default function ClientRegister() {
         Motivation: Motivation,
         book_length: book_length,
         mood: mood,
+        author: author,
       });
 
       if (res.status === 201 && res.data) {
@@ -87,7 +95,6 @@ export default function ClientRegister() {
       // Zod validation error
       if (status === 422) {
         toast.error("ورودی‌ها معتبر نیستند");
-        console.log("Validation Details:", result?.details);
         return;
       }
 
@@ -104,18 +111,18 @@ export default function ClientRegister() {
   };
 
   return (
-    <div className="min-h-screen  flex flex-col md:flex-row bg-white">
-      <div className="hidden md:block md:w-1/2 h-screen">
-        <Image
-          src={img}
-          width={500}
-          height={900}
-          alt="stack of books"
-          className="h-full w-full object-cover object-top"
-        />
-      </div>
+    <div className=" md:py-0 grid md:grid-cols-2 bg-white  min-h-screen lg:max-h-screen">
+      {/* <div className="hidden md:block h-full lg:h-screen overflow-hidden border-2 border-red-500"> */}
+      <Image
+        src={img}
+        width={500}
+        height={900}
+        alt="stack of books"
+        className="hidden md:block h-full w-full object-cover object-top"
+      />
+      {/* </div> */}
 
-      <div className="w-full md:w-1/2 flex items-center justify-center p-8">
+      <div className="w-full h-full flex items-center justify-center p-8  py-32 ">
         <motion.div
           initial="hidden"
           animate="visible"

@@ -15,7 +15,6 @@ import { useAuthClient } from "@/hooks/useAuthClient";
 
 const RecommendedBooks = () => {
   const { user } = useAuthClient();
-  console.log("this si the user: ", user)
   const userId = user?.id;
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteRecommendations(userId);

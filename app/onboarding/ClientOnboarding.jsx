@@ -6,6 +6,7 @@ import OnboardingQuestions from "@/components/pages/OnboardingQuestions";
 import OnboardingStart from "@/components/pages/OnboardingStart";
 // import { useAuth } from "@/hooks/useAuth";
 import { useAuthClient } from "@/hooks/useAuthClient";
+import axios from "axios";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 
@@ -23,14 +24,34 @@ const Onboarding = () => {
   };
 
   const handleGoToAuth = () => {
-    if (mode === "edit") {
-      // In edit mode, do not go to auth. Return to dashboard instead.
-      router.push("/dashboard");
-      return;
-    }
     const jsonString = JSON.stringify(formAnswers);
     const params = new URLSearchParams();
     params.set("data", jsonString);
+
+    console.log("collected answer or preferences: ", formAnswers)
+
+    if (mode === "edit") {
+      const baseURL = "/api";
+      const userId = user?.id;
+      const newPostData = { ...formAnswers };
+      // Use a template literal to construct the complete URL
+      const url = `${baseURL}/recommendation/${userId}`;
+      axios
+        .post(url, newPostData)
+        .then((response) => {
+          console.log("Post created successfully:", response.data);
+          // In edit mode, do not go to auth. Return to dashboard instead after recommendations updated.
+          router.push("/dashboard");
+        })
+        .catch((error) => {
+          console.error("There was an error:", error);
+          // In edit mode, do not go to auth. Return to dashboard instead after recommendations updated.
+          // router.push("/dashboard");
+        });
+
+      // return;
+    }
+
     router.push(`/register?${params.toString()}`);
   };
 
