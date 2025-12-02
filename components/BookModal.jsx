@@ -58,7 +58,7 @@ const BookModal = ({ book, open, onOpenChange }) => {
           aria-label="جزئیات کتاب"
         >
           <div
-            className="w-full max-w-4xl bg-white dark:bg-slate-800 rounded-lg shadow-lg overflow-hidden relative"
+            className="w-full max-w-4xl bg-white dark:bg-slate-800 rounded-lg shadow-lg overflow-hidden relative border-2 border-red-500"
             dir="rtl"
           >
             {/* Close Button */}

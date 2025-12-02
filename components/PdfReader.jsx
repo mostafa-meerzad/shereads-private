@@ -9,21 +9,14 @@ import { Button } from "./ui/button";
 import { Spinner } from "./ui/shadcn-io/spinner";
 
 try {
-  pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-    "pdfjs-dist/build/pdf.worker.min.mjs",
-    import.meta.url
-  ).toString();
-} catch (e) {
-  // As a safety net, keep worker unset if bundler cannot resolve URL; react-pdf may fall back.
-  // console.warn("Failed to set local PDF workerSrc", e);
-}
+  pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.mjs`;
+} catch (e) {}
 
 export default function PdfReader({ userId, bookId, pdfUrl }) {
   const { data: progress } = useReadingProgress(userId);
   const saveProgress = useSaveProgress(userId);
 
-  const savedPage =
-    progress?.find((p) => p.bookId === bookId)?.lastPage || 1;
+  const savedPage = progress?.find((p) => p.bookId === bookId)?.lastPage || 1;
 
   const [page, setPage] = useState(savedPage);
   const [numPages, setNumPages] = useState(null);
@@ -31,9 +24,12 @@ export default function PdfReader({ userId, bookId, pdfUrl }) {
   const containerRef = useRef(null);
   const [pageWidth, setPageWidth] = useState(undefined);
 
+  // refs for touch handling
+  const touchStartRef = useRef({ x: 0, y: 0, t: 0 });
   useEffect(() => {
     if (savedPage !== page) {
-      setPage(savedPage);
+      const setPageAsync = async () => setPage(savedPage);
+      setPageAsync();
     }
   }, [savedPage]);
 
@@ -85,17 +81,69 @@ export default function PdfReader({ userId, bookId, pdfUrl }) {
     return () => ro.disconnect();
   }, []);
 
+  // Touch swipe: left -> previous, right -> next (for touch-screen mobiles)
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const el = containerRef.current;
+
+    function onTouchStart(e) {
+      const t = e.touches && e.touches[0];
+      if (!t) return;
+      touchStartRef.current = { x: t.clientX, y: t.clientY, t: Date.now() };
+    }
+
+    function onTouchEnd(e) {
+      const t = e.changedTouches && e.changedTouches[0];
+      if (!t) return;
+
+      const start = touchStartRef.current;
+      const dx = t.clientX - start.x;
+      const dy = t.clientY - start.y;
+      const dt = Date.now() - start.t;
+
+      const minDistance = 40; // px
+      const maxVertical = 100; // px - allow slight diagonal
+      const maxTime = 1000; // ms - allow slower swipes
+
+      if (
+        Math.abs(dx) > minDistance &&
+        Math.abs(dy) < maxVertical &&
+        dt < maxTime
+      ) {
+        // dx < 0 => finger moved left => user swiped left -> go to previous page
+        if (dx < 0) {
+          // previous
+          setPage((p) => (p > 1 ? Math.max(1, p - 1) : p));
+        } else {
+          // next
+          setPage((p) =>
+            numPages && p < numPages ? Math.min(numPages, p + 1) : p
+          );
+        }
+      }
+    }
+
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchend", onTouchEnd);
+
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [numPages]);
+
   return (
-    <div className="flex flex-col items-center py-4 md:py-8" dir="rtl">
+    <div className="flex flex-col items-center py-4 md:py-8 " dir="rtl">
       {/* PDF Card */}
       <div
         ref={containerRef}
-        className="w-full max-w-full md:max-w-3xl lg:max-w-4xl rounded-xl border bg-neutral-50 p-3 shadow"
+        className="w-full max-w-full md:max-w-3xl lg:max-w-4xl rounded-xl border bg-neutral-50 p-3 shadow "
       >
         <Document
           file={pdfUrl}
           loading={
-            <div className="flex h-[60vh] items-center justify-center">
+            <div className="flex  items-center justify-center">
               <Spinner variant="circle" className="size-12 text-gray-500" />
             </div>
           }
@@ -126,7 +174,7 @@ export default function PdfReader({ userId, bookId, pdfUrl }) {
             console.error("PDF load error", err);
             setError("خطا در بارگذاری فایل PDF. لطفاً بعداً دوباره تلاش کنید.");
           }}
-          className="flex justify-center"
+          className="flex justify-center h-[70vh] items-center"
         >
           <Page
             pageNumber={page}
@@ -145,7 +193,6 @@ export default function PdfReader({ userId, bookId, pdfUrl }) {
         {/* Bottom Toolbar: next/previous controls moved below the document */}
         <div className="mt-4 flex flex-col gap-3">
           <div className="flex items-center justify-between gap-3 rounded-xl border bg-white px-3 py-2 shadow-sm">
-           
             <div className="flex items-center gap-2">
               <Button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -155,16 +202,21 @@ export default function PdfReader({ userId, bookId, pdfUrl }) {
                 قبلی
               </Button>
               <Button
-                onClick={() => setPage((p) => Math.min(numPages || p + 1, p + 1))}
+                onClick={() =>
+                  setPage((p) => Math.min(numPages || p + 1, p + 1))
+                }
                 disabled={!numPages || page >= numPages}
                 className="rounded-full bg-emerald-700 text-white hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 بعدی
               </Button>
             </div>
-             <div className="text-sm text-slate-700">
-              صفحه <span className="font-semibold text-emerald-700">{page}</span>
-              {numPages ? <span className="text-slate-500"> از {numPages}</span> : null}
+            <div className="text-sm text-slate-700">
+              صفحه{" "}
+              <span className="font-semibold text-emerald-700">{page}</span>
+              {numPages ? (
+                <span className="text-slate-500"> از {numPages}</span>
+              ) : null}
             </div>
           </div>
         </div>

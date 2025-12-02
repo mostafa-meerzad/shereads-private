@@ -1,3 +1,5 @@
+"use client";
+
 import logo from "@/assets/logo.png";
 import mobileImg from "@/assets/onboarding-img-0.jpg";
 import desktopImg from "@/assets/onboarding-img-1.png";
@@ -5,8 +7,16 @@ import Image from "next/image";
 import { Button } from "../ui/button";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuthClient } from "@/hooks/useAuthClient";
 
 const OnboardingStart = ({ onStart }) => {
+  const { user } = useAuthClient();
+  const router = useRouter();
+  const handleSkip = () => {
+    if (!user)  router.push("/register");
+    router.push("/dashboard");
+  };
   return (
     <div className="grid  md:grid-rows-[auto_1fr] ">
       {/* Top Section */}
@@ -65,14 +75,14 @@ const OnboardingStart = ({ onStart }) => {
             >
               شروع کنید
             </Button>
-            <Link href={"/register"}>
-              <Button
-                variant={"outline"}
-                className="text-sm text-gray-500 hover:text-gray-700 w-fit px-4 py-3 lg:px- rounded-full lg:py-5 transition-all hover:scale-105 active:scale-95"
-              >
-                رد کردن
-              </Button>
-            </Link>
+
+            <Button
+              onClick={handleSkip}
+              variant={"outline"}
+              className="text-sm text-gray-500 hover:text-gray-700 w-fit px-4 py-3 lg:px- rounded-full lg:py-5 transition-all hover:scale-105 active:scale-95"
+            >
+              رد کردن
+            </Button>
           </motion.div>
         </motion.div>
       </div>
