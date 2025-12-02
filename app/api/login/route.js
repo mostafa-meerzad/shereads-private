@@ -30,6 +30,14 @@ export async function POST(req) {
       );
     }
 
+    // Prevent login for deactivated users
+    if (user.isActive === false || user.isActive === 0) {
+      return NextResponse.json(
+        { error: "حساب شما غیرفعال شده است. برای کسب اطلاعات بیشتر با پشتیبانی تماس بگیرید." },
+        { status: 403 }
+      );
+    }
+
     // Compare password
     const isValid = await verifyPassword(password, user.passwordHash);
     if (!isValid) {

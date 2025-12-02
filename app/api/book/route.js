@@ -10,7 +10,8 @@ import path from "path";
 export const runtime = "nodejs";
 
 export async function GET(req) {
-  verifyApiRequest();
+  const auth = await verifyApiRequest();
+  if (auth instanceof NextResponse) return auth;
   try {
     const url = new URL(req.url);
     const page = parseInt(url.searchParams.get("page")) || 1;

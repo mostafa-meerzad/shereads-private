@@ -5,7 +5,8 @@ import { UserEditSchema } from "@/app/services/userEditSchema";
 import { hashPassword } from "@/lib/auth";
 
 export async function GET(req, { params }) {
-  verifyApiRequest();
+  const auth = await verifyApiRequest();
+  if (auth instanceof NextResponse) return auth;
   try {
     const awaitedParams = await params;
     const userId = Number(awaitedParams.id);

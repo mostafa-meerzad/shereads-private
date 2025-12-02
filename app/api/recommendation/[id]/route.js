@@ -8,7 +8,8 @@ import { PreferencesSchema } from "@/app/services/preferencesSchema";
 // GET RECOMMENDATIONS
 // ------------------------------
 export async function GET(req, { params }) {
-  verifyApiRequest();
+  const auth = await verifyApiRequest();
+  if (auth instanceof NextResponse) return auth;
   try {
     const awaitedParams = await params;
     const userId = Number(awaitedParams.id);
@@ -83,7 +84,8 @@ export async function GET(req, { params }) {
 // POST → UPDATE USER PREFS + RECOMMEND
 // ------------------------------
 export async function POST(req, { params }) {
-  verifyApiRequest();
+  const auth = await verifyApiRequest();
+  if (auth instanceof NextResponse) return auth;
   try {
     const awaitedParams = await params;
     const userId = Number(awaitedParams.id);
