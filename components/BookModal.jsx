@@ -58,13 +58,13 @@ const BookModal = ({ book, open, onOpenChange }) => {
           aria-label="جزئیات کتاب"
         >
           <div
-            className="w-full max-w-4xl bg-white dark:bg-slate-800 rounded-lg shadow-lg overflow-hidden relative border-2 border-red-500"
+            className="w-full max-w-4xl bg-white dark:bg-slate-800 rounded-lg shadow-lg overflow-hidden relative  max-md:max-h-[75vh] max-md:overflow-y-scroll"
             dir="rtl"
           >
             {/* Close Button */}
             <button
               onClick={() => onOpenChange(false)}
-              className="absolute top-3 left-3 rounded-md p-1 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-700 z-50"
+              className="absolute top-3 left-3 rounded-md p-1 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-slate-700 z-50 bg-gray-200"
             >
               <XIcon className="size-5" />
             </button>

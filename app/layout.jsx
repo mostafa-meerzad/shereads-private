@@ -43,8 +43,8 @@ const estedad = localFont({
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="fa" >
-      <body className={`${estedad.variable} ${geistSans.variable} ${geistMono.variable} mx-auto font-estedad`}>
+    <html lang="fa ">
+      <body className={`${estedad.variable} ${geistSans.variable} ${geistMono.variable} mx-auto font-estedad h-screen` }>
         <Toaster/>
         <ReactQueryProvider>
         <main>{children}</main>

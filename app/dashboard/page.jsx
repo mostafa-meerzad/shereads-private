@@ -53,7 +53,7 @@ export default function Dashboard() {
               className={"size-10 text-lg"}
             />
 
-            <h1 className=" text-2xl md:text-3xl lg:text-4xl font-semibold text-emerald-800">
+            <h1 className=" text-center md:text-start text-2xl md:text-3xl lg:text-4xl font-semibold text-emerald-800">
               به کتابخانه She Reads خوش آمدید!
             </h1>
           </header>

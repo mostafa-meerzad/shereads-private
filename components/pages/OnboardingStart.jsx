@@ -18,7 +18,7 @@ const OnboardingStart = ({ onStart }) => {
     router.push("/dashboard");
   };
   return (
-    <div className="grid  md:grid-rows-[auto_1fr] ">
+    <div className="grid h-screen md:grid-rows-[auto_1fr] ">
       {/* Top Section */}
       <div className="row-start-1 flex flex-col lg:flex-row justify-between p-6 lg:p-10 ">
         {/* Logo */}
@@ -92,14 +92,14 @@ const OnboardingStart = ({ onStart }) => {
         initial={{ opacity: 0, y: 25 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.3 }}
-        className="lg:hidden"
+        className="lg:hidden h-full overflow-hidden"
       >
         <Image
           src={mobileImg}
           width={800}
           height={500}
           alt="girl reading a book with ducks around her"
-          className="w-full object-cover object-center row-start-2  row-span-2 "
+          className="w-full object-cover object-center h-full md:object-center row-start-2  row-span-2 "
         />
       </motion.div>
 
@@ -115,7 +115,7 @@ const OnboardingStart = ({ onStart }) => {
           width={800}
           height={500}
           alt="girl reading a book with ducks around her"
-          className="absolute w-full object-cover inset-0 object-top row-start-2 row-span-2 "
+          className="absolute w-full h-full object-cover inset-0 object-center row-start-2 row-span-2 "
         />
       </motion.div>
     </div>

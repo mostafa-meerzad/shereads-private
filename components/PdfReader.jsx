@@ -174,7 +174,7 @@ export default function PdfReader({ userId, bookId, pdfUrl }) {
             console.error("PDF load error", err);
             setError("خطا در بارگذاری فایل PDF. لطفاً بعداً دوباره تلاش کنید.");
           }}
-          className="flex justify-center h-[70vh] items-center"
+          className="flex justify-center max-md:h-[70vh] max-lg:h-auto items-center"
         >
           <Page
             pageNumber={page}

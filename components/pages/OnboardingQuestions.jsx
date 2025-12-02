@@ -198,7 +198,7 @@ const OnboardingQuestions = ({ onComplete }) => {
                       },
                     },
                   }}
-                  className={`relative size-8 sm:size-10 md:size-9 lg:size-10 rounded-full border-2 flex items-center justify-center text-sm bg-green-700 text-white border-green-700`}
+                  className={`relative size-8 sm:size-10 md:size-9 lg:size-10 rounded-full  flex items-center justify-center text-sm bg-green-700 text-white border-green-700`}
                 >
                   {i + 1}
                   {i < totalQuestions && (
@@ -284,7 +284,7 @@ const OnboardingQuestions = ({ onComplete }) => {
                 key={i}
                 animate={{ scale: i === step ? 1.03 : 1 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                className={`relative size-10 md:size-8 lg:size-10 rounded-full border-2 flex items-center justify-center text-sm ${
+                className={`relative size-7 md:size-8 lg:size-10 rounded-full border-2 flex items-center justify-center text-sm ${
                   i === step
                     ? "bg-green-700 text-white border-green-700"
                     : i < step
@@ -316,10 +316,10 @@ const OnboardingQuestions = ({ onComplete }) => {
             initial="enter"
             animate="center"
             exit="exit"
-            className=" relative top-0"
+            className=" relative top-0 mx-auto md:max-w-full  md:mx-0 "
             
           >
-            <motion.h2 className="text-xl text-center font-medium text-gray-800 mb-6 md:text-right">
+            <motion.h2 className="text-2xl text-center font-medium text-gray-800 mb-6 md:text-right">
               {formData[step].question}
             </motion.h2>
 
@@ -432,7 +432,7 @@ const OnboardingQuestions = ({ onComplete }) => {
                 return (
                   <div
                     dir="rtl"
-                    className="grid md:grid-cols-2 flex-col items-end ml-auto gap-4 mb-8 mt-10 "
+                    className="grid md:grid-cols-2 px-8 md:px-0 items-end md:ml-auto gap-4 mb-0 mt-10 "
                   >
                     {formData[step].answers.map((answer, idx) => {
                       const isSelected = values.includes(answer);
@@ -461,7 +461,7 @@ const OnboardingQuestions = ({ onComplete }) => {
             />
 
             {/* Navigation */}
-            <div className="flex justify-between mt-18 lg:pl-12">
+            <div className="flex justify-between mt-12 md:mt-18 lg:pl-12">
               {step > 0 ? (
                 <motion.button
                   type="button"
