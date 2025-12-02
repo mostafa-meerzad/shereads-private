@@ -14,7 +14,7 @@ export async function GET(req, { params }) {
     const userId = Number(awaitedParams.id);
 
     if (!userId) {
-      console.log(userId);
+  
       return NextResponse.json({ error: "Invalid user id" }, { status: 400 });
     }
 

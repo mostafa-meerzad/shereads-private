@@ -83,7 +83,7 @@ const Book = ({ book, favIds, onToggleFav }) => {
     >
       <div
         onClick={() => setModalOpen(true)}
-        className="w-full h-80 bg-linear-to-b from-gray-500/20 to-gray-200 rounded-md mb-2 flex justify-center items-center overflow-hidden cursor-pointer"
+        className="w-full h-56 bg-linear-to-b from-gray-500/20 to-gray-200 rounded-md  flex justify-center items-center overflow-hidden cursor-pointer"
       >
         {coverUrl ? (
           // Using a plain <img> so relative public paths work out of the box
@@ -103,7 +103,7 @@ const Book = ({ book, favIds, onToggleFav }) => {
 
       {progressPercent > 0 ? (
         <div className="w-full mb-2" title={`${progressPercent}% خوانده شده`}>
-          <div className="h-2 w-full rounded-full bg-gray-200 overflow-hidden">
+          <div className="h-1.5 w-full mt-1 rounded-full bg-gray-200 overflow-hidden">
             <div
               className="h-full bg-emerald-600 transition-[width] duration-300"
               style={{ width: `${progressPercent}%` }}
@@ -129,7 +129,7 @@ const Book = ({ book, favIds, onToggleFav }) => {
             router.push(`/reader/${book.id}${urlParam}`);
           }}
           disabled={!pdfUrl}
-          className="border-emerald-400 rounded-full text-white bg-green-700 hover:bg-green-900 h-10"
+          className="border-emerald-400 rounded-full text-white bg-green-700 hover:bg-green-900 h-8"
         >
           مطالعه
         </Button>
@@ -137,7 +137,7 @@ const Book = ({ book, favIds, onToggleFav }) => {
         <motion.button
           whileTap={{ scale: 0.8 }}
           onClick={() => onToggleFav(book.id, favIds.has(book.id))}
-          className={`flex justify-center items-center rounded-full size-10 border ${
+          className={`flex justify-center items-center rounded-full size-8 border ${
             favIds.has(book.id)
               ? "bg-green-700 text-white"
               : "bg-white text-green-700 border-gray-300"

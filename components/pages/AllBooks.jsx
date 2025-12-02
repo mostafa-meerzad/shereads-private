@@ -111,7 +111,7 @@ const AllBooks = () => {
     );
 
   if (status === "error") {
-    toast.error("بارگذاری کتاب‌ها انجام نشد");
+    toast.error("بارگیری کتاب‌ها انجام نشد");
     return null;
   }
 
@@ -197,7 +197,7 @@ const AllBooks = () => {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.33 }}
-        className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))]  gap-4 min-h-screen"
+        className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))]  gap-4 min-h-screen"
       >
         {books.map((book) => (
           <Book

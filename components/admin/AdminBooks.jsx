@@ -18,6 +18,7 @@ import { Calendar } from "../ui/persian-calendar";
 import ToggleDatePicker from "../ui/toggle-date-picker";
 import MultiSelectWithTags from "../ui/multi-select-with-tags";
 import Image from "next/image";
+import { Search } from "lucide-react";
 
 // NEW OPTIONS
 const GENRES = [
@@ -43,21 +44,19 @@ const MODES = [
 
 const AGES = ["۱۲–۱۷", "۱۸–۲۵", "۲۶–۳۵", "۳۶–۵۰", "۵۰+"];
 
-const MOTIVATIONS = [
-  "سرگرمی",
-  "یادگیری",
-  "رشد_فردی",
-  "بهبود_مهارت_ها",
-];
+const MOTIVATIONS = ["سرگرمی", "یادگیری", "رشد_فردی", "بهبود_مهارت_ها"];
 
-function useAdminBooks({ page, title }) {
+function useAdminBooks({ page, filters }) {
   return useQuery({
-    queryKey: ["admin", "books", { page, title }],
+    queryKey: ["admin", "books", { page, filters }],
     queryFn: async () => {
       const qs = new URLSearchParams();
       qs.set("page", String(page || 1));
       qs.set("limit", String(20));
-      if (title) qs.set("title", title);
+      // filters: { title?, author?, genre? }
+      if (filters?.title) qs.set("title", filters.title);
+      if (filters?.author) qs.set("author", filters.author);
+      if (filters?.genre) qs.set("genre", filters.genre);
       const { data } = await api.get(`/book?${qs.toString()}`);
       return data; // { books, page, totalPages, total }
     },
@@ -67,11 +66,18 @@ function useAdminBooks({ page, title }) {
 export default function AdminBooks() {
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
-  const [title, setTitle] = useState("");
+  // Search UI state (mirrors AllBooks)
+  const [inputSearch, setInputSearch] = useState(""); // controlled input
+  const [filters, setFilters] = useState({
+    title: "",
+    genre: "",
+  });
+  // searchScope: 'title' | 'author' | 'genre'
+  const [searchScope, setSearchScope] = useState("title");
   const [openCreate, setOpenCreate] = useState(false);
   const [editBook, setEditBook] = useState(null);
 
-  const { data, status } = useAdminBooks({ page, title });
+  const { data, status } = useAdminBooks({ page, filters });
   const books = data?.books || [];
 
   const softDelete = useMutation({
@@ -83,35 +89,129 @@ export default function AdminBooks() {
     onError: (e) => toast.error(e?.error || "خطا در حذف کتاب"),
   });
 
+  const confirmDelete = (book) => {
+    toast(
+      (t) => (
+        <div dir="rtl" className="p-2">
+          <div className="text-sm">حذف «{book.title}»؟</div>
+          <div className="mt-4 flex gap-2 justify-start">
+            <button
+              onClick={() => {
+                softDelete.mutate(book.id);
+                toast.dismiss(t.id);
+              }}
+              className="rounded-lg bg-rose-600 hover:bg-rose-700 text-white h-8 px-3 text-sm"
+            >
+              بله
+            </button>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="rounded-lg border px-3 h-8 text-sm"
+            >
+              خیر
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity }
+    );
+  };
+
+  // --- Search handlers (similar to AllBooks)
+  const applySearch = () => {
+    const q = inputSearch.trim();
+    setFilters((prev) => ({
+      ...prev,
+      title: searchScope === "author" || searchScope === "genre" ? "" : q,
+      author: searchScope === "title" || searchScope === "genre" ? "" : q,
+      genre: searchScope === "genre" ? q : prev.genre,
+    }));
+    setPage(1);
+  };
+
+  const handleGenreChange = (value) => {
+    setFilters((prev) => ({ ...prev, genre: value === "all" ? "" : value }));
+  };
+
+  const handleScopeChange = (value) => {
+    setSearchScope(value);
+  };
+
   return (
     <div className="space-y-6" dir="rtl">
       <div className="flex flex-col md:flex-row gap-3 md:items-center">
-        <Input
-          placeholder="جستجو بر اساس عنوان"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="rounded-full"
-        />
-        <div className="flex gap-2">
-          <Button onClick={() => setPage(1)} className="rounded-full bg-emerald-700 hover:bg-emerald-800 text-white">
-            اعمال فیلتر
-          </Button>
+        
           <Button
-            variant="outline"
-            className="rounded-full border-emerald-700 text-emerald-700"
-            onClick={() => {
-              setTitle("");
-              setPage(1);
-            }}
-          >
-            پاک‌سازی
-          </Button>
-          <Button
-            className="rounded-full bg-emerald-700 hover:bg-emerald-800 text-white"
+            className="rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs ml-4 !py-0"
             onClick={() => setOpenCreate(true)}
           >
             افزودن کتاب
           </Button>
+        
+        <div className="flex flex-row gap-2  w-full ">
+          <div className="flex flex-row-reverse gap-2 w-full">
+            <div className="relative w-full">
+              <Input
+                dir="rtl"
+                type="search"
+                placeholder="جستجوی کتاب، نویسند..."
+                value={inputSearch}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setInputSearch(v);
+                  if (v === "") {
+                    setFilters((prev) => ({ ...prev, title: "", author: "" }));
+                  }
+                }}
+                className="pl-5 pr-12 rounded-full w-full border-green-800"
+              />
+             <Search className="absolute right-5 top-2.5 h-4 w-4 text-muted-foreground" />
+            </div>
+            <Button
+              onClick={() => applySearch()}
+              className="rounded-full  px-5 py-1 bg-emerald-700 text-white hover:bg-emerald-900"
+            >
+              جستجو
+            </Button>
+          </div>
+
+          <div className="flex flex-row-reverse gap-2 justify-end ">
+            <Select
+              onValueChange={handleGenreChange}
+              value={filters.genre === "" ? "all" : filters.genre}
+            >
+              <SelectTrigger
+                dir="rtl"
+                className="rounded-full w-36  border-2 border-emerald-700 text-emerald-700 text-sm py-2 px-7"
+              >
+                <SelectValue placeholder="ژانر" />
+              </SelectTrigger>
+              <SelectContent dir="rtl">
+                <SelectItem value="all">همه ژانرها</SelectItem>
+                {GENRES.map((g) => (
+                  <SelectItem key={g} value={g}>
+                    {g}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <div className="mr-2">
+              <Select onValueChange={handleScopeChange} value={searchScope}>
+                <SelectTrigger
+                  dir="rtl"
+                  className="rounded-full w-36 border-2 border-emerald-700 text-emerald-700 text-sm py-2 px-3"
+                >
+                  <SelectValue placeholder="جستجو در" />
+                </SelectTrigger>
+                <SelectContent dir="rtl">
+                  <SelectItem value="title">جستجوی عنوان</SelectItem>
+                  <SelectItem value="genre">جستجوی ژانر</SelectItem>
+                  <SelectItem value="author">جستجوی نویسنده</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -124,59 +224,56 @@ export default function AdminBooks() {
       ) : books.length === 0 ? (
         <div className="text-slate-600">کتابی یافت نشد.</div>
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))]  gap-4 min-h-screen">
           {books.map((b) => (
-           <div
-  key={b.id}
-  className="bg-white dark:bg-slate-800 rounded-md shadow-md p-4 flex flex-col items-center"
->
-  {/* Cover */}
-  <div className="w-full h-80 bg-linear-to-b from-gray-500/20 to-gray-200 rounded-md mb-2 flex justify-center items-center overflow-hidden">
-    {b.coverURL ? (
-      <img
-        src={b.coverURL}
-        alt={b.title}
-        className="w-full h-full object-cover"
-        loading="lazy"
-      />
-    ) : (
-      <div className="text-slate-400 text-xs">بدون کاور</div>
-    )}
-  </div>
+            <div
+              key={b.id}
+              className="bg-white max-w-80 h-fit dark:bg-slate-800 rounded-md shadow-md p-4 flex flex-col items-center"
+            >
+              {/* Cover */}
+              <div className="w-full h-56 bg-linear-to-b from-gray-500/20 to-gray-200 rounded-md  flex justify-center items-center overflow-hidden cursor-pointer">
+                {b.coverURL ? (
+                  <img
+                    src={b.coverURL}
+                    alt={b.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="text-slate-400 text-xs">بدون کاور</div>
+                )}
+              </div>
 
-  {/* Title + Author */}
-  <div className="flex flex-col items-start gap-2 w-full mt-1 mb-4">
-    <h4 className="font-semibold text-sm text-emerald-700 break-words">
-      {b.title}
-    </h4>
+              {/* Title + Author */}
+              <div className="flex flex-col items-start gap-2 w-full mt-1 mb-4">
+                <h4 className="font-semibold text-sm text-emerald-700 break-words">
+                  {b.title}
+                </h4>
 
-    <p className="text-xs text-gray-800">
-      <span className="text-gray-500">نویسنده:</span>{" "}
-      <span>{b.author?.name || "—"}</span>
-    </p>
-  </div>
+                <p className="text-xs text-gray-800">
+                  <span className="text-gray-500">نویسنده:</span>{" "}
+                  <span>{b.author?.name || "—"}</span>
+                </p>
+              </div>
 
-  {/* Actions */}
-  <div className="flex gap-2 w-full justify-start">
-    <Button
-      size="sm"
-      className="rounded-full bg-rose-600 hover:bg-rose-700 text-white h-10"
-      onClick={() => {
-        if (confirm(`حذف نرم «${b.title}»؟`)) softDelete.mutate(b.id);
-      }}
-    >
-      حذف
-    </Button>
-    <Button
-      size="sm"
-      className="rounded-full bg-amber-500 hover:bg-amber-600 text-white h-10"
-      onClick={() => setEditBook(b)}
-    >
-      ویرایش
-    </Button>
-  </div>
-</div>
-
+              {/* Actions */}
+              <div className="flex gap-2 w-full justify-start">
+                <Button
+                  size="sm"
+                  className="rounded-full bg-rose-600 hover:bg-rose-700 text-white h-8 text-sm"
+                  onClick={() => confirmDelete(b)}
+                >
+                  حذف
+                </Button>
+                <Button
+                  size="sm"
+                  className="rounded-full bg-amber-500 hover:bg-amber-600 text-white h-8 text-sm"
+                  onClick={() => setEditBook(b)}
+                >
+                  ویرایش
+                </Button>
+              </div>
+            </div>
           ))}
         </div>
       )}
@@ -254,7 +351,9 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
     // keep state in sync when switching edit targets
     setTitle(book?.title || "");
     setDescription(book?.description || "");
-    setPublishDate(book?.publish_date ? new Date(book.publish_date).toISOString() : "");
+    setPublishDate(
+      book?.publish_date ? new Date(book.publish_date).toISOString() : ""
+    );
     setAuthor(book?.author?.name || "");
     setGenres(book?.Genre || []);
     setModes(book?.mood || []);
@@ -266,8 +365,8 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
 
   const submit = async (e) => {
     e.preventDefault();
-    if (!title || !author) {
-      toast.error("عنوان و نویسنده الزامی هستند");
+    if (!title || !author || !description) {
+      toast.error("عنوان ,توضیحات و نویسنده الزامی هستند");
       return;
     }
 
@@ -309,9 +408,12 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
         }
 
         // send PATCH
-        const updated = await api.patch(`/book/${book.id}`, payload).then(r => r.data || r).catch((err) => {
-          throw err?.response?.data || err;
-        });
+        const updated = await api
+          .patch(`/book/${book.id}`, payload)
+          .then((r) => r.data || r)
+          .catch((err) => {
+            throw err?.response?.data || err;
+          });
 
         toast.success("کتاب با موفقیت به‌روز شد");
         onUpdated && onUpdated(updated);
@@ -320,7 +422,7 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
 
       // Create flow (existing behavior) - upload files and then create via API
       if (!pdf) {
-        toast.error("در هنگام ایجاد، فایل PDF اجباری است");
+        toast.error(" در هنگام ایجاد فایل  اجباری است,PDF");
         return;
       }
 
@@ -345,7 +447,9 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
         title,
         description: description || undefined,
         authorName: author,
-        publish_date: publishDate ? new Date(publishDate).toISOString() : undefined,
+        publish_date: publishDate
+          ? new Date(publishDate).toISOString()
+          : undefined,
         pdfURL: uploaded?.pdfPath || null,
         coverURL: uploaded?.coverPath || null,
       };
@@ -371,11 +475,12 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
       <div
         className="
           bg-white rounded-2xl p-5 space-y-4 w-full 
-          max-w-[95%]
+          max-w-[90%]
           sm:max-w-[600px]
           md:max-w-[750px]
           lg:max-w-[900px]
           xl:max-w-[1050px]
+          overflow-y-scroll  max-h-[90%]
         "
       >
         {/* Header */}
@@ -421,57 +526,58 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
               className="w-full border rounded-xl p-2"
             />
           </div>
-<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          <ToggleDatePicker value={publishDate} onChange={setPublishDate} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <ToggleDatePicker value={publishDate} onChange={setPublishDate} />
 
-          {/* Author */}
-          <div>
-            <label className="block text-sm text-slate-600">نویسنده</label>
-            <Input
-              value={author}
-              onChange={(e) => setAuthor(e.target.value)}
-              className="rounded-xl p-5"
+            {/* Author */}
+            <div>
+              <label className="block text-sm text-slate-600">نویسنده</label>
+              <Input
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                className="rounded-xl p-5"
+              />
+            </div>
+
+            {/* Multi selects */}
+            <MultiSelectWithTags
+              label="ژانر"
+              options={GENRES}
+              values={genres}
+              onChange={setGenres}
+            />
+
+            <MultiSelectWithTags
+              label="مود"
+              options={MODES}
+              values={modes}
+              onChange={setModes}
+            />
+
+            {/* Age group */}
+            <div>
+              <label className="block text-sm text-slate-600">گروه سنی</label>
+              <Select value={ageGroup} onValueChange={setAgeGroup}>
+                <SelectTrigger className="rounded-full">
+                  <SelectValue placeholder="انتخاب گروه سنی" />
+                </SelectTrigger>
+                <SelectContent>
+                  {AGES.map((a) => (
+                    <SelectItem key={a} value={a}>
+                      {a}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <MultiSelectWithTags
+              label="انگیزه"
+              options={MOTIVATIONS}
+              values={motivations}
+              onChange={setMotivations}
             />
           </div>
-
-          {/* Multi selects */}
-          <MultiSelectWithTags
-            label="ژانر"
-            options={GENRES}
-            values={genres}
-            onChange={setGenres}
-          />
-
-          <MultiSelectWithTags
-            label="مود"
-            options={MODES}
-            values={modes}
-            onChange={setModes}
-          />
-
-          {/* Age group */}
-          <div>
-            <label className="block text-sm text-slate-600">گروه سنی</label>
-            <Select value={ageGroup} onValueChange={setAgeGroup}>
-              <SelectTrigger className="rounded-full">
-                <SelectValue placeholder="انتخاب گروه سنی" />
-              </SelectTrigger>
-              <SelectContent>
-                {AGES.map((a) => (
-                  <SelectItem key={a} value={a}>
-                    {a}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <MultiSelectWithTags
-            label="انگیزه"
-            options={MOTIVATIONS}
-            values={motivations}
-            onChange={setMotivations}
-          /></div>
 
           {/* File Uploads */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -502,7 +608,9 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
                 className="border rounded-xl p-2"
               />
               {book?.pdfURL && !pdf && (
-                <div className="text-xs text-slate-600 mt-2">فایل PDF فعلی موجود است</div>
+                <div className="text-xs text-slate-600 mt-2">
+                  فایل PDF فعلی موجود است
+                </div>
               )}
             </div>
           </div>
@@ -521,7 +629,11 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
               disabled={submitting}
               className="rounded-full bg-emerald-700 hover:bg-emerald-800 text-white"
             >
-              {submitting ? "در حال ذخیره..." : book ? "بروزرسانی" : "ذخیره کتاب"}
+              {submitting
+                ? "در حال ذخیره..."
+                : book
+                ? "بروزرسانی"
+                : "ذخیره کتاب"}
             </Button>
           </div>
         </form>
@@ -529,4 +641,3 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
     </div>
   );
 }
-

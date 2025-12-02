@@ -52,7 +52,7 @@ const BookModal = ({ book, open, onOpenChange }) => {
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" />
-
+    <Dialog.Title>{book.title}</Dialog.Title>
         <Dialog.Content
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
           aria-label="جزئیات کتاب"

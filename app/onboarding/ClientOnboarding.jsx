@@ -28,8 +28,6 @@ const Onboarding = () => {
     const params = new URLSearchParams();
     params.set("data", jsonString);
 
-    console.log("collected answer or preferences: ", formAnswers)
-
     if (mode === "edit") {
       const baseURL = "/api";
       const userId = user?.id;
@@ -39,7 +37,7 @@ const Onboarding = () => {
       axios
         .post(url, newPostData)
         .then((response) => {
-          console.log("Post created successfully:", response.data);
+
           // In edit mode, do not go to auth. Return to dashboard instead after recommendations updated.
           router.push("/dashboard");
         })

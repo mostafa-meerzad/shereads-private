@@ -111,18 +111,18 @@ export default function ClientRegister() {
   };
 
   return (
-    <div className=" md:py-0 grid md:grid-cols-2 bg-white  min-h-screen lg:max-h-screen">
-      {/* <div className="hidden md:block h-full lg:h-screen overflow-hidden border-2 border-red-500"> */}
+    <div className=" md:py-0 grid md:grid-cols-2 bg-white ">
+      <div className="hidden md:block h-full  overflow-hidden max-h-fit">
       <Image
         src={img}
         width={500}
         height={900}
         alt="stack of books"
-        className="hidden md:block h-full w-full object-cover object-top"
+        className="hidden md:block h-full w-full object-cover object-top max-h-[110vh]"
       />
-      {/* </div> */}
+      </div>
 
-      <div className="w-full h-full flex items-center justify-center p-8  py-32 ">
+      <div className="w-full h-full flex items-center justify-center p-8  py-16 ">
         <motion.div
           initial="hidden"
           animate="visible"
@@ -143,7 +143,7 @@ export default function ClientRegister() {
             <div className="relative">
               <Input
                 placeholder="نام کامل"
-                className="text-right rounded-full py-5"
+                className="text-right rounded-full py-4"
                 {...register("fullName", {
                   required: "لطفاً نام کامل خود را وارد کنید",
                 })}
@@ -160,7 +160,7 @@ export default function ClientRegister() {
               <Input
                 type="email"
                 placeholder="ایمیل"
-                className="text-right rounded-full py-5"
+                className="text-right rounded-full py-4"
                 {...register("email", {
                   required: "لطفاً ایمیل را وارد کنید",
                   pattern: {
@@ -181,7 +181,7 @@ export default function ClientRegister() {
               <Input
                 type={showPassword ? "text" : "password"}
                 placeholder="رمز عبور"
-                className="text-right pr-5 rounded-full py-5"
+                className="text-right pr-5 rounded-full py-4"
                 {...register("password", {
                   required: "لطفاً رمز عبور را وارد کنید",
                   minLength: {
@@ -211,7 +211,7 @@ export default function ClientRegister() {
               <Input
                 type={showConfirm ? "text" : "password"}
                 placeholder="تایید رمز عبور"
-                className="text-right pr-5 rounded-full py-5"
+                className="text-right pr-5 rounded-full py-4"
                 {...register("confirmPassword", {
                   required: "لطفاً تایید رمز عبور را وارد کنید",
                   validate: (value) =>
@@ -271,7 +271,7 @@ export default function ClientRegister() {
               type="submit"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              className="w-full bg-green-700 text-white py-3 rounded-lg mt-2 mb-3"
+              className="w-full bg-green-700 text-white py-2 rounded-lg mt-2 mb-3"
             >
               ثبت‌نام
             </motion.button>
