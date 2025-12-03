@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 import { verifyApiRequest } from "@/lib/serverAuth";
 
 export async function GET() {
-  verifyApiRequest();
+  const auth = await verifyApiRequest();
+  if (auth instanceof NextResponse) return auth;
 
   try {
     const grouped = await prisma.book.groupBy({

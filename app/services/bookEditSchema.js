@@ -13,8 +13,8 @@ export const EditBookSchema = z.object({
   authorName: z.string().min(1).optional(),
 
   publish_date: z.string().datetime().optional().nullable(),
-  pdfURL: z.string().url().optional().nullable(),
-  coverURL: z.string().url().optional().nullable(),
+  pdfURL: z.string().optional().nullable(),
+  coverURL: z.string().optional().nullable(),
 
   Genre: z.array(GenreEnum).optional().nullable(),
   mood: z.array(MoodEnum).optional().nullable(),

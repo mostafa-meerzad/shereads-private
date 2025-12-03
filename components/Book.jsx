@@ -58,13 +58,16 @@ const Book = ({ book, favIds, onToggleFav }) => {
       const key = `reading-meta:${String(user.id)}:${String(book.id)}`;
       const val = localStorage.getItem(key);
       if (!val) {
-        setReadingMeta(null);
+        const reset = async()=>setReadingMeta(null)
+        reset()
         return;
       }
       const obj = JSON.parse(val);
-      setReadingMeta(obj || null);
+      const setMetadata = async ()=>setReadingMeta(obj || null);
+      setMetadata()
     } catch {
-      setReadingMeta(null);
+      const setReading = async ()=>setReadingMeta(null);
+      setReading()
     }
   }, [user?.id, book?.id]);
 

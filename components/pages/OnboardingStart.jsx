@@ -1,3 +1,5 @@
+"use client";
+
 import logo from "@/assets/logo.png";
 import mobileImg from "@/assets/onboarding-img-0.jpg";
 import desktopImg from "@/assets/onboarding-img-1.png";
@@ -5,10 +7,18 @@ import Image from "next/image";
 import { Button } from "../ui/button";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuthClient } from "@/hooks/useAuthClient";
 
 const OnboardingStart = ({ onStart }) => {
+  const { user } = useAuthClient();
+  const router = useRouter();
+  const handleSkip = () => {
+    if (!user)  router.push("/register");
+    router.push("/dashboard");
+  };
   return (
-    <div className="grid  md:grid-rows-[auto_1fr] ">
+    <div className="grid h-screen md:grid-rows-[auto_1fr] ">
       {/* Top Section */}
       <div className="row-start-1 flex flex-col lg:flex-row justify-between p-6 lg:p-10 ">
         {/* Logo */}
@@ -65,14 +75,14 @@ const OnboardingStart = ({ onStart }) => {
             >
               شروع کنید
             </Button>
-            <Link href={"/register"}>
-              <Button
-                variant={"outline"}
-                className="text-sm text-gray-500 hover:text-gray-700 w-fit px-4 py-3 lg:px- rounded-full lg:py-5 transition-all hover:scale-105 active:scale-95"
-              >
-                رد کردن
-              </Button>
-            </Link>
+
+            <Button
+              onClick={handleSkip}
+              variant={"outline"}
+              className="text-sm text-gray-500 hover:text-gray-700 w-fit px-4 py-3 lg:px- rounded-full lg:py-5 transition-all hover:scale-105 active:scale-95"
+            >
+              رد کردن
+            </Button>
           </motion.div>
         </motion.div>
       </div>
@@ -82,14 +92,14 @@ const OnboardingStart = ({ onStart }) => {
         initial={{ opacity: 0, y: 25 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.3 }}
-        className="lg:hidden"
+        className="lg:hidden h-full overflow-hidden"
       >
         <Image
           src={mobileImg}
           width={800}
           height={500}
           alt="girl reading a book with ducks around her"
-          className="w-full object-cover object-center row-start-2  row-span-2 "
+          className="w-full object-cover object-center h-full md:object-center row-start-2  row-span-2 "
         />
       </motion.div>
 
@@ -105,7 +115,7 @@ const OnboardingStart = ({ onStart }) => {
           width={800}
           height={500}
           alt="girl reading a book with ducks around her"
-          className="absolute w-full object-cover inset-0 object-top row-start-2 row-span-2 "
+          className="absolute w-full h-full object-cover inset-0 object-center row-start-2 row-span-2 "
         />
       </motion.div>
     </div>

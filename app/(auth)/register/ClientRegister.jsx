@@ -111,14 +111,14 @@ export default function ClientRegister() {
   };
 
   return (
-    <div className=" md:py-0 grid md:grid-cols-2 bg-white ">
-      <div className="hidden md:block h-full  overflow-hidden max-h-fit">
+    <div className=" md:py-0 grid md:grid-cols-2 bg-white">
+      <div className="hidden md:block h-full  overflow-hidden max-h-fit lg:max-h-screen">
       <Image
         src={img}
         width={500}
         height={900}
         alt="stack of books"
-        className="hidden md:block h-full w-full object-cover object-top max-h-[110vh]"
+        className="hidden md:block h-full w-full object-cover object-top "
       />
       </div>
 

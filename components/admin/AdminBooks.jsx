@@ -140,14 +140,13 @@ export default function AdminBooks() {
   return (
     <div className="space-y-6" dir="rtl">
       <div className="flex flex-col md:flex-row gap-3 md:items-center">
-        
-          <Button
-            className="rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs ml-4 !py-0"
-            onClick={() => setOpenCreate(true)}
-          >
-            افزودن کتاب
-          </Button>
-        
+        <Button
+          className="rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs ml-4 !py-0"
+          onClick={() => setOpenCreate(true)}
+        >
+          افزودن کتاب
+        </Button>
+
         <div className="flex flex-row gap-2  w-full ">
           <div className="flex flex-row-reverse gap-2 w-full">
             <div className="relative w-full">
@@ -165,7 +164,7 @@ export default function AdminBooks() {
                 }}
                 className="pl-5 pr-12 rounded-full w-full border-green-800"
               />
-             <Search className="absolute right-5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute right-5 top-2.5 h-4 w-4 text-muted-foreground" />
             </div>
             <Button
               onClick={() => applySearch()}
@@ -405,6 +404,7 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
           const uploaded = await uploadedRes.json();
           if (uploaded?.coverPath) payload.coverURL = uploaded.coverPath;
           if (uploaded?.pdfPath) payload.pdfURL = uploaded.pdfPath;
+          if (uploaded?.length) payload.length = uploaded.length;
         }
 
         // send PATCH
@@ -452,6 +452,7 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
           : undefined,
         pdfURL: uploaded?.pdfPath || null,
         coverURL: uploaded?.coverPath || null,
+        length: uploaded?.length || null,
       };
 
       if (genres && genres.length) payload.Genre = genres;

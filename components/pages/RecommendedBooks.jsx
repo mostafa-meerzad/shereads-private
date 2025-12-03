@@ -12,6 +12,7 @@ import { Spinner } from "../ui/shadcn-io/spinner";
 import useInfiniteRecommendations from "@/hooks/useInfiniteRecommendations";
 import Book from "../Book";
 import { useAuthClient } from "@/hooks/useAuthClient";
+import Link from "next/link";
 
 const RecommendedBooks = () => {
   const { user } = useAuthClient();
@@ -25,7 +26,7 @@ const RecommendedBooks = () => {
     if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [inView, hasNextPage, isFetchingNextPage]);
+  }, [inView, hasNextPage, isFetchingNextPage,]);
 
   const favoritesQuery = useFavorites(userId);
   const toggleFav = useToggleFavorite(userId);
@@ -55,6 +56,13 @@ const RecommendedBooks = () => {
     return null;
   }
 
+  if (data?.pages[0]?.books.length === 0){
+    return <div className="size-full h-[75vh] flex flex-col justify-center items-center gap-2 bg-radial from-gray-200  rounded-xl to-transparent">
+<span className="text-gray-500">!هیچ کتابی به شما پیشنهاد نشده است</span>
+
+<Link href={"onboarding?mode=edit"} className="underline text-green-700 text-sm">در ارزیابی شرکت کنید</Link>
+      </div>
+  }
   const pages = data?.pages || [];
   const books = pages.flatMap((p) => p.books || []);
 

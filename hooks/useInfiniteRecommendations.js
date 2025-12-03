@@ -27,7 +27,7 @@ export default function useInfiniteRecommendations(userId, { limit = 20, enabled
       const next = lastPage.page + 1;
       return next <= lastPage.totalPages ? next : undefined;
     },
-    staleTime: 1000 * 60 * 2,
-    cacheTime: 1000 * 60 * 20,
+    staleTime: 0,
+    cacheTime:0,
   });
 }

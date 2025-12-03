@@ -120,49 +120,8 @@ const AllBooks = () => {
 
   return (
     <div dir="rtl" className="space-y-10">
-      <div className="flex justify-between flex-col lg:flex-row-reverse lg:items-center gap-2 w-full">
-        <motion.div whileHover={{ scale: 1.02 }} className="flex flex-row-reverse gap-4 justify-end ">
-          
-            {/* Genre Filter */}
-            <Select
-              onValueChange={handleGenreChange}
-              value={filters.genre === "" ? "all" : filters.genre}
-            >
-              <SelectTrigger
-                dir="rtl"
-                className="rounded-full  w-40  border-2 border-emerald-700 text-emerald-700 text-md py-2 px-7"
-              >
-                <SelectValue placeholder="ژانر" />
-              </SelectTrigger>
-              <SelectContent dir="rtl">
-                <SelectItem value="all">همه ژانرها</SelectItem>
-                {genres.map((g) => (
-                  <SelectItem key={g} value={g}>
-                    {g}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {/* Search Scope Select (both/title/author) */}
-            <div className="mr-2">
-              <Select onValueChange={handleScopeChange} value={searchScope}>
-                <SelectTrigger
-                  dir="rtl"
-                  className="rounded-full w-40 border-2 border-emerald-700 text-emerald-700 text-md py-2 px-3"
-                >
-                  <SelectValue placeholder="جستجو در" />
-                </SelectTrigger>
-                <SelectContent dir="rtl">
-                  {/* <SelectItem value="empty">جستجو بر اساس</SelectItem> */}
-                  <SelectItem value="title">جستجوی عنوان</SelectItem>
-                  <SelectItem value="genre">جستجوی ژانر</SelectItem>
-                  <SelectItem value="author">جستجوی نویسنده</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          
-          {/* Search Input + Button */}
-        </motion.div>
+      <div className="flex justify-between flex-col lg:flex-row lg:items-center gap-2 w-full">
+       
         <div className="flex flex-row-reverse gap-4 w-full">
           <div className="relative w-full">
             <Input
@@ -189,6 +148,48 @@ const AllBooks = () => {
             جستجو
           </Button>
         </div>
+         <motion.div whileHover={{ scale: 1.02 }} className="flex flex-row-reverse gap-4 justify-end">
+          
+            {/* Genre Filter */}
+            <Select
+              onValueChange={handleGenreChange}
+              value={filters.genre === "" ? "all" : filters.genre}
+            >
+              <SelectTrigger
+                dir="rtl"
+                className="rounded-full  w-40  border bg-green-600/20 border-emerald-700 text-emerald-700 text-sm py-2 px-7"
+              >
+                <SelectValue placeholder="ژانر" />
+              </SelectTrigger>
+              <SelectContent dir="rtl">
+                <SelectItem value="all">همه ژانرها</SelectItem>
+                {genres.map((g) => (
+                  <SelectItem key={g} value={g}>
+                    {g}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {/* Search Scope Select (both/title/author) */}
+            <div className="mr-2">
+              <Select onValueChange={handleScopeChange} value={searchScope}>
+                <SelectTrigger
+                  dir="rtl"
+                  className="rounded-full w-40 border bg-green-600/20 border-emerald-700 text-emerald-700 text-sm py-2 px-3"
+                >
+                  <SelectValue placeholder="جستجو در" />
+                </SelectTrigger>
+                <SelectContent dir="rtl">
+                  {/* <SelectItem value="empty">جستجو بر اساس</SelectItem> */}
+                  <SelectItem value="title">جستجوی عنوان</SelectItem>
+                  <SelectItem value="genre">جستجوی ژانر</SelectItem>
+                  <SelectItem value="author">جستجوی نویسنده</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          
+          {/* Search Input + Button */}
+        </motion.div>
       </div>
 
       {/* Book Grid */}

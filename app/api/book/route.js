@@ -9,24 +9,9 @@ import path from "path";
 // Ensure we run on the Node.js runtime (needed for fs access)
 export const runtime = "nodejs";
 
-// Heuristic PDF page counter from a Buffer
-function getPdfPageCountFromBuffer(buffer) {
-  try {
-    const text = buffer.toString("latin1"); // avoid UTF-8 breaking binary
-    // Strategy 1: Count occurrences of "/Type /Page" which usually appears per page object
-    const pageObjects = (text.match(/\/Type\s*\/Page[^s]/g) || []).length;
-    // Strategy 2: Look for max /Count N in Pages dictionary
-    const countMatches = [...text.matchAll(/\/Count\s+(\d{1,6})/g)].map((m) => parseInt(m[1], 10));
-    const maxCount = countMatches.length ? Math.max(...countMatches) : 0;
-    const guess = Math.max(pageObjects, maxCount);
-    return Number.isFinite(guess) && guess > 0 ? guess : null;
-  } catch {
-    return null;
-  }
-}
-
 export async function GET(req) {
-  verifyApiRequest();
+  const auth = await verifyApiRequest();
+  if (auth instanceof NextResponse) return auth;
   try {
     const url = new URL(req.url);
     const page = parseInt(url.searchParams.get("page")) || 1;
