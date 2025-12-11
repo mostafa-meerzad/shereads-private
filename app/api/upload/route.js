@@ -46,7 +46,8 @@ export async function POST(req) {
 
     const baseName = `${baseSafe(title) || "book"}-${Date.now()}`;
 
-    const publicDir = path.join(process.cwd(), "public");
+    // const publicDir = path.join(process.cwd(), "public");
+    const publicDir = path.join(process.cwd(), "uploads");
     const booksDir = path.join(publicDir, "books");
     const coversDir = path.join(publicDir, "covers");
     await fs.mkdir(booksDir, { recursive: true });

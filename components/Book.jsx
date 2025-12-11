@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuthClient } from "@/hooks/useAuthClient";
 import BookModal from "./BookModal";
+import Image from "next/image";
 
 const Book = ({ book, favIds, onToggleFav }) => {
   const router = useRouter();
@@ -91,8 +92,10 @@ const Book = ({ book, favIds, onToggleFav }) => {
         {coverUrl ? (
           // Using a plain <img> so relative public paths work out of the box
           // If you prefer next/image, ensure the domain/config allows external hosts
-          <img
-            src={coverUrl}
+          <Image
+          width={200}
+          height={200}
+            src={`/api/files${coverUrl}`}
             alt={book.title || "book cover"}
             className="w-full h-full object-cover"
             loading="lazy"

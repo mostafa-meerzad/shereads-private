@@ -232,8 +232,10 @@ export default function AdminBooks() {
               {/* Cover */}
               <div className="w-full h-56 bg-linear-to-b from-gray-500/20 to-gray-200 rounded-md  flex justify-center items-center overflow-hidden cursor-pointer">
                 {b.coverURL ? (
-                  <img
-                    src={b.coverURL}
+                  <Image
+                  width={200}
+                  height={200}
+                    src={`/api/files${b.coverURL}`}
                     alt={b.title}
                     className="w-full h-full object-cover"
                     loading="lazy"
