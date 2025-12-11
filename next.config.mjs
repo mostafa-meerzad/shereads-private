@@ -1,8 +1,7 @@
-
 const nextConfig = {
   experimental: {
-    proxyClientMaxBodySize: '200mb',
+    proxyClientMaxBodySize: "200mb",
   },
-}
- 
-export default nextConfig
+};
+
+export default nextConfig;

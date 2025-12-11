@@ -8,11 +8,9 @@ import { pdfjs } from "react-pdf";
 import { Button } from "./ui/button";
 import { Spinner } from "./ui/shadcn-io/spinner";
 
-try {
-  pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.mjs`;
-} catch (e) {}
+pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js"
 
-export default function PdfReader({ userId, bookId, pdfUrl }) {
+export default function PdfReaders({ userId, bookId, pdfUrl }) {
   const { data: progress } = useReadingProgress(userId);
   const saveProgress = useSaveProgress(userId);
 
@@ -224,3 +222,5 @@ export default function PdfReader({ userId, bookId, pdfUrl }) {
     </div>
   );
 }
+
+
