@@ -24,7 +24,7 @@ CREATE TABLE `User` (
 CREATE TABLE `Book` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(191) NOT NULL,
-    `description` VARCHAR(191) NOT NULL,
+    `description` TEXT NOT NULL,
     `authorId` INTEGER NOT NULL,
     `publish_date` DATETIME(3) NULL,
     `pdfURL` VARCHAR(191) NULL,
