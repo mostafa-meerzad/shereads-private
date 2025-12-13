@@ -1,32 +1,82 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 
+const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS) || 10;
+export async function hashPassword(password) {
+  return bcrypt.hash(password, SALT_ROUNDS);
+}
 const prisma = new PrismaClient();
 
 async function main() {
   console.log("🌱 Seeding database...");
 
-  // ============================
-  //  Authors
-  // ============================
-  const authors = await prisma.author.createMany({
+  // ============================================================
+  // 🚀 PRODUCTION MODE — seed ONLY the admin user
+  // ============================================================
+  if (process.env.NODE_ENV === "production") {
+    console.log("🚀 Production mode detected — seeding ONLY admin user.");
+
+    const existingAdmin = await prisma.user.findUnique({
+      where: { email: "admin@gmail.com" },
+    });
+
+    if (existingAdmin) {
+      console.log("⚠️ Admin already exists. Skipping creation.");
+      return;
+    }
+
+    const hashed = await hashPassword("123456");
+
+    await prisma.user.create({
+      data: {
+        name: "admin",
+        email: "admin@gmail.com",
+        passwordHash: hashed,
+        role: "admin",
+
+        // Required fields
+        gender: "مذکر",
+        Genre: [],
+        mood: null,
+        Motivation: [],
+        Age: "۱۸–۲۵",
+        author: [],
+        book_length: [],
+        recommendedBooksIds: [],
+      },
+    });
+
+    console.log("✅ Admin user created.");
+    return; // STOP HERE IN PRODUCTION
+  }
+
+  // ============================================================
+  // 🛠 DEVELOPMENT MODE — FULL SEED
+  // ============================================================
+  console.log("🛠 Development mode — full database seed.");
+
+  // -----------------------
+  // Authors
+  // -----------------------
+  await prisma.author.createMany({
     data: [
-      { id: 1, name: "جلال آل‌احمد"},
-      { id: 2, name: "صادق هدایت"},
-      { id: 3, name: "محمود دولت‌آبادی"},
+      { id: 1, name: "جلال آل‌احمد" },
+      { id: 2, name: "صادق هدایت" },
+      { id: 3, name: "محمود دولت‌آبادی" },
       { id: 4, name: "احمد شاملو" },
-      { id: 5, name: "ژان پل سارتر"},
-      { id: 6, name: "پائولو کوئیلو"},
-      { id: 7, name: "داستايفسکی"},
-      { id: 8, name: "اورول"},
-      { id: 9, name: "نیل گیمن"},
-      { id: 10, name: "جین آستن"}
+      { id: 5, name: "ژان پل سارتر" },
+      { id: 6, name: "پائولو کوئیلو" },
+      { id: 7, name: "داستايفسکی" },
+      { id: 8, name: "اورول" },
+      { id: 9, name: "نیل گیمن" },
+      { id: 10, name: "جین آستن" },
     ],
   });
 
-  // ============================
-  //  Books
-  // ============================
-  const books = await prisma.book.createMany({
+  // -----------------------
+  // Books
+  // -----------------------
+  await prisma.book.createMany({
     data: [
       {
         id: 1,
@@ -38,7 +88,7 @@ async function main() {
         mood: ["احساسی", "احساس_خوب"],
         Motivation: ["سرگرمی", "یادگیری"],
         Age: "۱۲–۱۷",
-        length: 220
+        length: 220,
       },
       {
         id: 2,
@@ -50,7 +100,7 @@ async function main() {
         mood: ["پرهیجان"],
         Motivation: ["یادگیری", "رشد_فردی"],
         Age: "۱۲–۱۷",
-        length: 1200
+        length: 1200,
       },
       {
         id: 3,
@@ -62,7 +112,7 @@ async function main() {
         mood: ["الهام_بخش"],
         Motivation: ["رشد_فردی"],
         Age: "۱۸–۲۵",
-        length: 200
+        length: 200,
       },
       {
         id: 4,
@@ -74,7 +124,7 @@ async function main() {
         mood: ["آرام"],
         Motivation: ["یادگیری"],
         Age: "۲۶–۳۵",
-        length: 160
+        length: 160,
       },
       {
         id: 5,
@@ -86,7 +136,7 @@ async function main() {
         mood: ["احساسی", "پرهیجان"],
         Motivation: ["یادگیری"],
         Age: "۵۰+",
-        length: 700
+        length: 700,
       },
       {
         id: 6,
@@ -98,7 +148,7 @@ async function main() {
         mood: ["معلوماتی"],
         Motivation: ["یادگیری", "رشد_فردی"],
         Age: "۳۶–۵۰",
-        length: 328
+        length: 328,
       },
       {
         id: 7,
@@ -110,7 +160,7 @@ async function main() {
         mood: ["پرهیجان"],
         Motivation: ["سرگرمی"],
         Age: "۳۶–۵۰",
-        length: 480
+        length: 480,
       },
       {
         id: 8,
@@ -122,7 +172,7 @@ async function main() {
         mood: ["احساس_خوب"],
         Motivation: ["سرگرمی"],
         Age: "۳۶–۵۰",
-        length: 300
+        length: 300,
       },
       {
         id: 9,
@@ -134,7 +184,7 @@ async function main() {
         mood: ["آرام"],
         Motivation: ["یادگیری"],
         Age: "۳۶–۵۰",
-        length: 150
+        length: 150,
       },
       {
         id: 10,
@@ -146,22 +196,22 @@ async function main() {
         mood: ["احساسی"],
         Motivation: ["سرگرمی"],
         Age: "۲۶–۳۵",
-        length: 400
-      }
-    ]
+        length: 400,
+      },
+    ],
   });
 
-  // ============================
-  //  Users
-  // ============================
-  const users = await prisma.user.createMany({
+  // -----------------------
+  // Users
+  // -----------------------
+  await prisma.user.createMany({
     data: [
       {
         id: 1,
         name: "الیاس",
         gender: "مذکر",
         email: "elyas@example.com",
-        passwordHash: "hashed_pass",
+        passwordHash: await hashPassword("pass1"),
         role: "user",
         Genre: ["ادبیات", "توسعه_فردی"],
         mood: "آرام",
@@ -169,14 +219,14 @@ async function main() {
         Age: "۱۸–۲۵",
         author: [1, 6],
         book_length: ["کوتاه", "متوسط"],
-        recommendedBooksIds: [1, 3, 6]
+        recommendedBooksIds: [1, 3, 6],
       },
       {
         id: 2,
         name: "سمانه",
         gender: "مونث",
         email: "samane@example.com",
-        passwordHash: "pass",
+        passwordHash: await hashPassword("pass2"),
         role: "user",
         Genre: ["رمانتیک", "داستان"],
         mood: "احساس_خوب",
@@ -184,14 +234,14 @@ async function main() {
         Age: "۱۸–۲۵",
         author: [10],
         book_length: ["متوسط"],
-        recommendedBooksIds: [8]
+        recommendedBooksIds: [8],
       },
       {
         id: 3,
         name: "حمید",
         gender: "مذکر",
         email: "hamid@example.com",
-        passwordHash: "x",
+        passwordHash: await hashPassword("pass3"),
         role: "admin",
         Genre: ["معلوماتی", "تاریخی"],
         mood: "معلوماتی",
@@ -199,66 +249,36 @@ async function main() {
         Age: "۲۶–۳۵",
         author: [5, 7],
         book_length: ["بلند"],
-        recommendedBooksIds: [5, 6]
+        recommendedBooksIds: [5, 6],
       },
-      {
-        id: 4,
-        name: "نرگس",
-        gender: "مونث",
-        email: "narges@example.com",
-        passwordHash: "x",
-        role: "user",
-        Genre: ["فانتزی"],
-        mood: "پرهیجان",
-        Motivation: ["سرگرمی"],
-        Age: "۳۶–۵۰",
-        author: [9],
-        book_length: ["بلند"],
-        recommendedBooksIds: [7]
-      },
-      {
-        id: 5,
-        name: "مهیار",
-        gender: "مذکر",
-        email: "mahiyar@example.com",
-        passwordHash: "x",
-        role: "user",
-        Genre: ["ادبیات", "بیوگرافی"],
-        mood: "الهام_بخش",
-        Motivation: ["رشد_فردی"],
-        Age: "۳۶–۵۰",
-        author: [6, 3],
-        book_length: ["متوسط", "بلند"],
-        recommendedBooksIds: [3, 10]
-      }
-    ]
+    ],
   });
 
-  // ============================
+  // -----------------------
   // Favorites
-  // ============================
-  const favorites = await prisma.favorite.createMany({
+  // -----------------------
+  await prisma.favorite.createMany({
     data: [
       { id: 1, userId: 1, bookId: 1 },
       { id: 2, userId: 1, bookId: 3 },
       { id: 3, userId: 2, bookId: 8 },
-      { id: 4, userId: 3, bookId: 6 }
-    ]
+      { id: 4, userId: 3, bookId: 6 },
+    ],
   });
 
-  // ============================
+  // -----------------------
   // Reading Progress
-  // ============================
-  const progress = await prisma.reading_Progress.createMany({
+  // -----------------------
+  await prisma.reading_Progress.createMany({
     data: [
       { id: 1, userId: 1, bookId: 1, lastPage: 50 },
       { id: 2, userId: 1, bookId: 3, lastPage: 60 },
       { id: 3, userId: 2, bookId: 8, lastPage: 120 },
-      { id: 4, userId: 3, bookId: 6, lastPage: 200 }
-    ]
+      { id: 4, userId: 3, bookId: 6, lastPage: 200 },
+    ],
   });
 
-  console.log("🌱 Seeding complete!");
+  console.log("🌱 Full development seed complete!");
 }
 
 main()

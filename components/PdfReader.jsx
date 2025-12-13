@@ -8,11 +8,9 @@ import { pdfjs } from "react-pdf";
 import { Button } from "./ui/button";
 import { Spinner } from "./ui/shadcn-io/spinner";
 
-try {
-  pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.mjs`;
-} catch (e) {}
+pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js"
 
-export default function PdfReader({ userId, bookId, pdfUrl }) {
+export default function PdfReaders({ userId, bookId, pdfUrl }) {
   const { data: progress } = useReadingProgress(userId);
   const saveProgress = useSaveProgress(userId);
 
@@ -141,7 +139,7 @@ export default function PdfReader({ userId, bookId, pdfUrl }) {
         className="w-full max-w-full md:max-w-3xl lg:max-w-4xl rounded-xl border bg-neutral-50 p-3 shadow "
       >
         <Document
-          file={pdfUrl}
+          file={`/api/files${pdfUrl}`}
           loading={
             <div className="flex  items-center justify-center">
               <Spinner variant="circle" className="size-12 text-gray-500" />
@@ -224,3 +222,5 @@ export default function PdfReader({ userId, bookId, pdfUrl }) {
     </div>
   );
 }
+
+

@@ -75,7 +75,7 @@ const BookModal = ({ book, open, onOpenChange }) => {
               <div className="w-full md:w-1/3 lg:w-1/2 bg-gray-50 dark:bg-slate-700 p-5 flex items-center justify-center ">
                 {coverUrl ? (
                   <img
-                    src={coverUrl}
+                    src={`/api/files${coverUrl}`}
                     alt={book.title || "book cover"}
                     className="w-full h-72 md:h-[420px] object-cover rounded-md shadow"
                   />

@@ -27,7 +27,8 @@ export default function ReaderPageClient() {
   const pdfUrl = searchParams?.get("url") || "/test.pdf";
 
   useEffect(() => {
-    setReady(true);
+    const ready = ()=>setReady(true);
+    ready()
   }, []);
 
   if (!ready) return null;

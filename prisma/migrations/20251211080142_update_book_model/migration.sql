@@ -5,16 +5,15 @@ CREATE TABLE `User` (
     `gender` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
     `passwordHash` VARCHAR(191) NOT NULL,
-    `profileImgURL` VARCHAR(191) NULL,
     `isActive` BOOLEAN NOT NULL DEFAULT true,
     `role` VARCHAR(191) NOT NULL DEFAULT 'user',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `Genre` JSON NULL,
-    `mode` VARCHAR(191) NULL,
+    `mood` VARCHAR(191) NULL,
     `Motivation` JSON NULL,
-    `Age` INTEGER NULL,
+    `Age` VARCHAR(191) NULL,
     `author` JSON NULL,
-    `length` JSON NULL,
+    `book_length` JSON NULL,
     `recommendedBooksIds` JSON NULL,
 
     UNIQUE INDEX `User_email_key`(`email`),
@@ -25,16 +24,16 @@ CREATE TABLE `User` (
 CREATE TABLE `Book` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(191) NOT NULL,
-    `description` VARCHAR(191) NOT NULL,
+    `description` TEXT NOT NULL,
     `authorId` INTEGER NOT NULL,
     `publish_date` DATETIME(3) NULL,
     `pdfURL` VARCHAR(191) NULL,
     `coverURL` VARCHAR(191) NULL,
     `Genre` JSON NULL,
-    `mode` JSON NULL,
+    `mood` JSON NULL,
     `Motivation` JSON NULL,
     `Age` VARCHAR(191) NULL,
-    `length` VARCHAR(191) NULL,
+    `length` INTEGER NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -60,6 +59,17 @@ CREATE TABLE `Reading_Progress` (
     UNIQUE INDEX `Reading_Progress_userId_bookId_key`(`userId`, `bookId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Author` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(191) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `Book` ADD CONSTRAINT `Book_authorId_fkey` FOREIGN KEY (`authorId`) REFERENCES `Author`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Favorite` ADD CONSTRAINT `Favorite_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
