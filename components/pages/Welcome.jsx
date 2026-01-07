@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import TextType from "../TextType";
+import { useAuthClient } from "@/hooks/useAuthClient";
 
 const Welcome = () => {
+  const { isLoggedIn } = useAuthClient();
   return (
     <section className="page bg-[#E6F0EC] text-black flex flex-col  md:flex-row justify-start lg:justify-center items-center  md:gap-1 lg:gap-10 py-10  lg:py-0">
       <motion.div
@@ -60,7 +62,7 @@ const Welcome = () => {
           animate={{ opacity: 1, transition: { duration: 0.9, delay: 1 } }}
           className="flex flex-col justify-center gap-2 items-center"
         >
-          <Link href={"/onboarding"}>
+          <Link href={isLoggedIn ? "/dashboard" : "/getstarted"}>
             <Button
               className={
                 "rounded-full bg-green-700 hover:bg-green-800 hover:text-white text-gray-200 w-fit px-24 py-5 transition-all hover:scale-105 active:scale-95"
