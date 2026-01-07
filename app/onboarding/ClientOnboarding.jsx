@@ -38,13 +38,13 @@ const Onboarding = () => {
         .post(url, newPostData)
         .then((response) => {
 
-          // In edit mode, do not go to auth. Return to dashboard instead after recommendations updated.
-          router.push("/dashboard");
+          // In edit mode, do not go to auth. Return to home instead after recommendations updated.
+          router.push("/home");
         })
         .catch((error) => {
           console.error("There was an error:", error);
-          // In edit mode, do not go to auth. Return to dashboard instead after recommendations updated.
-          // router.push("/dashboard");
+          // In edit mode, do not go to auth. Return to home instead after recommendations updated.
+          // router.push("/home");
         });
 
       // return;
@@ -70,7 +70,7 @@ const Onboarding = () => {
       {stage === "account" && (
         <CreateAccount
           onContinue={handleGoToAuth}
-          buttonLabel={mode === "edit" ? "بازگشت به داشبورد" : undefined}
+          buttonLabel={mode === "edit" ? "بازگشت به خانه" : undefined}
         />
       )}
     </section>

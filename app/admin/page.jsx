@@ -21,10 +21,10 @@ export default function AdminPage() {
           <div className="font-bold text-emerald-800 text-xl">پنل مدیریت</div>
           <div className="flex items-center gap-2">
             <Button
-              onClick={() => router.push("/dashboard")}
+              onClick={() => router.push("/home")}
               className="rounded-full bg-emerald-700 hover:bg-emerald-800 text-white"
             >
-              بازگشت به داشبورد
+              بازگشت به خانه
             </Button>
           </div>
         </div>

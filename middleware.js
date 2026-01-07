@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 /**
  * Middleware to restrict access for unauthenticated users.
  * - If no `token` cookie is present, only allow access to:
- *   `/login`, `/register`, `/dashboard`, `/api/login`, `/api/register`, and next static assets.
+ *   `/login`, `/register`, `/home`, `/api/login`, `/api/register`, and next static assets.
  * - All other requests will be redirected to `/login`.
  *
  * Note: This middleware only checks for cookie presence (not JWT signature) to keep it Edge-compatible.
@@ -40,7 +40,6 @@ export function middleware(req) {
     "/welcome",
     "/getstarted",
     "/register",
-    // "/dashboard",
     "home",
     "/api/login",
     "/api/register",

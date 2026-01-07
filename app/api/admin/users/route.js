@@ -23,7 +23,7 @@ export async function POST(req) {
     });
     if (existing) {
       return NextResponse.json(
-        { error: "Email already in use" },
+        { error: "این ایمیل قبلاً استفاده شده است" },
         { status: 409 }
       );
     }

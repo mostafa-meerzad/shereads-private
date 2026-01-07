@@ -15,7 +15,7 @@ const OnboardingStart = ({ onStart }) => {
   const router = useRouter();
   const handleSkip = () => {
     if (!user)  router.push("/register");
-    router.push("/dashboard");
+    router.push("/home");
   };
   return (
     <div className="grid h-screen md:grid-rows-[auto_1fr] ">

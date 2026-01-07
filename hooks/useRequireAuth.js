@@ -15,9 +15,9 @@ export function useRequireAuth({ redirectTo = "/login", requireAdmin = false } =
       return;
     }
 
-    // if admin required but user is not admin, send to dashboard
+    // if admin required but user is not admin, send to home
     if (requireAdmin && user && user.role !== "admin") {
-      router.replace("/dashboard");
+      router.replace("/home");
     }
   }, [user, router, redirectTo, requireAdmin]);
 

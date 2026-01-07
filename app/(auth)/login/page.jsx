@@ -43,7 +43,7 @@ export default function Login() {
 
         // Redirect after small delay so toast can be seen
         setTimeout(() => {
-          router.push("/dashboard");
+          router.push("/home");
         }, 300); // 0.3s delay
       } else {
         // Unexpected success response

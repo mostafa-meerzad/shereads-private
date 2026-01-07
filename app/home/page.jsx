@@ -17,7 +17,7 @@ import dynamic from "next/dynamic";
 import SettingsModal from "@/components/SettingsModal";
 
 const tabs = [
-  { key: "dashboard", label: "کتاب‌ها ", icon: Component },
+  { key: "home", label: "کتاب‌ها ", icon: Component },
   { key: "mybooks", label: "کتاب‌های من", icon: UserCheck },
   { key: "recommendations", label: "پیشنهادی", icon: Library },
   { key: "favorites", label: "موردعلاقه‌", icon: Heart },
@@ -25,7 +25,7 @@ const tabs = [
 ];
 
 
-export default function Dashboard() {
+export default function Home() {
 
   const [selected, setSelected] = useState("mybooks");
   const [mobileOpen, setMobileOpen] = useState(false);

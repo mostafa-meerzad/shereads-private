@@ -62,7 +62,7 @@ const Welcome = () => {
           animate={{ opacity: 1, transition: { duration: 0.9, delay: 1 } }}
           className="flex flex-col justify-center gap-2 items-center"
         >
-          <Link href={isLoggedIn ? "/dashboard" : "/getstarted"}>
+          <Link href={isLoggedIn ? "/home" : "/getstarted"}>
             <Button
               className={
                 "rounded-full bg-green-700 hover:bg-green-800 hover:text-white text-gray-200 w-fit px-24 py-5 transition-all hover:scale-105 active:scale-95"

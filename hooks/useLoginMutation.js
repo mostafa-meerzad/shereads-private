@@ -2,7 +2,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "../lib/apiClient";
 
-export default function useLoginMutation({ onSuccessRedirect = "/dashboard" } = {}) {
+export default function useLoginMutation({ onSuccessRedirect = "/home" } = {}) {
   const qc = useQueryClient();
 
   const mutation = useMutation(

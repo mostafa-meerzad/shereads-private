@@ -55,8 +55,8 @@ export default function ReaderPageClient() {
   return (
     <div className="min-h-screen bg-white" dir="rtl">
       <div className="p-4 border-b flex items-center justify-center  relative">
-        <Link href="/dashboard" className="text-emerald-800 hover:underline absolute right-4">
-          بازگشت <span className="max-md:hidden">به داشبورد</span>
+        <Link href="/home" className="text-emerald-800 hover:underline absolute right-4">
+          بازگشت <span className="max-md:hidden">به خانه</span>
         </Link>
         <div className="font-semibold">خواندن کتاب</div>
         <div />

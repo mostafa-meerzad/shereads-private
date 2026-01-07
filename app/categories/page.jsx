@@ -107,8 +107,8 @@ export default function CategoriesPage() {
 
       toast.success("دسته‌بندی‌ها با موفقیت ذخیره شد");
 
-      // navigate to dashboard after confirming
-      router.push("/dashboard");
+      // navigate to home after confirming
+      router.push("/home");
     } catch (err) {
       const msg = err?.error || err?.message || "خطا در ذخیره‌سازی دسته‌بندی‌ها";
       toast.error(typeof msg === "string" ? msg : "خطا در ذخیره‌سازی");
