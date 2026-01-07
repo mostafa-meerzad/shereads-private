@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "She Reads",
+  title: "She Reads Now",
   description: "پلتفرمی برای پیدا کردن کتاب‌های مورد علاقه‌تان",
 };
 

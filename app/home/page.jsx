@@ -56,7 +56,7 @@ export default function Home() {
             />
 
             <h1 className=" text-center md:text-start text-2xl md:text-3xl lg:text-4xl font-semibold text-emerald-800">
-              به کتابخانه She Reads خوش آمدید!
+              به کتابخانه She Reads Now خوش آمدید!
             </h1>
           </header>
 
