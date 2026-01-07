@@ -21,6 +21,7 @@ export async function GET(req) {
     const author = url.searchParams.get("author");
     // const date = url.searchParams.get("date");
     const title = url.searchParams.get("title");
+    const onlyMatches = url.searchParams.get("onlyMatches") === "true";
 
     const skip = (page - 1) * limit;
 
@@ -56,10 +57,14 @@ export async function GET(req) {
       where.title = { contains: title };
     }
 
+    if (onlyMatches && categories && categories.length > 0) {
+      where.category = { in: categories };
+    }
+
     const total = await prisma.book.count({ where });
 
     let books = [];
-    if (categories && categories.length > 0) {
+    if (!onlyMatches && categories && categories.length > 0) {
       const matchingWhere = { ...where, category: { in: categories } };
       const othersWhere = {
         ...where,
