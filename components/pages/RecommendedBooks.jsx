@@ -56,15 +56,18 @@ const RecommendedBooks = () => {
     return null;
   }
 
-  if (data?.pages[0]?.books.length === 0){
-    return <div className="size-full h-[75vh] flex flex-col justify-center items-center gap-2 bg-radial from-gray-200  rounded-xl to-transparent">
-<span className="text-gray-500">!هیچ کتابی به شما پیشنهاد نشده است</span>
-
-<Link href={"onboarding?mode=edit"} className="underline text-green-700 text-sm">در ارزیابی شرکت کنید</Link>
-      </div>
-  }
   const pages = data?.pages || [];
   const books = pages.flatMap((p) => p.books || []);
+
+  if (books.length === 0) {
+    return (
+      <div className="size-full h-[75vh] flex flex-col justify-center items-center gap-2 bg-radial from-gray-200  rounded-xl to-transparent">
+        <span className="text-gray-500">!هیچ کتابی به شما پیشنهاد نشده است</span>
+
+        <Link href={"onboarding?mode=edit"} className="underline text-green-700 text-sm">در ارزیابی شرکت کنید</Link>
+      </div>
+    );
+  }
 
   return (
     <div dir="rtl" className="space-y-10">
