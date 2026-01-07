@@ -244,7 +244,7 @@ const AllBooks = () => {
             <Spinner className="size-10" />
           ) : hasNextPage ? (
             <div ref={ref} className="p-2 rounded text-gray-500">
-              بارگذاری بیشتر...
+              بارگیری بیشتر...
             </div>
           ) : (
             <div className="text-gray-400">به انتها رسیدید</div>

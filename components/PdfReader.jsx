@@ -174,7 +174,7 @@ export default function PdfReaders({ userId, bookId, pdfUrl }) {
           }}
           onLoadError={(err) => {
             console.error("PDF load error", err);
-            setError("خطا در بارگذاری فایل PDF. لطفاً بعداً دوباره تلاش کنید.");
+            setError("خطا در بارگیری فایل PDF. لطفاً بعداً دوباره تلاش کنید.");
           }}
           className="flex justify-center max-md:h-[70vh] max-lg:h-auto items-center overflow-hidden"
         >

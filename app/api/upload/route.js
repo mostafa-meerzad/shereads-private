@@ -85,6 +85,6 @@ export async function POST(req) {
     return NextResponse.json({ pdfPath: finalPdfURL, coverPath: finalCoverURL, length: detectedLength });
   } catch (err) {
     console.error("Upload Error:", err);
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    return NextResponse.json({ error: "آپلود ناموفق" }, { status: 500 });
   }
 }

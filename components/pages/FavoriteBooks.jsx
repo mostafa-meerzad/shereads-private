@@ -66,7 +66,7 @@ const RecommendedBooks = () => {
     );
 
   if (status === "error") {
-    toast.error("بارگذاری کتاب‌ها انجام نشد");
+    toast.error("بارگیری کتاب‌ها انجام نشد");
     return null;
   }
 
@@ -95,7 +95,7 @@ const RecommendedBooks = () => {
             <Spinner className="size-10" />
           ) : hasNextPage ? (
             <div ref={ref} className="p-2 rounded text-gray-500">
-              بارگذاری بیشتر...
+              بارگیری بیشتر...
             </div>
           ) : (
             <div className="text-gray-400">به انتها رسیدید</div>

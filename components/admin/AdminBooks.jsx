@@ -417,7 +417,7 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
 
           if (!uploadedRes.ok) {
             const err = await uploadedRes.json().catch(() => ({}));
-            throw err || new Error("Upload failed");
+            throw err || new Error("آپلود ناموفق");
           }
 
           const uploaded = await uploadedRes.json();
@@ -457,7 +457,7 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
       });
       if (!uploadedRes.ok) {
         const err = await uploadedRes.json().catch(() => ({}));
-        throw err || new Error("Upload failed");
+        throw err || new Error("آپلود ناموفق");
       }
       const uploaded = await uploadedRes.json();
 
