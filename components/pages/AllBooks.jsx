@@ -108,11 +108,26 @@ const AllBooks = () => {
 
   function onToggleFav(bookId, isFav) {
     if (!userId) {
-      alert("Please login to favorite books");
+      toast.error("لطفاً برای افزودن به علاقه‌مندی‌ها وارد شوید");
       return;
     }
-    if (isFav) toggleFav.remove.mutate({ userId, bookId });
-    else toggleFav.add.mutate({ userId, bookId });
+    if (isFav) {
+      toggleFav.remove.mutate(
+        { userId, bookId },
+        {
+          onSuccess: () => toast.success("از علاقه‌مندی‌ها حذف شد"),
+          onError: () => toast.error("حذف از علاقه‌مندی‌ها انجام نشد"),
+        }
+      );
+    } else {
+      toggleFav.add.mutate(
+        { userId, bookId },
+        {
+          onSuccess: () => toast.success("به علاقه‌مندی‌ها اضافه شد"),
+          onError: () => toast.error("افزودن به علاقه‌مندی‌ها انجام نشد"),
+        }
+      );
+    }
   }
 
   // -------------------------------------------------------

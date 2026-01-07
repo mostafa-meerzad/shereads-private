@@ -40,7 +40,8 @@ export function middleware(req) {
     "/welcome",
     "/getstarted",
     "/register",
-    "/dashboard",
+    // "/dashboard",
+    "home",
     "/api/login",
     "/api/register",
     "/api/author"

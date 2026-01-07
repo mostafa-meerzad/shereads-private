@@ -47,11 +47,26 @@ const MyBooks = () => {
 
   function onToggleFav(bookId, isFav) {
     if (!userId) {
-      alert("Please login to favorite books");
+      toast.error("لطفاً برای افزودن به علاقه‌مندی‌ها وارد شوید");
       return;
     }
-    if (isFav) toggleFav.remove.mutate({ userId, bookId });
-    else toggleFav.add.mutate({ userId, bookId });
+    if (isFav) {
+      toggleFav.remove.mutate(
+        { userId, bookId },
+        {
+          onSuccess: () => toast.success("از علاقه‌مندی‌ها حذف شد"),
+          onError: () => toast.error("حذف از علاقه‌مندی‌ها انجام نشد"),
+        }
+      );
+    } else {
+      toggleFav.add.mutate(
+        { userId, bookId },
+        {
+          onSuccess: () => toast.success("به علاقه‌مندی‌ها اضافه شد"),
+          onError: () => toast.error("افزودن به علاقه‌مندی‌ها انجام نشد"),
+        }
+      );
+    }
   }
 
   if (status === "loading")
@@ -69,7 +84,17 @@ const MyBooks = () => {
   const pages = data?.pages || [];
   const books = pages.flatMap((p) => p.books || []);
 
-  if (books.length === 0 && status === "success") {
+  // Only include books that match user's selected categories.
+  // Be defensive: a book's `category` may be a string or an array.
+  const matchesCategories = (book) => {
+    if (!preferredCategories || preferredCategories.length === 0) return false;
+    const bookCats = Array.isArray(book.category) ? book.category : [book.category];
+    return bookCats.some((c) => preferredCategories.includes(c));
+  };
+
+  const filteredBooks = books.filter((b) => matchesCategories(b));
+
+  if (filteredBooks.length === 0 && status === "success") {
     return (
       <div className="flex flex-col items-center justify-center h-[50vh] text-gray-500">
         <p className="text-xl">کتابی مطابق با علایق شما پیدا نشد.</p>
@@ -86,7 +111,7 @@ const MyBooks = () => {
         transition={{ duration: 0.33 }}
         className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))]  gap-4 "
       >
-        {books.map((book) => (
+        {filteredBooks.map((book) => (
           <Book
             key={book.id}
             book={book}
