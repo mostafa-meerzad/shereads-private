@@ -42,14 +42,15 @@ export async function PATCH(req, { params }) {
     let authorId = existing.authorId;
 
     // Handle author changes
-    if (data.authorName) {
+    if (data.authorName !== undefined) {
+      const finalAuthorName = data.authorName || "Unknown Author";
       let author = await prisma.author.findFirst({
-        where: { name: data.authorName },
+        where: { name: finalAuthorName },
       });
 
       if (!author) {
         const parseAuthor = AddAuthorSchema.safeParse({
-          name: data.authorName,
+          name: finalAuthorName,
         });
         if (!parseAuthor.success) {
           return NextResponse.json(
@@ -59,7 +60,7 @@ export async function PATCH(req, { params }) {
         }
 
         author = await prisma.author.create({
-          data: { name: data.authorName },
+          data: { name: finalAuthorName },
         });
       }
 
@@ -96,6 +97,7 @@ export async function PATCH(req, { params }) {
       ...(data.Genre !== undefined && { Genre: data.Genre }),
       ...(data.mood !== undefined && { mood: data.mood }),
       ...(data.Motivation !== undefined && { Motivation: data.Motivation }),
+      ...(data.category !== undefined && { category: data.category }),
       ...(data.Age !== undefined && { Age: data.Age }),
       ...(data.length !== undefined && { length: data.length }),
       authorId,

@@ -28,6 +28,7 @@ export default function ClientRegister() {
   const [showConfirm, setShowConfirm] = useState(false);
   const searchParams = useSearchParams();
   const collectedAnswers = searchParams.get("data");
+  const categoriesParam = searchParams.get("categories");
 
   const {
     register,
@@ -46,7 +47,7 @@ export default function ClientRegister() {
   };
 
   const onSubmit = async (data) => {
-    let Age, Genre, Motivation, book_length, mood, author;
+    let Age, Genre, Motivation, book_length, mood, author, categories;
 
     // If collectedAnswers exists, parse it
     if (collectedAnswers) {
@@ -55,6 +56,17 @@ export default function ClientRegister() {
         ({ Age, Genre, Motivation, book_length, mood, author } = parsedData);
       } catch (e) {
         console.error("Invalid JSON in collectedAnswers", e);
+      }
+    }
+
+    // If categories param exists, parse it and normalize to an array
+    if (categoriesParam) {
+      try {
+        const parsedCats = JSON.parse(categoriesParam);
+        categories = Array.isArray(parsedCats) ? parsedCats : [parsedCats];
+      } catch (e) {
+        // If it's not valid JSON treat it as a single category string
+        categories = [categoriesParam];
       }
     }
 
@@ -71,6 +83,7 @@ export default function ClientRegister() {
         book_length: book_length,
         mood: mood,
         author: author,
+        categories: categories,
       });
 
       if (res.status === 201 && res.data) {

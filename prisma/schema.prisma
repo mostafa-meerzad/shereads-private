@@ -23,6 +23,8 @@ model User {
   mood                String?  // ENUM in MySQL
   Motivation          Json?    // MotivationType[]
   Age                 String?    // Age categories
+  // user-selected onboarding categories (eg. ["educational","language"]) stored as JSON
+  categories          Json?
   author              Json?    // Int[]
   book_length              Json?    // Length[]
   recommendedBooksIds Json?    // Int[]
@@ -50,6 +52,8 @@ model Book {
   // Single enums stored as strings
   Age         String?   // ENUM
   length      Int?   // ENUM
+  // primary category for the book - one of CategoryEnum values (stored as string)
+  category    String?
 
   // Relations
   author      Author    @relation(fields: [authorId], references: [id])

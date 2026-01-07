@@ -8,6 +8,7 @@ import {
   LengthEnum,
   AgeEnum,
 } from '@/app/services/answersSchema'; 
+import { CategoryEnum } from '@/app/services/answersSchema';
 
 export const RegisterSchema = z.object({
   name: z.string().min(1),
@@ -26,4 +27,6 @@ export const RegisterSchema = z.object({
   author: z.array(z.number().int().positive()).optional().nullable(),
   book_length: z.array(LengthEnum).optional().nullable(),
   recommendedBooksIds: z.array(z.number().int().positive()).optional().nullable(),
+  // categories collected from onboarding / getstarted
+  categories: z.array(CategoryEnum).optional().nullable(),
 });

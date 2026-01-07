@@ -132,6 +132,14 @@ export default function SettingsModal({ open, onOpenChange }) {
             >
               تنظیم ترجیحات
             </Button>
+            <Button
+              type="button"
+              className="rounded-full border-emerald-600 text-emerald-700"
+              variant="outline"
+              onClick={() => router.push("/categories")}
+            >
+              تنظیم دسته‌بندی‌ها
+            </Button>
           </div>
         </form>
       </SheetContent>

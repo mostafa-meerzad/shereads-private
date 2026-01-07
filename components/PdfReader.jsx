@@ -7,6 +7,7 @@ import { useSaveProgress } from "@/hooks/useSaveProgress";
 import { pdfjs } from "react-pdf";
 import { Button } from "./ui/button";
 import { Spinner } from "./ui/shadcn-io/spinner";
+import { motion, AnimatePresence } from "framer-motion";
 
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js"
 
@@ -21,6 +22,7 @@ export default function PdfReaders({ userId, bookId, pdfUrl }) {
   const [error, setError] = useState(null);
   const containerRef = useRef(null);
   const [pageWidth, setPageWidth] = useState(undefined);
+  const [direction, setDirection] = useState(0); // 1 for next, -1 for prev
 
   // refs for touch handling
   const touchStartRef = useRef({ x: 0, y: 0, t: 0 });
@@ -112,9 +114,11 @@ export default function PdfReaders({ userId, bookId, pdfUrl }) {
         // dx < 0 => finger moved left => user swiped left -> go to previous page
         if (dx < 0) {
           // previous
+          setDirection(-1);
           setPage((p) => (p > 1 ? Math.max(1, p - 1) : p));
         } else {
           // next
+          setDirection(1);
           setPage((p) =>
             numPages && p < numPages ? Math.min(numPages, p + 1) : p
           );
@@ -172,14 +176,26 @@ export default function PdfReaders({ userId, bookId, pdfUrl }) {
             console.error("PDF load error", err);
             setError("خطا در بارگذاری فایل PDF. لطفاً بعداً دوباره تلاش کنید.");
           }}
-          className="flex justify-center max-md:h-[70vh] max-lg:h-auto items-center"
+          className="flex justify-center max-md:h-[70vh] max-lg:h-auto items-center overflow-hidden"
         >
-          <Page
-            pageNumber={page}
-            renderAnnotationLayer={false}
-            renderTextLayer={false}
-            width={pageWidth}
-          />
+          <AnimatePresence initial={false} custom={direction} mode="wait">
+            <motion.div
+              key={page}
+              custom={direction}
+              initial={{ x: direction > 0 ? 100 : -100, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: direction > 0 ? -100 : 100, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="w-full flex justify-center"
+            >
+              <Page
+                pageNumber={page}
+                renderAnnotationLayer={false}
+                renderTextLayer={false}
+                width={pageWidth}
+              />
+            </motion.div>
+          </AnimatePresence>
         </Document>
 
         {error && (
@@ -193,16 +209,20 @@ export default function PdfReaders({ userId, bookId, pdfUrl }) {
           <div className="flex items-center justify-between gap-3 rounded-xl border bg-white px-3 py-2 shadow-sm">
             <div className="flex items-center gap-2">
               <Button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                onClick={() => {
+                  setDirection(-1);
+                  setPage((p) => Math.max(1, p - 1));
+                }}
                 disabled={page <= 1}
                 className="rounded-full bg-emerald-700 text-white hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 قبلی
               </Button>
               <Button
-                onClick={() =>
-                  setPage((p) => Math.min(numPages || p + 1, p + 1))
-                }
+                onClick={() => {
+                  setDirection(1);
+                  setPage((p) => Math.min(numPages || p + 1, p + 1));
+                }}
                 disabled={!numPages || page >= numPages}
                 className="rounded-full bg-emerald-700 text-white hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >

@@ -19,3 +19,12 @@ export const MotivationEnum = z.enum([
 export const LengthEnum = z.enum(["کوتاه", "متوسط", "بلند"]);
 
 export const AgeEnum = z.enum(["۱۲–۱۷", "۱۸–۲۵", "۲۶–۳۵", "۳۶–۵۰", "۵۰+"])
+
+// Categories used in onboarding / getstarted page
+export const CategoryEnum = z.enum([
+  "educational",
+  "language",
+  "life_skills",
+  "self_growth",
+  "literature",
+]);

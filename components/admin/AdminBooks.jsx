@@ -44,7 +44,21 @@ const MODES = [
 
 const AGES = ["۱۲–۱۷", "۱۸–۲۵", "۲۶–۳۵", "۳۶–۵۰", "۵۰+"];
 
-const MOTIVATIONS = ["سرگرمی", "یادگیری", "رشد_فردی", "بهبود_مهارت_ها"];
+const MOTIVATIONS = [
+  "سرگرمی",
+  "یادگیری",
+  "رشد_فردی",
+  "بهبود_مهارت_ها",
+];
+
+// Categories matching getstarted page
+const CATEGORIES = [
+  { id: "educational", label: "تعلیمی" },
+  { id: "language", label: "زبان‌آموزی" },
+  { id: "life_skills", label: "مهارت‌های زندگی" },
+  { id: "self_growth", label: "رشد فردی" },
+  { id: "literature", label: "ادبیات" },
+];
 
 function useAdminBooks({ page, filters }) {
   return useQuery({
@@ -341,6 +355,7 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
   const [modes, setModes] = useState(book?.mood || []);
   const [ageGroup, setAgeGroup] = useState(book?.Age || "");
   const [motivations, setMotivations] = useState(book?.Motivation || []);
+  const [category, setCategory] = useState(book?.category || "");
 
   const coverPreview = useMemo(() => {
     if (cover) return URL.createObjectURL(cover);
@@ -360,14 +375,15 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
     setModes(book?.mood || []);
     setAgeGroup(book?.Age || "");
     setMotivations(book?.Motivation || []);
+    setCategory(book?.category || "");
     setCover(null);
     setPdf(null);
   }, [book]);
 
   const submit = async (e) => {
     e.preventDefault();
-    if (!title || !author || !description) {
-      toast.error("عنوان ,توضیحات و نویسنده الزامی هستند");
+    if (!title || !description || !category) {
+      toast.error("عنوان، توضیحات و دسته‌بندی الزامی هستند");
       return;
     }
 
@@ -386,6 +402,7 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
         if (modes && modes.length) payload.mood = modes;
         if (motivations && motivations.length) payload.Motivation = motivations;
         if (ageGroup) payload.Age = ageGroup;
+        if (category) payload.category = category;
 
         // If new files selected, upload them first to `/api/upload`
         if (cover || pdf) {
@@ -456,6 +473,8 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
         coverURL: uploaded?.coverPath || null,
         length: uploaded?.length || null,
       };
+
+      if (category) payload.category = category;
 
       if (genres && genres.length) payload.Genre = genres;
       if (modes && modes.length) payload.mood = modes;
@@ -557,22 +576,39 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
               onChange={setModes}
             />
 
-            {/* Age group */}
-            <div>
-              <label className="block text-sm text-slate-600">گروه سنی</label>
-              <Select value={ageGroup} onValueChange={setAgeGroup}>
-                <SelectTrigger className="rounded-full">
-                  <SelectValue placeholder="انتخاب گروه سنی" />
-                </SelectTrigger>
-                <SelectContent>
-                  {AGES.map((a) => (
-                    <SelectItem key={a} value={a}>
-                      {a}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          {/* Age group */}
+          <div>
+            <label className="block text-sm text-slate-600">گروه سنی</label>
+            <Select value={ageGroup} onValueChange={setAgeGroup}>
+              <SelectTrigger className="rounded-full">
+                <SelectValue placeholder="انتخاب گروه سنی" />
+              </SelectTrigger>
+              <SelectContent>
+                {AGES.map((a) => (
+                  <SelectItem key={a} value={a}>
+                    {a}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Category (onboarding categories) */}
+          <div>
+            <label className="block text-sm text-slate-600">دسته‌بندی</label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger className="rounded-full">
+                <SelectValue placeholder="انتخاب دسته‌بندی" />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORIES.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
             <MultiSelectWithTags
               label="انگیزه"

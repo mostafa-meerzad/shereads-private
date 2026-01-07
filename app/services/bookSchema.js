@@ -5,6 +5,7 @@ import {
   MotivationEnum,
   AgeEnum,
 } from "@/app/services/answersSchema";
+import { CategoryEnum } from "@/app/services/answersSchema";
 
 // Schema for author creation (name only)
 export const AddAuthorSchema = z.object({
@@ -17,7 +18,7 @@ export const AddBookSchema = z.object({
   description: z.string().min(1),
 
   // Instead of authorId we take name
-  authorName: z.string().min(1),
+  authorName: z.string().optional().nullable(),
 
   publish_date: z.string().datetime().optional().nullable(),
   pdfURL: z.string().optional().nullable(),
@@ -26,6 +27,7 @@ export const AddBookSchema = z.object({
   Genre: z.array(GenreEnum).optional().nullable(),
   mood: z.array(MoodEnum).optional().nullable(),
   Motivation: z.array(MotivationEnum).optional().nullable(),
+  category: CategoryEnum,
 
   Age: AgeEnum.optional().nullable(),
   length: z.number().int().positive().optional().nullable(),

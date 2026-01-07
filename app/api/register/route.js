@@ -41,6 +41,7 @@ export async function POST(req) {
       data.mood ||
       data.Motivation ||
       data.Age ||
+      data.categories ||
       data.author ||
       data.book_length;
 
@@ -72,6 +73,7 @@ export async function POST(req) {
         author: data.author ?? null,
         book_length: data.book_length ?? null,
         recommendedBooksIds: recommendedIds.length > 0 ? recommendedIds : null,
+        categories: data.categories ?? null,
       },
     });
 

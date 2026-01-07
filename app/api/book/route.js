@@ -17,6 +17,7 @@ export async function GET(req) {
     const page = parseInt(url.searchParams.get("page")) || 1;
     const limit = parseInt(url.searchParams.get("limit")) || 20;
     const genre = url.searchParams.get("genre");
+    const categories = url.searchParams.getAll("categories");
     const author = url.searchParams.get("author");
     // const date = url.searchParams.get("date");
     const title = url.searchParams.get("title");
@@ -30,6 +31,10 @@ export async function GET(req) {
       // genre is stored as JSON array
       where.Genre = { array_contains: [genre] };
     }
+
+    // if (categories && categories.length > 0) {
+    //   where.category = { in: categories };
+    // }
 
     if (author) {
       where.author = {
@@ -53,13 +58,59 @@ export async function GET(req) {
 
     const total = await prisma.book.count({ where });
 
-    const books = await prisma.book.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: { publish_date: "desc" },
-      include: { author: true },
-    });
+    let books = [];
+    if (categories && categories.length > 0) {
+      const matchingWhere = { ...where, category: { in: categories } };
+      const othersWhere = {
+        ...where,
+        OR: [{ category: { notIn: categories } }, { category: null }],
+      };
+
+      const matchingCount = await prisma.book.count({ where: matchingWhere });
+
+      if (skip < matchingCount) {
+        // We are still within the matching books or overlapping
+        const matchingBooks = await prisma.book.findMany({
+          where: matchingWhere,
+          skip,
+          take: limit,
+          orderBy: { publish_date: "desc" },
+          include: { author: true },
+        });
+        books = [...matchingBooks];
+
+        if (books.length < limit) {
+          // Need to fill the rest from 'others'
+          const remainingLimit = limit - books.length;
+          const otherBooks = await prisma.book.findMany({
+            where: othersWhere,
+            skip: 0,
+            take: remainingLimit,
+            orderBy: { publish_date: "desc" },
+            include: { author: true },
+          });
+          books = [...books, ...otherBooks];
+        }
+      } else {
+        // We are completely in the 'others' section
+        const otherBooks = await prisma.book.findMany({
+          where: othersWhere,
+          skip: skip - matchingCount,
+          take: limit,
+          orderBy: { publish_date: "desc" },
+          include: { author: true },
+        });
+        books = [...otherBooks];
+      }
+    } else {
+      books = await prisma.book.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { publish_date: "desc" },
+        include: { author: true },
+      });
+    }
 
     return NextResponse.json({
       page,
@@ -82,15 +133,97 @@ export async function POST(req) {
     let payload;
 
     if (contentType.includes("multipart/form-data")) {
-      return NextResponse.json(
-        { error: "Use /api/upload to upload files (multipart). Send JSON to /api/book for DB creation." },
-        { status: 400 }
-      );
-    }
+      const form = await req.formData();
 
-    // Fallback to JSON body
-    const body = await req.json();
-    payload = body;
+      // Helper to parse optional JSON arrays/enums if provided as JSON string
+      const parseMaybeJSON = (v) => {
+        if (typeof v !== "string") return undefined;
+        try {
+          return JSON.parse(v);
+        } catch {
+          return undefined;
+        }
+      };
+
+      const title = form.get("title")?.toString() || "";
+      const description = form.get("description")?.toString() || "";
+      const authorName = form.get("authorName")?.toString() || form.get("author")?.toString() || "";
+      const category = form.get("category")?.toString() || undefined;
+      const publish_date = form.get("publish_date")?.toString() || null;
+
+      // Files
+      const pdf = form.get("pdf");
+      const cover = form.get("cover");
+
+      // Build unique, related base name for files
+      let pdfURL = null;
+      let coverURL = null;
+
+      const baseSafe = (str) =>
+        str
+          .toString()
+          .trim()
+          .replace(/\s+/g, "-")
+          .replace(/[^\u0600-\u06FF\w-]/g, "") // allow Persian letters and word chars
+          .slice(0, 50);
+
+      const baseName = `${baseSafe(title) || "book"}-${Date.now()}`;
+
+      // Ensure directories
+      const publicDir = path.join(process.cwd(), "public");
+      const booksDir = path.join(publicDir, "books");
+      const coversDir = path.join(publicDir, "covers");
+      await fs.mkdir(booksDir, { recursive: true });
+      await fs.mkdir(coversDir, { recursive: true });
+
+      // Derive origin so we can return absolute URLs (Zod expects url format)
+      const origin = new URL(req.url).origin;
+
+      // Save PDF if provided
+      let detectedLength = null;
+      if (pdf && typeof pdf === "object" && pdf.arrayBuffer) {
+        const original = pdf.name || "file.pdf";
+        const ext = path.extname(original) || ".pdf";
+        const fileName = `${baseName}${ext}`;
+        const filePath = path.join(booksDir, fileName);
+        const buffer = Buffer.from(await pdf.arrayBuffer());
+        // Detect pages before writing (buffer in memory)
+        detectedLength = getPdfPageCountFromBuffer(buffer);
+        await fs.writeFile(filePath, buffer);
+        pdfURL = `${origin}/books/${fileName}`;
+      }
+
+      // Save cover if provided
+      if (cover && typeof cover === "object" && cover.arrayBuffer) {
+        const original = cover.name || "cover.jpg";
+        const ext = path.extname(original) || ".jpg";
+        const fileName = `${baseName}${ext}`;
+        const filePath = path.join(coversDir, fileName);
+        const buffer = Buffer.from(await cover.arrayBuffer());
+        await fs.writeFile(filePath, buffer);
+        coverURL = `${origin}/covers/${fileName}`;
+      }
+
+      payload = {
+        title,
+        description,
+        authorName,
+        publish_date: publish_date || null,
+        pdfURL,
+        coverURL,
+        Genre: parseMaybeJSON(form.get("Genre")) ?? undefined,
+        mood: parseMaybeJSON(form.get("mood")) ?? undefined,
+        Motivation: parseMaybeJSON(form.get("Motivation")) ?? undefined,
+        Age: form.get("Age")?.toString() ?? undefined,
+        category: category ?? undefined,
+        // If client sent length keep it for compatibility, but prefer detectedLength when available
+        length: detectedLength ?? (form.get("length") ? Number(form.get("length")) : undefined),
+      };
+    } else {
+      // Fallback to JSON body
+      const body = await req.json();
+      payload = body;
+    }
 
     // Validate book input
     const parsedBook = AddBookSchema.safeParse(payload);
@@ -109,13 +242,15 @@ export async function POST(req) {
     const data = parsedBook.data;
 
     // 1️⃣ Check if author already exists
+    const finalAuthorName = data.authorName || "Unknown Author";
+
     let author = await prisma.author.findFirst({
-      where: { name: data.authorName },
+      where: { name: finalAuthorName },
     });
 
     // 2️⃣ If not → create author
     if (!author) {
-      const authorCheck = AddAuthorSchema.safeParse({ name: data.authorName });
+      const authorCheck = AddAuthorSchema.safeParse({ name: finalAuthorName });
 
       if (!authorCheck.success) {
         return NextResponse.json(
@@ -125,7 +260,7 @@ export async function POST(req) {
       }
 
       author = await prisma.author.create({
-        data: { name: data.authorName },
+        data: { name: finalAuthorName },
       });
     }
 
@@ -159,6 +294,7 @@ export async function POST(req) {
         Genre: data.Genre,
         mood: data.mood,
         Motivation: data.Motivation,
+        category: data.category,
         Age: data.Age,
         length: data.length,
       },

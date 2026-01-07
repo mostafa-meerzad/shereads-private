@@ -8,9 +8,6 @@ const page = () => {
   return (
     <div>
       <Welcome />
-      {/* <DashboardApp/> */}
-      {/* <Sidebar/> */}
-      {/* <OnBoardingForm/> */}
     </div>
   );
   

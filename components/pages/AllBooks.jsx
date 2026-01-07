@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import toast from "react-hot-toast";
 import { useInView } from "react-intersection-observer";
 
@@ -48,6 +48,17 @@ const AllBooks = () => {
   // searchScope: 'both' | 'title' | 'author' | 'genre'
   const [searchScope, setSearchScope] = useState("title");
 
+  // Prefer books that match user's selected categories (if any)
+  const preferredCategories = useMemo(() => {
+    if (!user?.categories) return [];
+    try {
+      if (Array.isArray(user.categories)) return user.categories;
+      if (typeof user.categories === "string") return JSON.parse(user.categories);
+      return [];
+    } catch (e) {
+      return [user.categories].filter(Boolean);
+    }
+  }, [user]);
   const applySearch = () => {
     const q = inputSearch.trim();
     setFilters((prev) => ({
@@ -71,8 +82,11 @@ const AllBooks = () => {
     setSearchScope(value);
   };
 
+  // Include user's preferred categories in the filters passed to the
+  // books query so the query key changes and React Query refetches whenever
+  // the user's categories change.
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
-    useInfiniteBooks({ limit: 20, filters });
+    useInfiniteBooks({ limit: 20, filters: { ...filters, categories: preferredCategories } });
 
   const { ref, inView } = useInView({ rootMargin: "200px" });
 

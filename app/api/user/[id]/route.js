@@ -55,14 +55,17 @@ export async function PATCH(req, { params }) {
 
     const dataToUpdate = {};
 
-    const { name, gender, email, password, Age, isActive, role } = parsed.data;
-
+    const { name, gender, email, password, Age, isActive, role, categories } = parsed.data;
+    console.log("current user's role: ", role)
+console.log("current user's name: ", name)
+console.log("current user's email: ", email)
     // --- Conditionally add fields to update ----
     if (name !== undefined) dataToUpdate.name = name;
     if (gender !== undefined) dataToUpdate.gender = gender;
     if (Age !== undefined) dataToUpdate.Age = Age;
     if (isActive !== undefined) dataToUpdate.isActive = isActive; 
     if (role !== undefined) dataToUpdate.role = role;
+    if (categories !== undefined) dataToUpdate.categories = categories;
 
     // Email update with uniqueness check
     if (email !== undefined) {
@@ -97,6 +100,7 @@ export async function PATCH(req, { params }) {
         role: true,
         isActive: true, 
         Age: true,
+        categories: true,
         createdAt: true,
       },
     });

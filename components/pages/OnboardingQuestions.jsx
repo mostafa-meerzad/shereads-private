@@ -326,7 +326,7 @@ const OnboardingQuestions = ({ onComplete }) => {
             <Controller
               control={control}
               name={`answers.${step}`}
-              rules={{ required: true }}
+              rules={{ required: !isAuthorsStep }}
               render={({ field }) => {
                 const values = field.value || [];
 
@@ -478,11 +478,11 @@ const OnboardingQuestions = ({ onComplete }) => {
               {step < totalQuestions - 1 ? (
                 <motion.button
                   type="button"
-                  onClick={() => selected && setStep(step + 1)}
-                  disabled={selected.length === 0}
-                  whileHover={selected.length > 0 ? { y: -2 } : {}}
+                  onClick={() => (isAuthorsStep || (selected && selected.length > 0)) && setStep(step + 1)}
+                  disabled={!isAuthorsStep && selected.length === 0}
+                  whileHover={(isAuthorsStep || selected.length > 0) ? { y: -2 } : {}}
                   className={`px-6 py-1 tex-xs rounded-full border ${
-                    selected.length > 0
+                    (isAuthorsStep || selected.length > 0)
                       ? "bg-green-700 text-white border-green-700"
                       : "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"
                   }`}
@@ -492,10 +492,10 @@ const OnboardingQuestions = ({ onComplete }) => {
               ) : (
                 <motion.button
                   type="submit"
-                  disabled={selected.length === 0}
-                  whileHover={selected.length > 0 ? { y: -2 } : {}}
+                  disabled={!isAuthorsStep && selected.length === 0}
+                  whileHover={(isAuthorsStep || selected.length > 0) ? { y: -2 } : {}}
                   className={`px-6 py-1 tex-xs rounded-full border ${
-                    selected.length > 0
+                    (isAuthorsStep || selected.length > 0)
                       ? "bg-green-700 text-white border-green-700"
                       : "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"
                   }`}
