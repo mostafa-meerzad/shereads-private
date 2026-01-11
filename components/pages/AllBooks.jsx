@@ -24,17 +24,13 @@ import {
 import Book from "../Book";
 import { useAuthClient } from "@/hooks/useAuthClient";
 
-// Genres
-const genres = [
-  "داستان",
-  "ادبیات",
-  "رمانتیک",
-  "تخیلی",
-  "تاریخی",
-  "توسعه_فردی",
-  "بیوگرافی",
-  "فانتزی",
-  "آموزش_مهارت",
+// Categories matching getstarted page
+const CATEGORIES = [
+  { id: "educational", label: "تعلیمی" },
+  { id: "language", label: "زبان‌آموزی" },
+  { id: "life_skills", label: "مهارت‌های زندگی" },
+  { id: "self_growth", label: "رشد فردی" },
+  { id: "literature", label: "ادبیات" },
 ];
 
 const AllBooks = () => {
@@ -44,6 +40,7 @@ const AllBooks = () => {
   const [filters, setFilters] = useState({
     title: "",
     genre: "",
+    category: "",
   });
   // searchScope: 'both' | 'title' | 'author' | 'genre'
   const [searchScope, setSearchScope] = useState("title");
@@ -78,6 +75,13 @@ const AllBooks = () => {
     }));
   };
 
+  const handleCategoryChange = (value) => {
+    setFilters((prev) => ({
+      ...prev,
+      category: value === "all" ? "" : value,
+    }));
+  };
+
   const handleScopeChange = (value) => {
     setSearchScope(value);
   };
@@ -86,7 +90,7 @@ const AllBooks = () => {
   // books query so the query key changes and React Query refetches whenever
   // the user's categories change.
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
-    useInfiniteBooks({ limit: 20, filters: { ...filters, categories: preferredCategories } });
+    useInfiniteBooks({ limit: 20, filters: { ...filters, preferredCategories } });
 
   const { ref, inView } = useInView({ rootMargin: "200px" });
 
@@ -179,22 +183,22 @@ const AllBooks = () => {
         </div>
          <motion.div whileHover={{ scale: 1.02 }} className="flex flex-row-reverse gap-4 justify-end">
           
-            {/* Genre Filter */}
+            {/* Category Filter */}
             <Select
-              onValueChange={handleGenreChange}
-              value={filters.genre === "" ? "all" : filters.genre}
+              onValueChange={handleCategoryChange}
+              value={filters.category === "" ? "all" : filters.category}
             >
               <SelectTrigger
                 dir="rtl"
                 className="rounded-full  w-40  border bg-green-600/20 border-emerald-700 text-emerald-700 text-sm py-2 px-7"
               >
-                <SelectValue placeholder="ژانر" />
+                <SelectValue placeholder="دسته‌بندی" />
               </SelectTrigger>
               <SelectContent dir="rtl">
-                <SelectItem value="all">همه ژانرها</SelectItem>
-                {genres.map((g) => (
-                  <SelectItem key={g} value={g}>
-                    {g}
+                <SelectItem value="all">همه دسته‌ها</SelectItem>
+                {CATEGORIES.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.label}
                   </SelectItem>
                 ))}
               </SelectContent>

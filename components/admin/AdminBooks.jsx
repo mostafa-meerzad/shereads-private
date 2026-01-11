@@ -71,6 +71,7 @@ function useAdminBooks({ page, filters }) {
       if (filters?.title) qs.set("title", filters.title);
       if (filters?.author) qs.set("author", filters.author);
       if (filters?.genre) qs.set("genre", filters.genre);
+      if (filters?.category) qs.set("category", filters.category);
       const { data } = await api.get(`/book?${qs.toString()}`);
       return data; // { books, page, totalPages, total }
     },
@@ -85,6 +86,7 @@ export default function AdminBooks() {
   const [filters, setFilters] = useState({
     title: "",
     genre: "",
+    category: "",
   });
   // searchScope: 'title' | 'author' | 'genre'
   const [searchScope, setSearchScope] = useState("title");
@@ -147,6 +149,10 @@ export default function AdminBooks() {
     setFilters((prev) => ({ ...prev, genre: value === "all" ? "" : value }));
   };
 
+  const handleCategoryChange = (value) => {
+    setFilters((prev) => ({ ...prev, category: value === "all" ? "" : value }));
+  };
+
   const handleScopeChange = (value) => {
     setSearchScope(value);
   };
@@ -190,20 +196,20 @@ export default function AdminBooks() {
 
           <div className="flex flex-row-reverse gap-2 justify-end ">
             <Select
-              onValueChange={handleGenreChange}
-              value={filters.genre === "" ? "all" : filters.genre}
+              onValueChange={handleCategoryChange}
+              value={filters.category === "" ? "all" : filters.category}
             >
               <SelectTrigger
                 dir="rtl"
-                className="rounded-full w-36  border-2 border-emerald-700 text-emerald-700 text-sm py-2 px-7"
+                className="rounded-full w-40  border-2 border-emerald-700 text-emerald-700 text-sm py-2 px-7"
               >
-                <SelectValue placeholder="ژانر" />
+                <SelectValue placeholder="دسته‌بندی" />
               </SelectTrigger>
               <SelectContent dir="rtl">
-                <SelectItem value="all">همه ژانرها</SelectItem>
-                {GENRES.map((g) => (
-                  <SelectItem key={g} value={g}>
-                    {g}
+                <SelectItem value="all">همه دسته‌ها</SelectItem>
+                {CATEGORIES.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.label}
                   </SelectItem>
                 ))}
               </SelectContent>

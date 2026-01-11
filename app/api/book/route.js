@@ -17,7 +17,8 @@ export async function GET(req) {
     const page = parseInt(url.searchParams.get("page")) || 1;
     const limit = parseInt(url.searchParams.get("limit")) || 20;
     const genre = url.searchParams.get("genre");
-    const categories = url.searchParams.getAll("categories");
+    const categoriesFilter = url.searchParams.get("category");
+    const preferredCategories = url.searchParams.getAll("categories");
     const author = url.searchParams.get("author");
     // const date = url.searchParams.get("date");
     const title = url.searchParams.get("title");
@@ -30,6 +31,10 @@ export async function GET(req) {
     if (genre) {
       // genre is stored as JSON array
       where.Genre = { array_contains: [genre] };
+    }
+
+    if (categoriesFilter) {
+      where.category = categoriesFilter;
     }
 
     // if (categories && categories.length > 0) {
@@ -59,11 +64,11 @@ export async function GET(req) {
     const total = await prisma.book.count({ where });
 
     let books = [];
-    if (categories && categories.length > 0) {
-      const matchingWhere = { ...where, category: { in: categories } };
+    if (preferredCategories && preferredCategories.length > 0) {
+      const matchingWhere = { ...where, category: { in: preferredCategories } };
       const othersWhere = {
         ...where,
-        OR: [{ category: { notIn: categories } }, { category: null }],
+        OR: [{ category: { notIn: preferredCategories } }, { category: null }],
       };
 
       const matchingCount = await prisma.book.count({ where: matchingWhere });
