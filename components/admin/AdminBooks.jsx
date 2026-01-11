@@ -366,7 +366,7 @@ function CreateBookModal({onClose, onCreated, book, onUpdated}) {
 
     const coverPreview = useMemo(() => {
         if (cover) return URL.createObjectURL(cover);
-        if (book?.coverURL) return book.coverURL;
+        if (book?.coverURL) return `/api/files${book.coverURL}`;
         return null;
     }, [cover, book]);
 
@@ -638,6 +638,8 @@ function CreateBookModal({onClose, onCreated, book, onUpdated}) {
                             {coverPreview && (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <Image
+                                    width={200}
+                                    height={200}
                                     src={coverPreview}
                                     alt={book?.title || "cover preview"}
                                     className="mt-2 h-40 w-auto  object-cover rounded-lg"
@@ -655,7 +657,7 @@ function CreateBookModal({onClose, onCreated, book, onUpdated}) {
                             />
                             {book?.pdfURL && !pdf && (
                                 <div className="text-xs text-slate-600 mt-2">
-                                    فایل PDF فعلی موجود است
+                                    {book.pdfURL.split("/").pop()}
                                 </div>
                             )}
                         </div>

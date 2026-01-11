@@ -135,6 +135,16 @@ export default function PdfReaders({ userId, bookId, pdfUrl }) {
     };
   }, [numPages]);
 
+  const getNormalizedFileUrl = (url) => {
+    if (!url) return undefined;
+    if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/api/files")) {
+      return url;
+    }
+    return `/api/files${url.startsWith("/") ? "" : "/"}${url}`;
+  };
+
+  const normalizedPdfUrl = getNormalizedFileUrl(pdfUrl);
+
   return (
     <div className="flex flex-col items-center py-4 md:py-8 " dir="rtl">
       {/* PDF Card */}
@@ -143,7 +153,7 @@ export default function PdfReaders({ userId, bookId, pdfUrl }) {
         className="w-full max-w-full md:max-w-3xl lg:max-w-4xl rounded-xl border bg-neutral-50 p-3 shadow "
       >
         <Document
-          file={`/api/files${pdfUrl}`}
+          file={normalizedPdfUrl}
           loading={
             <div className="flex  items-center justify-center">
               <Spinner variant="circle" className="size-12 text-gray-500" />

@@ -131,6 +131,33 @@ export async function PATCH(req, { params }) {
   }
 }
 
+export async function GET(req, { params }) {
+  try {
+    const awaitedParams = await params;
+    const id = Number(awaitedParams.id);
+    if (!id) {
+      return NextResponse.json({ error: "Invalid book id" }, { status: 400 });
+    }
+
+    const book = await prisma.book.findUnique({
+      where: { id },
+      include: { author: true },
+    });
+
+    if (!book) {
+      return NextResponse.json({ error: "Book not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(book, { status: 200 });
+  } catch (error) {
+    console.error("GET BOOK ERROR:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(req, { params }) {
   const admin = await enforceAdminApi();
   if (admin instanceof NextResponse) return admin;

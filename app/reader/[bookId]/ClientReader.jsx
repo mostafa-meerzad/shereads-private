@@ -23,13 +23,33 @@ export default function ReaderPageClient() {
     return parseInt(id, 10);
   }, [params]);
 
-  // pdfUrl can be provided via query string or fallback to a test asset
-  const pdfUrl = searchParams?.get("url") || "/test.pdf";
+  // pdfUrl can be provided via query string or fetched from API
+  const [pdfUrl, setPdfUrl] = useState(searchParams?.get("url"));
 
   useEffect(() => {
     const ready = ()=>setReady(true);
     ready()
-  }, []);
+
+    if (!pdfUrl && bookId) {
+      // Fetch book data to get pdfURL
+      fetch(`/api/book/${bookId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.pdfURL) {
+            setPdfUrl(data.pdfURL);
+          } else {
+             // fallback to test asset if no pdfURL in DB
+             setPdfUrl("/test.pdf");
+          }
+        })
+        .catch(err => {
+          console.error("Failed to fetch book:", err);
+          setPdfUrl("/test.pdf");
+        });
+    } else if (!pdfUrl) {
+       setPdfUrl("/test.pdf");
+    }
+  }, [bookId, pdfUrl]);
 
   if (!ready) return null;
 

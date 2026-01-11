@@ -107,6 +107,12 @@ const Book = ({ book, favIds, onToggleFav }) => {
     }
   };
 
+  const handleRead = () => {
+    // Pass the raw path to the reader page; the reader will prefix it with /api/files if needed
+    const urlParam = pdfRaw ? `?url=${encodeURIComponent(pdfRaw)}` : "";
+    router.push(`/reader/${book.id}${urlParam}`);
+  };
+
   return (
     <motion.div
       layout
@@ -158,11 +164,8 @@ const Book = ({ book, favIds, onToggleFav }) => {
 
       <div className="flex gap-2 w-full justify-start">
         <Button
-          onClick={() => {
-            const urlParam = pdfUrl ? `?url=${encodeURIComponent(pdfUrl)}` : "";
-            router.push(`/reader/${book.id}${urlParam}`);
-          }}
-          disabled={!pdfUrl}
+          onClick={handleRead}
+          disabled={!pdfRaw}
           className="border-emerald-400 rounded-full text-white bg-green-700 hover:bg-green-900 h-8"
         >
           مطالعه
