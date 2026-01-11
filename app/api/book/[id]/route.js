@@ -94,7 +94,6 @@ export async function PATCH(req, { params }) {
       }),
       ...(data.pdfURL !== undefined && { pdfURL: data.pdfURL }),
       ...(data.coverURL !== undefined && { coverURL: data.coverURL }),
-      ...(data.Genre !== undefined && { Genre: data.Genre }),
       ...(data.mood !== undefined && { mood: data.mood }),
       ...(data.Motivation !== undefined && { Motivation: data.Motivation }),
       ...(data.category !== undefined && { category: data.category }),

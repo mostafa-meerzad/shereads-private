@@ -51,7 +51,6 @@ const BookModal = ({ book, open, onOpenChange }) => {
   const coverUrl = getFileUrl(coverRaw);
   const pdfUrl = getFileUrl(pdfRaw);
 
-  const genres = book.Genre || book.genres || book.genre || [];
   const moods = book.mood || book.Mood || [];
   const motivations = book.Motivation || book.motivation || [];
 
@@ -141,17 +140,6 @@ const BookModal = ({ book, open, onOpenChange }) => {
 
                 {/* Tags */}
                 <div className="space-y-2">
-                  {genres.length > 0 && (
-                    <Field label="ژانرها">
-                      <div className="flex flex-wrap gap-2 justify-start">
-                        {genres.map((g, i) => (
-                          <span key={i} className="text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded">
-                            {typeof g === "string" ? g : g.name}
-                          </span>
-                        ))}
-                      </div>
-                    </Field>
-                  )}
 
                   {moods.length > 0 && (
                     <Field label="مودها">

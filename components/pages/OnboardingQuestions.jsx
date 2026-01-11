@@ -88,7 +88,6 @@ const answerVariants = {
 };
 
 const backendKeys = {
-  0: "Genre",
   1: "mood",
   2: "Age",
   3: "book_length",

@@ -20,18 +20,6 @@ import MultiSelectWithTags from "../ui/multi-select-with-tags";
 import Image from "next/image";
 import {Search} from "lucide-react";
 
-// NEW OPTIONS
-const GENRES = [
-    "داستان",
-    "ادبیات",
-    "رمانتیک",
-    "تخیلی",
-    "تاریخی",
-    "توسعه_فردی",
-    "بیوگرافی",
-    "فانتزی",
-    "آموزش_مهارت",
-];
 
 const MODES = [
     "آرام",
@@ -67,10 +55,9 @@ function useAdminBooks({page, filters}) {
             const qs = new URLSearchParams();
             qs.set("page", String(page || 1));
             qs.set("limit", String(20));
-            // filters: { title?, author?, genre? }
+            // filters: { title?, author? }
             if (filters?.title) qs.set("title", filters.title);
             if (filters?.author) qs.set("author", filters.author);
-            if (filters?.genre) qs.set("genre", filters.genre);
             if (filters?.category) qs.set("category", filters.category);
             const {data} = await api.get(`/book?${qs.toString()}`);
             return data; // { books, page, totalPages, total }
@@ -85,10 +72,9 @@ export default function AdminBooks() {
     const [inputSearch, setInputSearch] = useState(""); // controlled input
     const [filters, setFilters] = useState({
         title: "",
-        genre: "",
         category: "",
     });
-    // searchScope: 'title' | 'author' | 'genre'
+    // searchScope: 'title' | 'author'
     const [searchScope, setSearchScope] = useState("title");
     const [openCreate, setOpenCreate] = useState(false);
     const [editBook, setEditBook] = useState(null);
@@ -138,16 +124,12 @@ export default function AdminBooks() {
         const q = inputSearch.trim();
         setFilters((prev) => ({
             ...prev,
-            title: searchScope === "author" || searchScope === "genre" ? "" : q,
-            author: searchScope === "title" || searchScope === "genre" ? "" : q,
-            genre: searchScope === "genre" ? q : prev.genre,
+            title: searchScope === "author" ? "" : q,
+            author: searchScope === "title" ? "" : q,
         }));
         setPage(1);
     };
 
-    const handleGenreChange = (value) => {
-        setFilters((prev) => ({...prev, genre: value === "all" ? "" : value}));
-    };
 
     const handleCategoryChange = (value) => {
         setFilters((prev) => ({...prev, category: value === "all" ? "" : value}));
@@ -225,7 +207,6 @@ export default function AdminBooks() {
                                 </SelectTrigger>
                                 <SelectContent dir="rtl">
                                     <SelectItem value="title">جستجوی عنوان</SelectItem>
-                                    <SelectItem value="genre">جستجوی ژانر</SelectItem>
                                     <SelectItem value="author">جستجوی نویسنده</SelectItem>
                                 </SelectContent>
                             </Select>
@@ -239,9 +220,9 @@ export default function AdminBooks() {
                     <Spinner className="size-10"/>
                 </div>
             ) : status === "error" ? (
-                <div className="text-red-600">خطا در بارگذاری کتاب‌ها</div>
+                <div className="text-red-600 text-center">خطا در بارگذاری کتاب‌ها</div>
             ) : books.length === 0 ? (
-                <div className="text-slate-600">کتابی یافت نشد.</div>
+                <div className="text-slate-600 text-center">کتابی یافت نشد.</div>
             ) : (
                 <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))]  gap-4 min-h-screen">
                     {books.map((b) => (
@@ -358,7 +339,6 @@ function CreateBookModal({onClose, onCreated, book, onUpdated}) {
     const [pdf, setPdf] = useState(null);
     const [submitting, setSubmitting] = useState(false);
 
-    const [genres, setGenres] = useState(book?.Genre || []);
     const [modes, setModes] = useState(book?.mood || []);
     const [ageGroup, setAgeGroup] = useState(book?.Age || "");
     const [motivations, setMotivations] = useState(book?.Motivation || []);
@@ -378,7 +358,6 @@ function CreateBookModal({onClose, onCreated, book, onUpdated}) {
             book?.publish_date ? new Date(book.publish_date).toISOString() : ""
         );
         setAuthor(book?.author?.name || "");
-        setGenres(book?.Genre || []);
         setModes(book?.mood || []);
         setAgeGroup(book?.Age || "");
         setMotivations(book?.Motivation || []);
@@ -405,7 +384,6 @@ function CreateBookModal({onClose, onCreated, book, onUpdated}) {
                 if (publishDate)
                     payload.publish_date = new Date(publishDate).toISOString();
                 if (author) payload.authorName = author;
-                if (genres && genres.length) payload.Genre = genres;
                 if (modes && modes.length) payload.mood = modes;
                 if (motivations && motivations.length) payload.Motivation = motivations;
                 if (ageGroup) payload.Age = ageGroup;
@@ -483,7 +461,6 @@ function CreateBookModal({onClose, onCreated, book, onUpdated}) {
 
             if (category) payload.category = category;
 
-            if (genres && genres.length) payload.Genre = genres;
             if (modes && modes.length) payload.mood = modes;
             if (motivations && motivations.length) payload.Motivation = motivations;
             if (ageGroup) payload.Age = ageGroup;
@@ -598,13 +575,6 @@ function CreateBookModal({onClose, onCreated, book, onUpdated}) {
                                     </SelectContent>
                                 </Select></div>
                         </div>
-                        {/* Multi selects */}
-                        <MultiSelectWithTags
-                            label="ژانر"
-                            options={GENRES}
-                            values={genres}
-                            onChange={setGenres}
-                        />
 
                         <MultiSelectWithTags
                             label="مود"

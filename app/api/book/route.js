@@ -16,7 +16,6 @@ export async function GET(req) {
     const url = new URL(req.url);
     const page = parseInt(url.searchParams.get("page")) || 1;
     const limit = parseInt(url.searchParams.get("limit")) || 20;
-    const genre = url.searchParams.get("genre");
     const categoriesFilter = url.searchParams.get("category");
     const preferredCategories = url.searchParams.getAll("categories");
     const author = url.searchParams.get("author");
@@ -28,10 +27,6 @@ export async function GET(req) {
     // Build Prisma where filter dynamically
     const where = {};
 
-    if (genre) {
-      // genre is stored as JSON array
-      where.Genre = { array_contains: [genre] };
-    }
 
     if (categoriesFilter) {
       where.category = categoriesFilter;
@@ -216,7 +211,6 @@ export async function POST(req) {
         publish_date: publish_date || null,
         pdfURL,
         coverURL,
-        Genre: parseMaybeJSON(form.get("Genre")) ?? undefined,
         mood: parseMaybeJSON(form.get("mood")) ?? undefined,
         Motivation: parseMaybeJSON(form.get("Motivation")) ?? undefined,
         Age: form.get("Age")?.toString() ?? undefined,
@@ -296,7 +290,6 @@ export async function POST(req) {
         publish_date: data.publish_date ? new Date(data.publish_date) : null,
         pdfURL: data.pdfURL,
         coverURL: data.coverURL,
-        Genre: data.Genre,
         mood: data.mood,
         Motivation: data.Motivation,
         category: data.category,

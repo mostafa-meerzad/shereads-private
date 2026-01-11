@@ -39,10 +39,9 @@ const AllBooks = () => {
   const [inputSearch, setInputSearch] = useState(""); // controlled input
   const [filters, setFilters] = useState({
     title: "",
-    genre: "",
     category: "",
   });
-  // searchScope: 'both' | 'title' | 'author' | 'genre'
+  // searchScope: 'both' | 'title' | 'author'
   const [searchScope, setSearchScope] = useState("title");
 
   // Prefer books that match user's selected categories (if any)
@@ -61,17 +60,8 @@ const AllBooks = () => {
     setFilters((prev) => ({
       ...prev,
       // depending on scope, set title and/or author
-      // when searching by genre, set genre and clear title/author
-      title: searchScope === "author" || searchScope === "genre" ? "" : q,
-      author: searchScope === "title" || searchScope === "genre" ? "" : q,
-      genre: searchScope === "genre" ? q : prev.genre,
-    }));
-  };
-
-  const handleGenreChange = (value) => {
-    setFilters((prev) => ({
-      ...prev,
-      genre: value === "all" ? "" : value,
+      title: searchScope === "author" ? "" : q,
+      author: searchScope === "title" ? "" : q,
     }));
   };
 
@@ -215,7 +205,7 @@ const AllBooks = () => {
                 <SelectContent dir="rtl">
                   {/* <SelectItem value="empty">جستجو بر اساس</SelectItem> */}
                   <SelectItem value="title">جستجوی عنوان</SelectItem>
-                  <SelectItem value="genre">جستجوی ژانر</SelectItem>
+
                   <SelectItem value="author">جستجوی نویسنده</SelectItem>
                 </SelectContent>
               </Select>

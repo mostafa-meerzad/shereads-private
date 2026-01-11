@@ -5,7 +5,7 @@ import { buildQuery } from "../lib/buildQuery";
 import { queryKeys } from "../lib/queryKeys";
 
 /**
- * Backend expects: GET /api/book?page=1&limit=20&genre=...
+ * Backend expects: GET /api/book?page=1&limit=20
  * Returns: { page, limit, total, totalPages, books: [...] }
  */
 
