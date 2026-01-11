@@ -192,9 +192,9 @@ export default function PdfReaders({ userId, bookId, pdfUrl }) {
             <motion.div
               key={page}
               custom={direction}
-              initial={{ x: direction > 0 ? 100 : -100, opacity: 0 }}
+              initial={{ x: direction > 0 ? -100 : 100, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={{ x: direction > 0 ? -100 : 100, opacity: 0 }}
+              exit={{ x: direction > 0 ? 100 : -100, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               className="w-full flex justify-center"
             >
