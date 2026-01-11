@@ -11,6 +11,19 @@ export async function GET(request, { params }) {
     const filePath = path.join(process.cwd(), "uploads", ...filenameParts);
 
     if (!fs.existsSync(filePath)) {
+      // Try public folder as fallback
+      const publicPath = path.join(process.cwd(), "public", ...filenameParts);
+      if (fs.existsSync(publicPath)) {
+        const fileBuffer = fs.readFileSync(publicPath);
+        const type = mime.getType(publicPath) || "application/octet-stream";
+        return new Response(fileBuffer, {
+          status: 200,
+          headers: {
+            "Content-Type": type,
+            "Content-Length": fileBuffer.length,
+          },
+        });
+      }
       return new Response("File not found", { status: 404 });
     }
 

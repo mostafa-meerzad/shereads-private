@@ -44,8 +44,16 @@ const Book = ({ book, favIds, onToggleFav }) => {
     "path",
   ]);
 
-  const coverUrl = normalizePublicPath(coverRaw);
-  const pdfUrl = normalizePublicPath(pdfRaw);
+  const getFileUrl = (url) => {
+    if (!url) return undefined;
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      return url;
+    }
+    return `/api/files${url.startsWith("/") ? "" : "/"}${url}`;
+  };
+
+  const coverUrl = getFileUrl(coverRaw);
+  const pdfUrl = getFileUrl(pdfRaw);
 
   // Read persisted reading meta (lastPage/numPages) to display a progress bar
   const { user } = useAuthClient();
@@ -84,7 +92,7 @@ const Book = ({ book, favIds, onToggleFav }) => {
     if (!pdfUrl) return;
     
     try {
-      const response = await fetch(`/api/files${pdfUrl}`);
+      const response = await fetch(pdfUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -115,7 +123,7 @@ const Book = ({ book, favIds, onToggleFav }) => {
           <Image
           width={200}
           height={200}
-            src={`/api/files${coverUrl}`}
+            src={coverUrl}
             alt={book.title || "book cover"}
             className="w-full h-full object-cover"
             loading="lazy"

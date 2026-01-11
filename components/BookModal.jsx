@@ -5,6 +5,7 @@ import { X as XIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import React from "react";
+import Image from "next/image";
 
 /* ---------------- Helpers ---------------- */
 
@@ -39,8 +40,16 @@ const BookModal = ({ book, open, onOpenChange }) => {
   const coverRaw = pickPath(book, ["coverPath", "coverURL", "cover", "imagePath", "imageUrl", "image"]);
   const pdfRaw = pickPath(book, ["pdfPath", "pdfURL", "filePath", "file", "path"]);
 
-  const coverUrl = normalizePublicPath(coverRaw);
-  const pdfUrl = normalizePublicPath(pdfRaw);
+  const getFileUrl = (url) => {
+    if (!url) return undefined;
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      return url;
+    }
+    return `/api/files${url.startsWith("/") ? "" : "/"}${url}`;
+  };
+
+  const coverUrl = getFileUrl(coverRaw);
+  const pdfUrl = getFileUrl(pdfRaw);
 
   const genres = book.Genre || book.genres || book.genre || [];
   const moods = book.mood || book.Mood || [];
@@ -74,11 +83,15 @@ const BookModal = ({ book, open, onOpenChange }) => {
               {/* 🚀 Right column visually (RTL) — Book Cover */}
               <div className="w-full md:w-1/3 lg:w-1/2 bg-gray-50 dark:bg-slate-700 p-5 flex items-center justify-center ">
                 {coverUrl ? (
-                  <img
-                    src={`/api/files${coverUrl}`}
-                    alt={book.title || "book cover"}
-                    className="w-full h-72 md:h-[420px] object-cover rounded-md shadow"
-                  />
+                  <div className="relative w-full h-72 md:h-[420px]">
+                    <Image
+                      src={coverUrl}
+                      alt={book.title || "book cover"}
+                      fill
+                      loading={"lazy"}
+                      className="object-cover rounded-md shadow"
+                    />
+                  </div>
                 ) : (
                   <div className="w-full h-72 md:h-[420px] flex items-center justify-center text-gray-500">
                     تصویر موجود نیست
