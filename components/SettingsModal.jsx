@@ -62,7 +62,7 @@ export default function SettingsModal({ open, onOpenChange }) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="bg-white text-slate-800 w-[60%] sm:max-w-md px-2" dir="rtl">
+      <SheetContent side="right" className="bg-white text-slate-800 w-[75%] sm:max-w-md px-2" dir="rtl">
         <SheetHeader className={"relative"}>
           <SheetTitle className="text-emerald-800 absolute left-5">تنظیمات حساب</SheetTitle>
         </SheetHeader>
@@ -120,7 +120,7 @@ export default function SettingsModal({ open, onOpenChange }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 pt-2">
+          <div className="grid md:flex-row items-center gap-2 pt-2">
             <Button type="submit" disabled={saving} className="rounded-full bg-emerald-700 hover:bg-emerald-800 text-white">
               ذخیره تغییرات
             </Button>

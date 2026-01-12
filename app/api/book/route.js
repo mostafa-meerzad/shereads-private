@@ -16,8 +16,8 @@ export async function GET(req) {
     const url = new URL(req.url);
     const page = parseInt(url.searchParams.get("page")) || 1;
     const limit = parseInt(url.searchParams.get("limit")) || 20;
-    const categoriesFilter = url.searchParams.get("category");
-    const preferredCategories = url.searchParams.getAll("categories");
+    const genre = url.searchParams.get("genre");
+    const categories = url.searchParams.getAll("categories");
     const author = url.searchParams.get("author");
     // const date = url.searchParams.get("date");
     const title = url.searchParams.get("title");
@@ -27,9 +27,9 @@ export async function GET(req) {
     // Build Prisma where filter dynamically
     const where = {};
 
-
-    if (categoriesFilter) {
-      where.category = categoriesFilter;
+    if (genre) {
+      // genre is stored as JSON array
+      where.Genre = { array_contains: [genre] };
     }
 
     // if (categories && categories.length > 0) {
@@ -59,11 +59,11 @@ export async function GET(req) {
     const total = await prisma.book.count({ where });
 
     let books = [];
-    if (preferredCategories && preferredCategories.length > 0) {
-      const matchingWhere = { ...where, category: { in: preferredCategories } };
+    if (categories && categories.length > 0) {
+      const matchingWhere = { ...where, category: { in: categories } };
       const othersWhere = {
         ...where,
-        OR: [{ category: { notIn: preferredCategories } }, { category: null }],
+        OR: [{ category: { notIn: categories } }, { category: null }],
       };
 
       const matchingCount = await prisma.book.count({ where: matchingWhere });
@@ -211,6 +211,7 @@ export async function POST(req) {
         publish_date: publish_date || null,
         pdfURL,
         coverURL,
+        Genre: parseMaybeJSON(form.get("Genre")) ?? undefined,
         mood: parseMaybeJSON(form.get("mood")) ?? undefined,
         Motivation: parseMaybeJSON(form.get("Motivation")) ?? undefined,
         Age: form.get("Age")?.toString() ?? undefined,
@@ -290,6 +291,7 @@ export async function POST(req) {
         publish_date: data.publish_date ? new Date(data.publish_date) : null,
         pdfURL: data.pdfURL,
         coverURL: data.coverURL,
+        Genre: data.Genre,
         mood: data.mood,
         Motivation: data.Motivation,
         category: data.category,
