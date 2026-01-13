@@ -22,6 +22,7 @@ export default function PdfReaders({ userId, bookId, pdfUrl }) {
   const [error, setError] = useState(null);
   const containerRef = useRef(null);
   const [pageWidth, setPageWidth] = useState(undefined);
+  const [pageHeight, setPageHeight] = useState(undefined);
   const [direction, setDirection] = useState(0); // 1 for next, -1 for prev
 
   // refs for touch handling
@@ -61,7 +62,7 @@ export default function PdfReaders({ userId, bookId, pdfUrl }) {
     return () => clearTimeout(timer);
   }, [page]);
 
-  // Measure container width to make PDF responsive across mobile/tablet/desktop
+  // Measure container width and viewport height to make PDF responsive and fit within browser height
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -69,37 +70,49 @@ export default function PdfReaders({ userId, bookId, pdfUrl }) {
 
     const update = () => {
       // account for padding inside the card (p-3 ~ 0.75rem each side)
-      const computed = el.clientWidth;
+      const computedWidth = el.clientWidth;
       const paddingX = 12; // px on each side (approx Tailwind p-3)
-      const target = Math.max(200, computed - paddingX * 2);
-      setPageWidth(target);
+      const targetWidth = Math.max(200, computedWidth - paddingX * 2);
+
+      // Calculate available height: viewport height minus some space for header/toolbar
+      // Header in ClientReader is ~60px, Toolbar in PdfReader is ~100px with margins.
+      // We want some margin so it doesn't touch the edges.
+      const viewportHeight = window.innerHeight;
+      const occupiedHeight = 250; // approximate height for header, margins, and toolbar
+      const targetHeight = Math.max(300, viewportHeight - occupiedHeight);
+
+      setPageWidth(targetWidth);
+      setPageHeight(targetHeight);
     };
 
     update();
     const ro = new ResizeObserver(update);
     ro.observe(el);
-    return () => ro.disconnect();
+    window.addEventListener("resize", update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", update);
+    };
   }, []);
 
-  // Touch swipe: left -> previous, right -> next (for touch-screen mobiles)
+  // Swipe handling: left -> previous, right -> next (for all touch-enabled devices)
   useEffect(() => {
     if (!containerRef.current) return;
 
     const el = containerRef.current;
 
-    function onTouchStart(e) {
-      const t = e.touches && e.touches[0];
-      if (!t) return;
-      touchStartRef.current = { x: t.clientX, y: t.clientY, t: Date.now() };
+    function onPointerDown(e) {
+      // Only handle touch pointers (or all if we want mouse swipe too, but the issue mentions touch devices)
+      // Usually, it's safer to check e.pointerType === 'touch' if we only want touch, 
+      // but 'mouse' with swipe can also be useful. 
+      // The issue specifically says "touch devices no matter if it's a desktop, laptop, tablet or phone".
+      touchStartRef.current = { x: e.clientX, y: e.clientY, t: Date.now() };
     }
 
-    function onTouchEnd(e) {
-      const t = e.changedTouches && e.changedTouches[0];
-      if (!t) return;
-
+    function onPointerUp(e) {
       const start = touchStartRef.current;
-      const dx = t.clientX - start.x;
-      const dy = t.clientY - start.y;
+      const dx = e.clientX - start.x;
+      const dy = e.clientY - start.y;
       const dt = Date.now() - start.t;
 
       const minDistance = 40; // px
@@ -126,12 +139,17 @@ export default function PdfReaders({ userId, bookId, pdfUrl }) {
       }
     }
 
-    el.addEventListener("touchstart", onTouchStart, { passive: true });
-    el.addEventListener("touchend", onTouchEnd);
+    el.addEventListener("pointerdown", onPointerDown);
+    el.addEventListener("pointerup", onPointerUp);
+    el.addEventListener("pointercancel", onPointerUp);
+
+    // Prevent default touch actions like scrolling when swiping horizontally
+    el.style.touchAction = "pan-y"; 
 
     return () => {
-      el.removeEventListener("touchstart", onTouchStart);
-      el.removeEventListener("touchend", onTouchEnd);
+      el.removeEventListener("pointerdown", onPointerDown);
+      el.removeEventListener("pointerup", onPointerUp);
+      el.removeEventListener("pointercancel", onPointerUp);
     };
   }, [numPages]);
 
@@ -186,7 +204,7 @@ export default function PdfReaders({ userId, bookId, pdfUrl }) {
             console.error("PDF load error", err);
             setError("خطا در بارگیری فایل PDF. لطفاً بعداً دوباره تلاش کنید.");
           }}
-          className="flex justify-center max-md:h-[70vh] max-lg:h-auto items-center overflow-hidden"
+          className="flex justify-center items-center overflow-hidden"
         >
           <AnimatePresence initial={false} custom={direction} mode="wait">
             <motion.div
@@ -196,13 +214,14 @@ export default function PdfReaders({ userId, bookId, pdfUrl }) {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: direction > 0 ? 100 : -100, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="w-full flex justify-center"
+              className="w-full flex justify-center "
             >
               <Page
                 pageNumber={page}
                 renderAnnotationLayer={false}
                 renderTextLayer={false}
                 width={pageWidth}
+                height={pageHeight}
               />
             </motion.div>
           </AnimatePresence>

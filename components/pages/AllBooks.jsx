@@ -80,7 +80,10 @@ const AllBooks = () => {
   // books query so the query key changes and React Query refetches whenever
   // the user's categories change.
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
-    useInfiniteBooks({ limit: 20, filters: { ...filters, preferredCategories } });
+    useInfiniteBooks({
+      limit: 20,
+      filters: { ...filters, categories: preferredCategories },
+    });
 
   const { ref, inView } = useInView({ rootMargin: "200px" });
 

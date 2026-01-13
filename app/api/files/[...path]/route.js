@@ -5,39 +5,57 @@ import mime from "mime";
 export async function GET(request, { params }) {
   try {
     const paramsObj = await params;
-    const filenameParts = paramsObj.path; // ["books", "file.pdf"] OR ["covers", "image.png"]
+    const filenameParts = paramsObj.path;
+    let filePath = path.join(process.cwd(), "uploads", ...filenameParts);
 
-    // Build the file path in uploads folder
-    // The paramsObj.path is an array like ["books", "file.pdf"]
-    const filePath = path.join(process.cwd(), "uploads", ...filenameParts);
+    if (!fs.existsSync(filePath)) {
+      filePath = path.join(process.cwd(), "public", ...filenameParts);
+    }
 
-    if (fs.existsSync(filePath)) {
-      const fileBuffer = fs.readFileSync(filePath);
-      const type = mime.getType(filePath) || "application/octet-stream";
-      return new Response(fileBuffer, {
+    if (!fs.existsSync(filePath)) {
+      return new Response("File not found", { status: 404 });
+    }
+
+    const stat = fs.statSync(filePath);
+    const fileSize = stat.size;
+    const range = request.headers.get("range");
+    const type = mime.getType(filePath) || "application/octet-stream";
+
+    if (range) {
+      const parts = range.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+      if (start >= fileSize) {
+        return new Response(null, {
+          status: 416,
+          headers: { "Content-Range": `bytes */${fileSize}` },
+        });
+      }
+
+      const chunksize = end - start + 1;
+      const fileStream = fs.createReadStream(filePath, { start, end });
+
+      return new Response(fileStream, {
+        status: 206,
+        headers: {
+          "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+          "Accept-Ranges": "bytes",
+          "Content-Length": chunksize,
+          "Content-Type": type,
+        },
+      });
+    } else {
+      const fileStream = fs.createReadStream(filePath);
+      return new Response(fileStream, {
         status: 200,
         headers: {
+          "Content-Length": fileSize,
           "Content-Type": type,
-          "Content-Length": fileBuffer.length,
+          "Accept-Ranges": "bytes",
         },
       });
     }
-
-    // Try public folder as fallback
-    const publicPath = path.join(process.cwd(), "public", ...filenameParts);
-    if (fs.existsSync(publicPath)) {
-      const fileBuffer = fs.readFileSync(publicPath);
-      const type = mime.getType(publicPath) || "application/octet-stream";
-      return new Response(fileBuffer, {
-        status: 200,
-        headers: {
-          "Content-Type": type,
-          "Content-Length": fileBuffer.length,
-        },
-      });
-    }
-
-    return new Response("File not found", { status: 404 });
   } catch (err) {
     console.error(err);
     return new Response("Internal server error", { status: 500 });

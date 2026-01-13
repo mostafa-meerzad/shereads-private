@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { BookOpen, Heart, Download } from "lucide-react";
+import { BookOpen, Heart } from "lucide-react";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -87,25 +87,6 @@ const Book = ({ book, favIds, onToggleFav }) => {
     return Math.min(100, Math.max(0, Math.round((lp / np) * 100)));
   })();
 
-  const handleDownload = async (e) => {
-    e.stopPropagation();
-    if (!pdfUrl) return;
-    
-    try {
-      const response = await fetch(pdfUrl);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${book.title || 'book'}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Download failed:", error);
-    }
-  };
 
   const handleRead = () => {
     // Pass the raw path to the reader page; the reader will prefix it with /api/files if needed
@@ -183,15 +164,6 @@ const Book = ({ book, favIds, onToggleFav }) => {
           <Heart className="size-[.9rem]" />
         </motion.button>
 
-        <motion.button
-          whileTap={{ scale: 0.8 }}
-          onClick={handleDownload}
-          disabled={!pdfUrl}
-          className={`flex justify-center items-center rounded-full size-8 border bg-white text-green-700 border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed`}
-          title="Download PDF"
-        >
-          <Download className="size-[.9rem]" />
-        </motion.button>
       </div>
     </motion.div>
   );

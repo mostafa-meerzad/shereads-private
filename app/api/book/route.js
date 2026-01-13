@@ -32,9 +32,10 @@ export async function GET(req) {
       where.Genre = { array_contains: [genre] };
     }
 
-    // if (categories && categories.length > 0) {
-    //   where.category = { in: categories };
-    // }
+    const category = url.searchParams.get("category");
+    if (category) {
+      where.category = category;
+    }
 
     if (author) {
       where.author = {
@@ -59,7 +60,7 @@ export async function GET(req) {
     const total = await prisma.book.count({ where });
 
     let books = [];
-    if (categories && categories.length > 0) {
+    if (!category && categories && categories.length > 0) {
       const matchingWhere = { ...where, category: { in: categories } };
       const othersWhere = {
         ...where,
