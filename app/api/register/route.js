@@ -37,7 +37,6 @@ export async function POST(req) {
     let recommendedIds = [];
 
     const hasPreferences =
-      data.Genre ||
       data.mood ||
       data.Motivation ||
       data.Age ||
@@ -66,7 +65,6 @@ export async function POST(req) {
         email: data.email,
         passwordHash,
         role: data.role,
-        Genre: data.Genre ?? null,
         mood: data.mood ?? null,
         Motivation: data.Motivation ?? null,
         Age: data.Age ?? null,

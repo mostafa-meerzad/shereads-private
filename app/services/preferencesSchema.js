@@ -1,14 +1,14 @@
 import { z } from "zod";
 import {
-  GenreEnum,
   MoodEnum,
   MotivationEnum,
   LengthEnum,
   AgeEnum
 } from "@/app/services/answersSchema";
+import { CategoryEnum } from "@/app/services/answersSchema";
 
 export const PreferencesSchema = z.object({
-  Genre: z.array(GenreEnum).optional().nullable(),
+  categories: z.array(CategoryEnum).optional().nullable(),
   mood: MoodEnum.optional().nullable(),
   Motivation: z.array(MotivationEnum).optional().nullable(),
   Age: AgeEnum.optional().nullable(),

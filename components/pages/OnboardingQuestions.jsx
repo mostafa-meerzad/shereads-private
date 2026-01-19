@@ -2,9 +2,10 @@
 "use client";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import usePaginatedAuthors from "@/hooks/usePaginatedAuthors"; // adjust path if needed
+import { useAuthClient } from "@/hooks/useAuthClient";
 
 // Image imports placeholder (user will replace)
 import img2 from "@/assets/onboarding-img-2.png";
@@ -14,20 +15,32 @@ import img5 from "@/assets/onboarding-img-5.png";
 import img6 from "@/assets/onboarding-img-6.png";
 import img8 from "@/assets/onboarding-img-8.png";
 import { Button } from "../ui/button";
+import CategoryCard from "./CategoryCard";
 
 const formData = [
   {
-    question: " کدام ژانرها را بیشتر دوست دارید ؟",
+    question: " کدام دسته‌بندی‌ها را بیشتر دوست دارید ؟",
     answers: [
-      "داستان",
-      "ادبیات",
-      "رمانتیک",
-      "تخیلی",
-      "تاریخی",
-      "توسعه_فردی",
-      "بیوگرافی",
-      "فانتزی",
-      "آموزش_مهارت",
+      {
+        id: "educational",
+        label: "کتاب‌های تعلیمی (درسی)",
+      },
+      {
+        id: "language",
+        label: "کتاب‌های زبان‌آموزی",
+         },
+      {
+        id: "life_skills",
+        label: "کتاب‌های مهارت‌های زندگی و فنی",
+          },
+      {
+        id: "self_growth",
+        label: "کتاب‌های رشد فردی و روان‌شناسی",
+      },
+      {
+        id: "literature",
+        label: "کتاب‌های ادبیات و فرهنگ",
+       },
     ],
     img: img6,
   },
@@ -88,6 +101,7 @@ const answerVariants = {
 };
 
 const backendKeys = {
+  0: "categories",
   1: "mood",
   2: "Age",
   3: "book_length",
@@ -96,12 +110,33 @@ const backendKeys = {
 };
 
 const OnboardingQuestions = ({ onComplete }) => {
+  const { user } = useAuthClient();
   const totalQuestions = formData.length; // now includes authors
   const finalStepIndex = totalQuestions; // final screen after all questions
-  const { control, handleSubmit } = useForm({
+  const { control, handleSubmit, reset } = useForm({
     defaultValues: { answers: {} },
   });
   const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    if (user && user.categories) {
+      let cats = user.categories;
+      if (typeof cats === "string") {
+        try {
+          cats = JSON.parse(cats);
+        } catch {}
+      }
+      if (Array.isArray(cats)) {
+        reset((prev) => ({
+          ...prev,
+          answers: {
+            ...prev.answers,
+            0: cats,
+          },
+        }));
+      }
+    }
+  }, [user, reset]);
 
   // useWatch for currently selected answers on current step
   const selected =
@@ -127,8 +162,11 @@ const OnboardingQuestions = ({ onComplete }) => {
       const backendKey = backendKeys[key];
       const value = data.answers[key];
 
-      // age & mood are SINGLE SELECT, so send as string
-      if (backendKey === "Age" || backendKey === "mood") {
+      // but also keep categories for user profile update
+      if (backendKey === "categories") {
+        transformed["categories"] = value || [];
+      } else if (backendKey === "Age" || backendKey === "mood") {
+        // age & mood are SINGLE SELECT, so send as string
         transformed[backendKey] = value && value.length > 0 ? value[0] : null;
       } else {
         // everything else MULTI SELECT (including Authors)
@@ -431,16 +469,33 @@ const OnboardingQuestions = ({ onComplete }) => {
                 return (
                   <div
                     dir="rtl"
-                    className="grid md:grid-cols-2 px-8 md:px-0 items-end md:ml-auto gap-4 mb-0 mt-10 "
+                    className={`grid px-8 md:px-0 items-end md:ml-auto gap-4 mb-0 mt-10 ${
+                      step === 0 ? "grid-cols-1" : "md:grid-cols-2"
+                    }`}
                   >
                     {formData[step].answers.map((answer, idx) => {
-                      const isSelected = values.includes(answer);
+                      const isObj = typeof answer === "object" && answer !== null;
+                      const answerValue = isObj ? answer.id : answer;
+                      const answerLabel = isObj ? answer.label : answer;
+                      const isSelected = values.includes(answerValue);
+
+                      if (step === 0) {
+                        return (
+                          <CategoryCard
+                            key={idx}
+                            title={answerLabel}
+                            description={answer.description}
+                            selected={isSelected}
+                            onToggle={() => handleSelect(answerValue)}
+                          />
+                        );
+                      }
 
                       return (
                         <motion.button
                           key={idx}
                           type="button"
-                          onClick={() => handleSelect(answer)}
+                          onClick={() => handleSelect(answerValue)}
                           variants={answerVariants}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
@@ -450,7 +505,7 @@ const OnboardingQuestions = ({ onComplete }) => {
                               : "border-green-700 text-green-700 bg-white hover:bg-green-50"
                           }`}
                         >
-                          {answer}
+                          {answerLabel}
                         </motion.button>
                       );
                     })}

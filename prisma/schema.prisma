@@ -7,56 +7,52 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 model User {
-  id                  Int      @id @default(autoincrement())
-  name                String
-  gender              String   // ENUM in MySQL, validated by Zod
-  email               String   @unique
-  passwordHash        String
-  isActive            Boolean  @default(true)
-  role                String   @default("user") // ENUM in MySQL
-  createdAt           DateTime @default(now())
+  id           Int      @id @default(autoincrement())
+  name         String
+  gender       String // ENUM in MySQL, validated by Zod
+  email        String   @unique
+  passwordHash String
+  isActive     Boolean  @default(true)
+  role         String   @default("user") // ENUM in MySQL
+  createdAt    DateTime @default(now())
 
-  // JSON fields for array data
-  Genre               Json?    // Genre[]
-  mood                String?  // ENUM in MySQL
-  Motivation          Json?    // MotivationType[]
-  Age                 String?    // Age categories
   // user-selected onboarding categories (eg. ["educational","language"]) stored as JSON
   categories          Json?
-  author              Json?    // Int[]
-  book_length              Json?    // Length[]
-  recommendedBooksIds Json?    // Int[]
+  // user preferences
+  mood                String? // single mood (e.g. "آرام")
+  Motivation          Json?   // array of motivations (e.g. ["یادگیری"]) 
+  Age                 String? // age group string (e.g. "۱۸–۲۵")
+  author              Json? // Int[]
+  book_length         Json? // Length[]
+  recommendedBooksIds Json? // Int[]
 
   // Relations
-  favorites           Favorite[]
-  readingProgress     Reading_Progress[]
+  favorites       Favorite[]
+  readingProgress Reading_Progress[]
 }
 
-
 model Book {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String @db.Text
-  authorId    Int
+  id           Int       @id @default(autoincrement())
+  title        String
+  description  String    @db.Text
+  authorId     Int
   publish_date DateTime?
-  pdfURL      String?
-  coverURL    String?
+  pdfURL       String?
+  coverURL     String?
 
   // JSON fields
-  Genre       Json?     // Genre[]
-  mood        Json?     // Mood[]
-  Motivation  Json?     // MotivationType[]
+  mood       Json? // Mood[]
+  Motivation Json? // MotivationType[]
 
   // Single enums stored as strings
-  Age         String?   // ENUM
-  length      Int?   // ENUM
+  Age      String? // ENUM
+  length   Int? // ENUM
   // primary category for the book - one of CategoryEnum values (stored as string)
-  category    String?
+  category String?
 
   // Relations
-  author      Author    @relation(fields: [authorId], references: [id])
+  author      Author             @relation(fields: [authorId], references: [id])
   favoritedBy Favorite[]
   readBy      Reading_Progress[]
 }
@@ -66,8 +62,8 @@ model Favorite {
   userId Int
   bookId Int
 
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  book   Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
   @@unique([userId, bookId]) // Prevent duplicate favorites
 }
@@ -86,8 +82,8 @@ model Reading_Progress {
 }
 
 model Author {
-  id        Int     @id @default(autoincrement())
-  name      String
+  id   Int    @id @default(autoincrement())
+  name String
 
-  books     Book[]  
+  books Book[]
 }

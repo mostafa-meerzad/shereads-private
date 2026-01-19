@@ -42,13 +42,13 @@ export async function POST(req) {
         email: data.email,
         passwordHash,
         role: data.role,
-        Genre: data.Genre ?? null,
         mood: data.mood ?? null,
         Motivation: data.Motivation ?? null,
         Age: data.Age ?? null,
         author: data.author ?? null,
         book_length: data.book_length ?? null,
         recommendedBooksIds: recommendedIds.length > 0 ? recommendedIds : null,
+        categories: data.categories ?? null,
       },
     });
 

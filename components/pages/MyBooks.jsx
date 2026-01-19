@@ -11,6 +11,7 @@ import { Spinner } from "../ui/shadcn-io/spinner";
 import useMyBooks from "@/hooks/useMyBooks";
 import Book from "../Book";
 import { useAuthClient } from "@/hooks/useAuthClient";
+import Link from "next/link";
 
 const MyBooks = () => {
   const { user } = useAuthClient();
@@ -20,7 +21,8 @@ const MyBooks = () => {
     if (!user?.categories) return [];
     try {
       if (Array.isArray(user.categories)) return user.categories;
-      if (typeof user.categories === "string") return JSON.parse(user.categories);
+      if (typeof user.categories === "string")
+        return JSON.parse(user.categories);
       return [];
     } catch (e) {
       return [user.categories].filter(Boolean);
@@ -88,7 +90,9 @@ const MyBooks = () => {
   // Be defensive: a book's `category` may be a string or an array.
   const matchesCategories = (book) => {
     if (!preferredCategories || preferredCategories.length === 0) return false;
-    const bookCats = Array.isArray(book.category) ? book.category : [book.category];
+    const bookCats = Array.isArray(book.category)
+      ? book.category
+      : [book.category];
     return bookCats.some((c) => preferredCategories.includes(c));
   };
 
@@ -98,7 +102,13 @@ const MyBooks = () => {
     return (
       <div className="flex flex-col items-center justify-center h-[50vh] text-gray-500">
         <p className="text-xl">کتابی مطابق با علایق شما پیدا نشد.</p>
-        <p className="text-sm mt-2">می‌توانید در تنظیمات، دسته‌بندی‌های مورد علاقه خود را تغییر دهید.</p>
+
+        <Link
+          href={"onboarding?mode=edit"}
+          className="underline text-green-700 text-sm mt-2"
+        >
+          در ارزیابی شرکت کنید
+        </Link>
       </div>
     );
   }

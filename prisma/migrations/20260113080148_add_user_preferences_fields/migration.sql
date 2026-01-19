@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE `User` ADD COLUMN `Age` VARCHAR(191) NULL,
+    ADD COLUMN `Motivation` JSON NULL,
+    ADD COLUMN `mood` VARCHAR(191) NULL;

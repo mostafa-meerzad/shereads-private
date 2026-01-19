@@ -343,6 +343,7 @@ function CreateBookModal({onClose, onCreated, book, onUpdated}) {
     const [ageGroup, setAgeGroup] = useState(book?.Age || "");
     const [motivations, setMotivations] = useState(book?.Motivation || []);
     const [category, setCategory] = useState(book?.category || "");
+    const [showValidationErrors, setShowValidationErrors] = useState(false);
 
     const coverPreview = useMemo(() => {
         if (cover) return URL.createObjectURL(cover);
@@ -364,12 +365,23 @@ function CreateBookModal({onClose, onCreated, book, onUpdated}) {
         setCategory(book?.category || "");
         setCover(null);
         setPdf(null);
+        setShowValidationErrors(false);
     }, [book]);
 
     const submit = async (e) => {
         e.preventDefault();
+        // Client-side validation: required fields
+        const validCategoryIds = CATEGORIES.map((c) => c.id);
         if (!title || !description || !category) {
+            setShowValidationErrors(true);
             toast.error("عنوان، توضیحات و دسته‌بندی الزامی هستند");
+            return;
+        }
+
+        // Ensure selected category is one of allowed ids (prevent sending invalid enum value)
+        if (category && !validCategoryIds.includes(category)) {
+            setShowValidationErrors(true);
+            toast.error("دسته‌بندی نامعتبر است");
             return;
         }
 
@@ -561,9 +573,25 @@ function CreateBookModal({onClose, onCreated, book, onUpdated}) {
                                     </SelectContent>
                                 </Select></div>
                             {/* Category (onboarding categories) */}
-                            <div><label className="block text-sm text-slate-600">دسته‌بندی</label>
-                                <Select value={category} onValueChange={setCategory}>
-                                    <SelectTrigger className="rounded-full w-40">
+                            <div>
+                                <label className="block text-sm text-slate-600">
+                                    دسته‌بندی <span className="text-rose-600">*</span>
+                                </label>
+                                <Select
+                                    value={category}
+                                    onValueChange={(v) => {
+                                        setCategory(v);
+                                        if (showValidationErrors) setShowValidationErrors(false);
+                                    }}
+                                    aria-required="true"
+                                >
+                                    <SelectTrigger
+                                        className={`rounded-full w-40 ${
+                                            showValidationErrors && !category
+                                                ? "border-rose-600 border-2"
+                                                : ""
+                                        }`}
+                                    >
                                         <SelectValue placeholder="انتخاب دسته‌بندی"/>
                                     </SelectTrigger>
                                     <SelectContent>
@@ -573,7 +601,11 @@ function CreateBookModal({onClose, onCreated, book, onUpdated}) {
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
-                                </Select></div>
+                                </Select>
+                                {showValidationErrors && !category && (
+                                    <div className="text-rose-600 text-xs mt-1">دسته‌بندی الزامی است</div>
+                                )}
+                            </div>
                         </div>
 
                         <MultiSelectWithTags
@@ -644,7 +676,7 @@ function CreateBookModal({onClose, onCreated, book, onUpdated}) {
                             انصراف
                         </Button>
                         <Button
-                            disabled={submitting}
+                            disabled={submitting || !category}
                             className="rounded-full bg-emerald-700 hover:bg-emerald-800 text-white"
                         >
                             {submitting

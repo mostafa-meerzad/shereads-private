@@ -125,7 +125,7 @@ export async function POST(req, { params }) {
     const updated = await prisma.user.update({
       where: { id: userId },
       data: {
-        Genre: data.Genre ?? null,
+        categories: data.categories ?? null,
         mood: data.mood ?? null,
         Motivation: data.Motivation ?? null,
         Age: data.Age ?? null,

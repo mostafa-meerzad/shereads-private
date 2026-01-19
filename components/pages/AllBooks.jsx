@@ -169,35 +169,37 @@ const AllBooks = () => {
           </div>
           <Button
             onClick={applySearch}
-            className="rounded-full h-8 px-5 bg-emerald-700 text-white hover:bg-emerald-900"
+            className="rounded-full h-8 px-5 bg-emerald-700 text-white hover:bg-emerald-900 hover:scale-105"
           >
             جستجو
           </Button>
         </div>
-         <motion.div whileHover={{ scale: 1.02 }} className="flex flex-row-reverse gap-4 justify-end">
+         <div className="flex flex-row-reverse gap-4 justify-end">
           
-            {/* Category Filter */}
-            <Select
-              onValueChange={handleCategoryChange}
-              value={filters.category === "" ? "all" : filters.category}
-            >
-              <SelectTrigger
-                dir="rtl"
-                className="rounded-full  w-40  border bg-green-600/20 border-emerald-700 text-emerald-700 text-sm py-2 px-7"
+            <motion.div  whileHover={{ scale: 1.02 }} >
+              {/* Category Filter */}
+              <Select
+                onValueChange={handleCategoryChange}
+                value={filters.category === "" ? "all" : filters.category}
               >
-                <SelectValue placeholder="دسته‌بندی" />
-              </SelectTrigger>
-              <SelectContent dir="rtl">
-                <SelectItem value="all">همه دسته‌ها</SelectItem>
-                {CATEGORIES.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>
-                    {cat.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+                <SelectTrigger
+                  dir="rtl"
+                  className="rounded-full  w-40  border bg-green-600/20 border-emerald-700 text-emerald-700 text-sm py-2 px-7"
+                >
+                  <SelectValue placeholder="دسته‌بندی" />
+                </SelectTrigger>
+                <SelectContent dir="rtl">
+                  <SelectItem value="all">همه دسته‌ها</SelectItem>
+                  {CATEGORIES.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </motion.div>
             {/* Search Scope Select (both/title/author) */}
-            <div className="mr-2">
+            <motion.div  whileHover={{ scale: 1.02 }}  className="mr-2">
               <Select onValueChange={handleScopeChange} value={searchScope}>
                 <SelectTrigger
                   dir="rtl"
@@ -212,10 +214,10 @@ const AllBooks = () => {
                   <SelectItem value="author">جستجوی نویسنده</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
+            </motion.div>
           
           {/* Search Input + Button */}
-        </motion.div>
+        </div>
       </div>
 
       {/* Book Grid */}

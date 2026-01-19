@@ -76,8 +76,8 @@ const RecommendedBooks = () => {
 
   if (books.length === 0) {
     return (
-      <div className="size-full h-[75vh] flex flex-col justify-center items-center gap-2 bg-radial from-gray-200  rounded-xl to-transparent">
-        <span className="text-gray-500">!هیچ کتابی به شما پیشنهاد نشده است</span>
+      <div className="size-full h-[50vh] flex flex-col justify-center items-center gap-2 ">
+        <span className="text-gray-500 text-lg">!هیچ کتابی به شما پیشنهاد نشده است</span>
 
         <Link href={"onboarding?mode=edit"} className="underline text-green-700 text-sm">در ارزیابی شرکت کنید</Link>
       </div>

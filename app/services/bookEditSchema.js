@@ -1,6 +1,5 @@
 import z from "zod";
 import {
-  GenreEnum,
   MoodEnum,
   MotivationEnum,
   AgeEnum,
@@ -17,7 +16,6 @@ export const EditBookSchema = z.object({
   pdfURL: z.string().optional().nullable(),
   coverURL: z.string().optional().nullable(),
 
-  Genre: z.array(GenreEnum).optional().nullable(),
   mood: z.array(MoodEnum).optional().nullable(),
   Motivation: z.array(MotivationEnum).optional().nullable(),
   category: CategoryEnum.optional().nullable(),

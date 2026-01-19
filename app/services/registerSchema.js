@@ -2,7 +2,6 @@ import z from "zod";
 import {
   GenderEnum,
   RoleEnum,
-  GenreEnum,
   MoodEnum,
   MotivationEnum,
   LengthEnum,
@@ -20,7 +19,6 @@ export const RegisterSchema = z.object({
   role: RoleEnum.optional().default('user'),
 
   // JSON array fields (optional)
-  Genre: z.array(GenreEnum).optional().nullable(),
   mood: MoodEnum.optional().nullable(),
   Motivation: z.array(MotivationEnum).optional().nullable(),
   Age: AgeEnum.optional().nullable(),

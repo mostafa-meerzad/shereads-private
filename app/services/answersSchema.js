@@ -3,10 +3,6 @@ import { z } from "zod";
 export const GenderEnum = z.enum(["مذکر", "مونث"]);
 export const RoleEnum = z.enum(["admin", "user"]);
 
-export const GenreEnum = z.enum([
-  "داستان", "ادبیات", "رمانتیک", "تخیلی", "تاریخی",
-  "توسعه_فردی", "بیوگرافی", "فانتزی", "آموزش_مهارت"
-]);
 
 export const MoodEnum = z.enum([
   "آرام", "الهام_بخش", "احساسی", "معلوماتی", "پرهیجان", "احساس_خوب"

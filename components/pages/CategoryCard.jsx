@@ -5,7 +5,7 @@ const CategoryCard = ({ title, description, selected, onToggle }) => {
     <div
       dir="rtl"
       onClick={onToggle}
-      className={`cursor-pointer select-none rounded-lg border border-green-800/30 p-5 transition-shadow hover:shadow-md flex flex-col justify-between min-h-[120px] ${
+      className={`cursor-pointer select-none rounded-lg border border-green-800/30 p-5 transition-shadow hover:shadow-md flex flex-col justify-between  ${
         selected ? "border-green-700 bg-green-50" : "border-gray-200 bg-white"
       }`}
     >
@@ -16,7 +16,7 @@ const CategoryCard = ({ title, description, selected, onToggle }) => {
         <p className="mt-2 text-right text-sm text-gray-600">{description}</p>
       </div>
 
-      <div className="mt-4 flex items-center justify-between">
+     {description && <div className="mt-4 flex items-center justify-between">
         <div className={`text-sm ${selected ? "text-green-700" : "text-gray-500"}`}>
           {selected ? "انتخاب شده" : "انتخاب کنید"}
         </div>
@@ -27,7 +27,7 @@ const CategoryCard = ({ title, description, selected, onToggle }) => {
         >
           {selected ? "✓" : ""}
         </div>
-      </div>
+      </div>}
     </div>
   );
 };

@@ -47,13 +47,13 @@ export default function ClientRegister() {
   };
 
   const onSubmit = async (data) => {
-    let Age, Genre, Motivation, book_length, mood, author, categories;
+    let Age, Motivation, book_length, mood, author, categories;
 
     // If collectedAnswers exists, parse it
     if (collectedAnswers) {
       try {
         const parsedData = JSON.parse(collectedAnswers);
-        ({ Age, Genre, Motivation, book_length, mood, author } = parsedData);
+        ({ Age, Motivation, book_length, mood, author, categories } = parsedData);
       } catch (e) {
         console.error("Invalid JSON in collectedAnswers", e);
       }
@@ -77,7 +77,6 @@ export default function ClientRegister() {
         password: data.password,
         role: data.role,
         gender: data.gender,
-        Genre: Genre,
         Age: Age,
         Motivation: Motivation,
         book_length: book_length,

@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/shadcn-io/spinner";
+import ChangePasswordModal from "./ChangePasswordModal";
 import {
   Select,
   SelectContent,
@@ -63,6 +64,8 @@ export default function AdminUsers() {
   const qc = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [selectedUserForPassword, setSelectedUserForPassword] = useState(null);
 
   const { data, status, isFetching } = useAdminUsers({ page, search });
 
@@ -320,17 +323,9 @@ export default function AdminUsers() {
                     variant="outline"
                     className="rounded-full border-emerald-700 text-emerald-700"
                     disabled={!u.isActive}
-                    onClick={async () => {
-                      const pwd = window.prompt("رمز عبور جدید را وارد کنید:");
-                      if (!pwd) return;
-                      if (pwd.length < 6) return toast.error("حداقل ۶ کاراکتر");
-
-                      const ok = await toastConfirm(
-                        `تغییر رمز کاربر ${u.email}?`
-                      );
-                      if (!ok) return;
-
-                      resetPassword.mutate({ userId: u.id, password: pwd });
+                    onClick={() => {
+                      setSelectedUserForPassword(u);
+                      setPasswordModalOpen(true);
                     }}
                   >
                     تغییر رمز
@@ -417,15 +412,9 @@ export default function AdminUsers() {
                 variant="outline"
                 className="rounded-full border-emerald-700 text-emerald-700"
                 disabled={!u.isActive}
-                onClick={async () => {
-                  const pwd = window.prompt("رمز عبور جدید:");
-                  if (!pwd) return;
-                  if (pwd.length < 6) return toast.error("حداقل ۶ کاراکتر");
-
-                  const ok = await toastConfirm(`تغییر رمز کاربر ${u.email}?`);
-                  if (!ok) return;
-
-                  resetPassword.mutate({ userId: u.id, password: pwd });
+                onClick={() => {
+                  setSelectedUserForPassword(u);
+                  setPasswordModalOpen(true);
                 }}
               >
                 تغییر رمز
@@ -434,6 +423,19 @@ export default function AdminUsers() {
           </div>
         ))}
       </div>
+      <ChangePasswordModal
+        open={passwordModalOpen}
+        onOpenChange={setPasswordModalOpen}
+        user={selectedUserForPassword}
+        onConfirm={(password) => {
+          if (selectedUserForPassword) {
+            resetPassword.mutate({
+              userId: selectedUserForPassword.id,
+              password,
+            });
+          }
+        }}
+      />
     </div>
   );
 }

@@ -120,7 +120,7 @@ export default function SettingsModal({ open, onOpenChange }) {
             </div>
           </div>
 
-          <div className="grid md:flex-row items-center gap-2 pt-2">
+          <div className="grid grid-rows-1 grid-cols-2 gap-2 pt-2">
             <Button type="submit" disabled={saving} className="rounded-full bg-emerald-700 hover:bg-emerald-800 text-white">
               ذخیره تغییرات
             </Button>
@@ -132,14 +132,14 @@ export default function SettingsModal({ open, onOpenChange }) {
             >
               تنظیم ترجیحات
             </Button>
-            <Button
+            {/* <Button
               type="button"
               className="rounded-full border-emerald-600 text-emerald-700"
               variant="outline"
               onClick={() => router.push("/categories")}
             >
               تنظیم دسته‌بندی‌ها
-            </Button>
+            </Button> */}
           </div>
         </form>
       </SheetContent>
