@@ -25,7 +25,7 @@ async function main() {
       return;
     }
 
-    const hashed = await hashPassword("123456");
+    const hashed = await hashPassword("admin123");
 
     await prisma.user.create({
       data: {
