@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import AllBooks from "@/components/pages/AllBooks";
 import MyBooks from "@/components/pages/MyBooks";
 import FavoriteBooks from "@/components/pages/FavoriteBooks";
-import ReadingBooks from "@/components/pages/ReadingBooks";
 import RecommendedBooks from "@/components/pages/RecommendedBooks";
 import SidebarUi from "@/components/SideBar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -21,13 +20,12 @@ const tabs = [
   { key: "mybooks", label: "کتاب‌های من", icon: UserCheck },
   { key: "recommendations", label: "پیشنهادی", icon: Library },
   { key: "favorites", label: "موردعلاقه‌", icon: Heart },
-  { key: "reading", label: "مطالعه", icon: BookMarked },
 ];
 
 
 export default function Home() {
 
-  const [selected, setSelected] = useState("mybooks");
+  const [selected, setSelected] = useState("home");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openSettings, setOpenSettings] = useState(false);
@@ -56,7 +54,7 @@ export default function Home() {
             />
 
             <h1 className=" text-center md:text-start text-2xl md:text-3xl lg:text-4xl font-semibold text-emerald-800">
-              به کتابخانه She Reads Now خوش آمدید!
+              به کتابخانه She Reads خوش آمدید!
             </h1>
           </header>
 
@@ -85,9 +83,7 @@ export default function Home() {
           </AnimatePresence>
 
           <section>
-            {selected === "reading" ? (
-              <ReadingBooks />
-            ) : selected === "favorites" ? (
+            { selected === "favorites" ? (
               <FavoriteBooks />
             ) : selected === "recommendations" ? (
               <RecommendedBooks />

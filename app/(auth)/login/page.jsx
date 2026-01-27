@@ -173,7 +173,7 @@ export default function Login() {
             حساب ندارید؟{" "}
             <Link
               href={"/register"}
-              className="text-green-700 hover:underline mr-1"
+              className="text-green-700 hover:underline mr-1 no-underline"
             >
               ثبت‌نام کنید
             </Link>

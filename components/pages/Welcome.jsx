@@ -72,10 +72,10 @@ const Welcome = () => {
             </Button>
           </Link>
           <div>
-            <span className="text-[#05653D] text-sm ml-1">حساب دارید؟</span>
+            <span className=" text-sm ml-1">حساب دارید؟</span>
             <Link
               href={"/login"}
-              className="hover:text-green-700 active:text-gray-500 transition-all"
+              className="text-[#05653D] active:text-gray-500 transition-all"
             >
               <span>وارد شوید</span>
             </Link>

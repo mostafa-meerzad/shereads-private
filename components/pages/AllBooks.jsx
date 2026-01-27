@@ -55,6 +55,15 @@ const AllBooks = () => {
       return [user.categories].filter(Boolean);
     }
   }, [user]);
+  // If the user has preferred categories, set the default category filter
+  // to the first preferred category, but only when the user hasn't
+  // already selected a category (so we don't override manual selection).
+  useEffect(() => {
+    if (!preferredCategories || preferredCategories.length === 0) return;
+    setFilters((prev) =>
+      prev.category ? prev : { ...prev, category: preferredCategories[0] }
+    );
+  }, [preferredCategories]);
   const applySearch = () => {
     const q = inputSearch.trim();
     setFilters((prev) => ({
