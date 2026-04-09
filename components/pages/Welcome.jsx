@@ -45,10 +45,10 @@ const Welcome = () => {
         />
       </motion.div>
 
-      <div className="md:absolute lg:relative md:right-0 md:min-w-[35rem] flex flex-col p-10  items-center md:items-end gap-10 max-w-[30rem] z-10">
-        <h1 className="text-[#05653D] text-center md:text-end text-3xl sm:text-4xl md:text-5xl leading-[1.4] ">
+      <div className="md:absolute lg:relative md:right-0 md:min-w-[35rem] lg:min-w-[38rem] flex flex-col p-10  items-center md:items-end gap-10 md:gap-2 lg:gap-8 max-w-[30rem] z-10">
+        <h1 className="text-[#05653D] text-center md:text-end text-3xl sm:text-4xl md:text-5xl leading-[1.4] md:min-h-36 lg:min-h-fit ">
           <TextType
-            text={["بیایید کتاب مورد علاقه‌ی شما را پیدا کنیم"]}
+            text={"دنیای از کتاب در جیب شما"}
             typingSpeed={60}
             // pauseDuration={1200}
             loop={false}
@@ -60,25 +60,27 @@ const Welcome = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1, transition: { duration: 0.9, delay: 1 } }}
-          className="flex flex-col justify-center gap-2 items-center"
+          className="flex flex-col justify-center gap-2 items-center "
         >
-          <Link href={isLoggedIn ? "/home" : "/getstarted"}>
+          <Link href={isLoggedIn ? "/home" : "/login"}>
             <Button
               className={
-                "rounded-full bg-green-700 hover:bg-green-800 hover:text-white text-gray-200 w-fit px-24 py-5 transition-all hover:scale-105 active:scale-95"
+                "rounded-full bg-green-700 hover:bg-green-800 hover:text-white text-gray-200 w-fit px-24 md:px-20 py-5 transition-all hover:scale-105 active:scale-95 text-sm md:text-lg"
               }
             >
-              شروع کنید
+              وارد شوید
             </Button>
           </Link>
           <div>
-            <span className=" text-sm ml-1">حساب دارید؟</span>
-            <Link
-              href={"/login"}
-              className="text-[#05653D] active:text-gray-500 transition-all"
-            >
-              <span>وارد شوید</span>
-            </Link>
+            <p className="text-center  text-sm text-gray-700">
+              حساب ندارید؟{" "}
+              <Link
+                href={"/register"}
+                className="text-green-700 hover:underline mr-1 no-underline"
+              >
+                ثبت‌نام کنید
+              </Link>
+            </p>
           </div>
         </motion.div>
       </div>

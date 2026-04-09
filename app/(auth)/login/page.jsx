@@ -73,7 +73,7 @@ export default function Login() {
   };
 
   return (
-    <div className=" md:py-0 grid md:grid-cols-2 bg-white  min-h-screen lg:max-h-screen" >
+    <div className=" md:py-0 grid md:grid-cols-2 bg-white  min-h-screen lg:max-h-screen">
       <div className="hidden md:block h-full lg:h-screen overflow-hidden ">
         <Image
           src={img}
