@@ -73,7 +73,11 @@ export default function ReaderPageClient() {
   }
 
   return (
-    <div className="min-h-screen bg-white" dir="rtl">
+    <div
+      className="min-h-screen bg-white select-none"
+      dir="rtl"
+      onContextMenu={(e) => e.preventDefault()}
+    >
       <div className="p-4 border-b flex items-center justify-center  relative">
         <Link
           href="/home"

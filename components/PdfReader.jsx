@@ -164,7 +164,11 @@ export default function PdfReaders({ userId, bookId, pdfUrl }) {
   const normalizedPdfUrl = getNormalizedFileUrl(pdfUrl);
 
   return (
-    <div className="flex flex-col items-center py-4 md:py-8 " dir="rtl">
+    <div
+      className="flex flex-col items-center py-4 md:py-8 select-none"
+      dir="rtl"
+      onContextMenu={(e) => e.preventDefault()}
+    >
       {/* PDF Card */}
       <div
         ref={containerRef}
