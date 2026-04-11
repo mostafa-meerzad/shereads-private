@@ -61,7 +61,7 @@ export default function MultiSelectWithTags({
           </div>
         </PopoverTrigger>
 
-        <PopoverContent className="w-[250px] p-2 space-y-1">
+        <PopoverContent className="w-[250px] p-2 space-y-1" dir="rtl">
           {options.map((option) => (
             <div
               key={option}

@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import Book from "../Book";
 import { useAuthClient } from "@/hooks/useAuthClient";
+import MultiSelectFilter from "../MultiSelectFilter";
 
 // Categories matching getstarted page
 const CATEGORIES = [
@@ -39,7 +40,7 @@ const AllBooks = () => {
   const [inputSearch, setInputSearch] = useState(""); // controlled input
   const [filters, setFilters] = useState({
     title: "",
-    category: "",
+    categories: [],
   });
   // searchScope: 'both' | 'title' | 'author'
   const [searchScope, setSearchScope] = useState("title");
@@ -49,7 +50,8 @@ const AllBooks = () => {
     if (!user?.categories) return [];
     try {
       if (Array.isArray(user.categories)) return user.categories;
-      if (typeof user.categories === "string") return JSON.parse(user.categories);
+      if (typeof user.categories === "string")
+        return JSON.parse(user.categories);
       return [];
     } catch (e) {
       return [user.categories].filter(Boolean);
@@ -59,11 +61,13 @@ const AllBooks = () => {
   // to the first preferred category, but only when the user hasn't
   // already selected a category (so we don't override manual selection).
   useEffect(() => {
-    if (!preferredCategories || preferredCategories.length === 0) return;
-    setFilters((prev) =>
-      prev.category ? prev : { ...prev, category: preferredCategories[0] }
-    );
-  }, [preferredCategories]);
+    if (preferredCategories && preferredCategories.length > 0) {
+      setFilters((prev) => ({
+        ...prev,
+        categories: preferredCategories,
+      }));
+    }
+  }, [preferredCategories]); // Reset filters when user preference changes (e.g. login/logout)
   const applySearch = () => {
     const q = inputSearch.trim();
     setFilters((prev) => ({
@@ -74,10 +78,10 @@ const AllBooks = () => {
     }));
   };
 
-  const handleCategoryChange = (value) => {
+  const handleCategoryChange = (selected) => {
     setFilters((prev) => ({
       ...prev,
-      category: value === "all" ? "" : value,
+      categories: selected,
     }));
   };
 
@@ -91,7 +95,7 @@ const AllBooks = () => {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteBooks({
       limit: 20,
-      filters: { ...filters, categories: preferredCategories },
+      filters: { ...filters },
     });
 
   const { ref, inView } = useInView({ rootMargin: "200px" });
@@ -109,7 +113,7 @@ const AllBooks = () => {
   const toggleFav = useToggleFavorite(userId);
 
   const favIds = new Set(
-    (favoritesQuery?.data?.favorites || []).map((b) => b.id)
+    (favoritesQuery?.data?.favorites || []).map((b) => b.id),
   );
 
   function onToggleFav(bookId, isFav) {
@@ -123,7 +127,7 @@ const AllBooks = () => {
         {
           onSuccess: () => toast.success("از علاقه‌مندی‌ها حذف شد"),
           onError: () => toast.error("حذف از علاقه‌مندی‌ها انجام نشد"),
-        }
+        },
       );
     } else {
       toggleFav.add.mutate(
@@ -131,7 +135,7 @@ const AllBooks = () => {
         {
           onSuccess: () => toast.success("به علاقه‌مندی‌ها اضافه شد"),
           onError: () => toast.error("افزودن به علاقه‌مندی‌ها انجام نشد"),
-        }
+        },
       );
     }
   }
@@ -156,7 +160,6 @@ const AllBooks = () => {
   return (
     <div dir="rtl" className="space-y-10">
       <div className="flex justify-between flex-col lg:flex-row lg:items-center gap-2 w-full">
-       
         <div className="flex flex-row-reverse gap-4 w-full">
           <div className="relative w-full">
             <Input
@@ -183,48 +186,38 @@ const AllBooks = () => {
             جستجو
           </Button>
         </div>
-         <div className="flex flex-row-reverse gap-4 justify-end">
-          
-            <motion.div  whileHover={{ scale: 1.02 }} >
-              {/* Category Filter */}
-              <Select
-                onValueChange={handleCategoryChange}
-                value={filters.category === "" ? "all" : filters.category}
+        <div className="flex flex-row-reverse gap-4 justify-end">
+          <motion.div whileHover={{ scale: 1.02 }}>
+            {/* Category Filter */}
+            <MultiSelectFilter
+              label="دسته‌بندی"
+              options={CATEGORIES.map((cat) => ({
+                label: cat.label,
+                value: cat.id,
+              }))}
+              values={filters.categories}
+              onChange={handleCategoryChange}
+              // className="w-40 border-2 border-red-500"
+            />
+          </motion.div>
+          {/* Search Scope Select (both/title/author) */}
+          <motion.div whileHover={{ scale: 1.02 }} className="mr-2">
+            <Select onValueChange={handleScopeChange} value={searchScope}>
+              <SelectTrigger
+                dir="rtl"
+                className="rounded-full w-40 border bg-green-600/20 border-emerald-700 text-emerald-700 text-sm py-2 px-3"
               >
-                <SelectTrigger
-                  dir="rtl"
-                  className="rounded-full  w-40  border bg-green-600/20 border-emerald-700 text-emerald-700 text-sm py-2 px-7"
-                >
-                  <SelectValue placeholder="دسته‌بندی" />
-                </SelectTrigger>
-                <SelectContent dir="rtl">
-                  <SelectItem value="all">همه دسته‌ها</SelectItem>
-                  {CATEGORIES.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </motion.div>
-            {/* Search Scope Select (both/title/author) */}
-            <motion.div  whileHover={{ scale: 1.02 }}  className="mr-2">
-              <Select onValueChange={handleScopeChange} value={searchScope}>
-                <SelectTrigger
-                  dir="rtl"
-                  className="rounded-full w-40 border bg-green-600/20 border-emerald-700 text-emerald-700 text-sm py-2 px-3"
-                >
-                  <SelectValue placeholder="جستجو در" />
-                </SelectTrigger>
-                <SelectContent dir="rtl">
-                  {/* <SelectItem value="empty">جستجو بر اساس</SelectItem> */}
-                  <SelectItem value="title">جستجوی عنوان</SelectItem>
+                <SelectValue placeholder="جستجو در" />
+              </SelectTrigger>
+              <SelectContent dir="rtl">
+                {/* <SelectItem value="empty">جستجو بر اساس</SelectItem> */}
+                <SelectItem value="title">جستجوی عنوان</SelectItem>
 
-                  <SelectItem value="author">جستجوی نویسنده</SelectItem>
-                </SelectContent>
-              </Select>
-            </motion.div>
-          
+                <SelectItem value="author">جستجوی نویسنده</SelectItem>
+              </SelectContent>
+            </Select>
+          </motion.div>
+
           {/* Search Input + Button */}
         </div>
       </div>

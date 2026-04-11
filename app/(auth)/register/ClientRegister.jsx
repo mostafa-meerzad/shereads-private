@@ -21,6 +21,29 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 
+const CATEGORIES = [
+  {
+    id: "educational",
+    label: "تعلیمی",
+  },
+  {
+    id: "language",
+    label: "زبان‌آموزی",
+  },
+  {
+    id: "life_skills",
+    label: "مهارت‌های زندگی",
+  },
+  {
+    id: "self_growth",
+    label: "رشد فردی",
+  },
+  {
+    id: "literature",
+    label: "ادبیات",
+  },
+];
+
 export default function ClientRegister() {
   const { user, login } = useAuthClient();
   const router = useRouter();
@@ -60,13 +83,23 @@ export default function ClientRegister() {
     }
 
     // If categories param exists, parse it and normalize to an array
+    let finalCategories = categories;
     if (categoriesParam) {
       try {
         const parsedCats = JSON.parse(categoriesParam);
-        categories = Array.isArray(parsedCats) ? parsedCats : [parsedCats];
+        finalCategories = Array.isArray(parsedCats) ? parsedCats : [parsedCats];
       } catch (e) {
         // If it's not valid JSON treat it as a single category string
-        categories = [categoriesParam];
+        finalCategories = [categoriesParam];
+      }
+    }
+
+    // Add selected category from dropdown if present and not already in finalCategories
+    if (data.categoryPreference) {
+      if (!finalCategories) {
+        finalCategories = [data.categoryPreference];
+      } else if (!finalCategories.includes(data.categoryPreference)) {
+        finalCategories = [...finalCategories, data.categoryPreference];
       }
     }
 
@@ -82,7 +115,7 @@ export default function ClientRegister() {
         book_length: book_length,
         mood: mood,
         author: author,
-        categories: categories,
+        categories: finalCategories,
       });
 
       if (res.status === 201 && res.data) {
@@ -264,8 +297,8 @@ export default function ClientRegister() {
                       <SelectValue placeholder="انتخاب جنسیت" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="مذکر">مذکر</SelectItem>
-                      <SelectItem value="مونث">مونث</SelectItem>
+                      <SelectItem className={"pr-3"} value="مذکر">مذکر</SelectItem>
+                      <SelectItem className={"pr-3"} value="مونث">مونث</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -276,6 +309,35 @@ export default function ClientRegister() {
                   {errors.gender.message}
                 </p>
               )}
+            </div>
+
+            {/* Category Preference */}
+
+            <div className="relative flex justify-between flex-row-reverse items-center">
+              <label className="text-sm text-gray-700 mb-1 block">دسته‌بندی مورد علاقه</label>
+
+              <Controller
+                name="categoryPreference"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    dir="rtl"
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="انتخاب دسته‌بندی" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CATEGORIES.map((cat) => (
+                        <SelectItem className={"pr-3"} key={cat.id} value={cat.id}>
+                          {cat.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
 
             {/* Submit */}

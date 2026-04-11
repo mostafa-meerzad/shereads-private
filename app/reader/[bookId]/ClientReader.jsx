@@ -27,27 +27,27 @@ export default function ReaderPageClient() {
   const [pdfUrl, setPdfUrl] = useState(searchParams?.get("url"));
 
   useEffect(() => {
-    const ready = ()=>setReady(true);
-    ready()
+    const ready = () => setReady(true);
+    ready();
 
     if (!pdfUrl && bookId) {
       // Fetch book data to get pdfURL
       fetch(`/api/book/${bookId}`)
-        .then(res => res.json())
-        .then(data => {
+        .then((res) => res.json())
+        .then((data) => {
           if (data.pdfURL) {
             setPdfUrl(data.pdfURL);
           } else {
-             // fallback to test asset if no pdfURL in DB
-             setPdfUrl("/test.pdf");
+            // fallback to test asset if no pdfURL in DB
+            setPdfUrl("/test.pdf");
           }
         })
-        .catch(err => {
+        .catch((err) => {
           console.error("Failed to fetch book:", err);
           setPdfUrl("/test.pdf");
         });
     } else if (!pdfUrl) {
-       setPdfUrl("/test.pdf");
+      setPdfUrl("/test.pdf");
     }
   }, [bookId, pdfUrl]);
 
@@ -75,8 +75,11 @@ export default function ReaderPageClient() {
   return (
     <div className="min-h-screen bg-white" dir="rtl">
       <div className="p-4 border-b flex items-center justify-center  relative">
-        <Link href="/home" className="text-emerald-800 hover:underline absolute right-4">
-          بازگشت <span className="max-md:hidden">به خانه</span>
+        <Link
+          href="/home"
+          className="text-emerald-800 hover:underline absolute right-4"
+        >
+          بازگشت
         </Link>
         <div className="font-semibold">خواندن کتاب</div>
         <div />

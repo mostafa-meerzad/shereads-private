@@ -29,6 +29,8 @@ export async function GET(req) {
     const category = url.searchParams.get("category");
     if (category) {
       where.category = category;
+    } else if (categories && categories.length > 0) {
+      where.category = { in: categories };
     }
 
     if (author) {
@@ -37,75 +39,19 @@ export async function GET(req) {
       };
     }
 
-    // if (date) {
-    //   const year = parseInt(date);
-    //   if (!isNaN(year)) {
-    //     where.publish_date = {
-    //       gte: new Date(year, 0, 1),
-    //       lt: new Date(year + 1, 0, 1),
-    //     };
-    //   }
-    // }
-
     if (title) {
       where.title = { contains: title };
     }
 
     const total = await prisma.book.count({ where });
 
-    let books = [];
-    if (!category && categories && categories.length > 0) {
-      const matchingWhere = { ...where, category: { in: categories } };
-      const othersWhere = {
-        ...where,
-        OR: [{ category: { notIn: categories } }, { category: null }],
-      };
-
-      const matchingCount = await prisma.book.count({ where: matchingWhere });
-
-      if (skip < matchingCount) {
-        // We are still within the matching books or overlapping
-        const matchingBooks = await prisma.book.findMany({
-          where: matchingWhere,
-          skip,
-          take: limit,
-          orderBy: { publish_date: "desc" },
-          include: { author: true },
-        });
-        books = [...matchingBooks];
-
-        if (books.length < limit) {
-          // Need to fill the rest from 'others'
-          const remainingLimit = limit - books.length;
-          const otherBooks = await prisma.book.findMany({
-            where: othersWhere,
-            skip: 0,
-            take: remainingLimit,
-            orderBy: { publish_date: "desc" },
-            include: { author: true },
-          });
-          books = [...books, ...otherBooks];
-        }
-      } else {
-        // We are completely in the 'others' section
-        const otherBooks = await prisma.book.findMany({
-          where: othersWhere,
-          skip: skip - matchingCount,
-          take: limit,
-          orderBy: { publish_date: "desc" },
-          include: { author: true },
-        });
-        books = [...otherBooks];
-      }
-    } else {
-      books = await prisma.book.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { publish_date: "desc" },
-        include: { author: true },
-      });
-    }
+    const books = await prisma.book.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: { publish_date: "desc" },
+      include: { author: true },
+    });
 
     return NextResponse.json({
       page,

@@ -119,19 +119,36 @@ const OnboardingQuestions = ({ onComplete }) => {
   const [step, setStep] = useState(0);
 
   useEffect(() => {
-    if (user && user.categories) {
-      let cats = user.categories;
-      if (typeof cats === "string") {
-        try {
-          cats = JSON.parse(cats);
-        } catch {}
-      }
-      if (Array.isArray(cats)) {
+    if (user) {
+      const initialAnswers = {};
+
+      Object.keys(backendKeys).forEach((stepIndex) => {
+        const key = backendKeys[stepIndex];
+        let val = user[key];
+
+        if (val) {
+          // If it's a string that looks like JSON, parse it (categories, author, etc. might be stored as strings in some DB setups)
+          if (typeof val === "string" && (val.startsWith("[") || val.startsWith("{"))) {
+            try {
+              val = JSON.parse(val);
+            } catch {}
+          }
+
+          if (Array.isArray(val)) {
+            initialAnswers[stepIndex] = val;
+          } else {
+            // Single select values (mood, Age) should be wrapped in an array for the form
+            initialAnswers[stepIndex] = [val];
+          }
+        }
+      });
+
+      if (Object.keys(initialAnswers).length > 0) {
         reset((prev) => ({
           ...prev,
           answers: {
             ...prev.answers,
-            0: cats,
+            ...initialAnswers,
           },
         }));
       }

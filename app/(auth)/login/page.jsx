@@ -39,7 +39,7 @@ export default function Login() {
         // Store full user + token
         login(res.data);
 
-        toast.success("ورود با موفقیت انجام شد");
+        // toast.success("ورود با موفقیت انجام شد");
 
         // Redirect after small delay so toast can be seen
         setTimeout(() => {
