@@ -6,7 +6,7 @@ import LoadingTexts from "../ui/LoadingText";
 
 const CollectPreferences = ({ onComplete }) => {
   return (
-    <div className="relative flex justify-center items-center p-6 lg:p-10 bg-[url('/loading.png')] bg-cover min-h-screen w-full">
+    <div className="relative flex justify-center items-center p-6 lg:p-10 bg-[url('/loading.jpg')] bg-cover min-h-screen w-full">
       <div className="absolute inset-0 bg-white opacity-60 bg-center"></div>
       <Image
         src={logo}

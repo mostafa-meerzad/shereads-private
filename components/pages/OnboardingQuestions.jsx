@@ -8,11 +8,11 @@ import usePaginatedAuthors from "@/hooks/usePaginatedAuthors"; // adjust path if
 import { useAuthClient } from "@/hooks/useAuthClient";
 
 // Image imports placeholder (user will replace)
-import img2 from "@/assets/onboarding-img-2.png";
-import img3 from "@/assets/onboarding-img-3.png";
-import img4 from "@/assets/onboarding-img-4.png";
-import img5 from "@/assets/onboarding-img-5.png";
-import img6 from "@/assets/onboarding-img-6.png";
+import img2 from "@/assets/onboarding-img-2.jpg";
+import img3 from "@/assets/onboarding-img-3.jpg";
+import img4 from "@/assets/onboarding-img-4.jpg";
+import img5 from "@/assets/onboarding-img-5.jpg";
+import img6 from "@/assets/onboarding-img-6.jpg";
 import img8 from "@/assets/onboarding-img-8.png";
 import { Button } from "../ui/button";
 import CategoryCard from "./CategoryCard";
@@ -28,11 +28,11 @@ const formData = [
       {
         id: "language",
         label: "کتاب‌های زبان‌آموزی",
-         },
+      },
       {
         id: "life_skills",
         label: "کتاب‌های مهارت‌های زندگی و فنی",
-          },
+      },
       {
         id: "self_growth",
         label: "کتاب‌های رشد فردی و روان‌شناسی",
@@ -40,7 +40,7 @@ const formData = [
       {
         id: "literature",
         label: "کتاب‌های ادبیات و فرهنگ",
-       },
+      },
     ],
     img: img6,
   },
@@ -106,7 +106,7 @@ const backendKeys = {
   2: "Age",
   3: "book_length",
   4: "Motivation",
-  5: "author", 
+  5: "author",
 };
 
 const OnboardingQuestions = ({ onComplete }) => {
@@ -128,7 +128,10 @@ const OnboardingQuestions = ({ onComplete }) => {
 
         if (val) {
           // If it's a string that looks like JSON, parse it (categories, author, etc. might be stored as strings in some DB setups)
-          if (typeof val === "string" && (val.startsWith("[") || val.startsWith("{"))) {
+          if (
+            typeof val === "string" &&
+            (val.startsWith("[") || val.startsWith("{"))
+          ) {
             try {
               val = JSON.parse(val);
             } catch {}
@@ -342,8 +345,8 @@ const OnboardingQuestions = ({ onComplete }) => {
                   i === step
                     ? "bg-green-700 text-white border-green-700"
                     : i < step
-                    ? "bg-green-100 text-green-700 border-green-600"
-                    : "bg-white text-gray-400 border-gray-300"
+                      ? "bg-green-100 text-green-700 border-green-600"
+                      : "bg-white text-gray-400 border-gray-300"
                 }`}
               >
                 {i + 1}
@@ -353,8 +356,8 @@ const OnboardingQuestions = ({ onComplete }) => {
                       i === step
                         ? "bg-green-700 text-white border-green-700"
                         : i < step
-                        ? "bg-green-600 text-green-700 border-green-600"
-                        : "bg-gray-300 text-gray-400 border-gray-300"
+                          ? "bg-green-600 text-green-700 border-green-600"
+                          : "bg-gray-300 text-gray-400 border-gray-300"
                     }`}
                   ></div>
                 )}
@@ -371,7 +374,6 @@ const OnboardingQuestions = ({ onComplete }) => {
             animate="center"
             exit="exit"
             className=" relative top-0 mx-auto md:max-w-full  md:mx-0 "
-            
           >
             <motion.h2 className="text-2xl text-center font-medium text-gray-800 mb-6 md:text-right">
               {formData[step].question}
@@ -403,7 +405,6 @@ const OnboardingQuestions = ({ onComplete }) => {
 
                 // If we're on the authors step, render the paginated authors list
                 if (isAuthorsStep) {
-
                   return (
                     <div dir="rtl" className="flex flex-col gap-6">
                       <div className="grid md:grid-cols-2 gap-4">
@@ -422,7 +423,6 @@ const OnboardingQuestions = ({ onComplete }) => {
                                   // toggle author.id
                                   handleSelect(author.id);
                                 }}
-                             
                                 className={`lg:w-4/5 border rounded-full py-2 px-6 text-right flex items-center justify-between transition-all duration-300 hover:scale-105  ${
                                   isSelected
                                     ? "bg-green-700 text-white border-green-700"
@@ -439,7 +439,6 @@ const OnboardingQuestions = ({ onComplete }) => {
                                     </span>
                                   )}
                                 </div>
-                                
                               </button>
                             );
                           })
@@ -459,7 +458,7 @@ const OnboardingQuestions = ({ onComplete }) => {
                             disabled={authorsPage <= 1}
                             className="px-5 py-1 text-sm rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
                           >
-                        صفحه    قبلی
+                            صفحه قبلی
                           </button>
 
                           <button
@@ -472,17 +471,15 @@ const OnboardingQuestions = ({ onComplete }) => {
                             disabled={authorsPage >= (authorsPages || 1)}
                             className="px-4 py-1 text-sm rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50"
                           >
-                        صفحه    بعدی
+                            صفحه بعدی
                           </button>
                         </div>
                       </div>
-
-                      
                     </div>
                   );
                 }
 
-                // Default (non-author) rendering 
+                // Default (non-author) rendering
                 return (
                   <div
                     dir="rtl"
@@ -491,7 +488,8 @@ const OnboardingQuestions = ({ onComplete }) => {
                     }`}
                   >
                     {formData[step].answers.map((answer, idx) => {
-                      const isObj = typeof answer === "object" && answer !== null;
+                      const isObj =
+                        typeof answer === "object" && answer !== null;
                       const answerValue = isObj ? answer.id : answer;
                       const answerLabel = isObj ? answer.label : answer;
                       const isSelected = values.includes(answerValue);
@@ -549,11 +547,16 @@ const OnboardingQuestions = ({ onComplete }) => {
               {step < totalQuestions - 1 ? (
                 <motion.button
                   type="button"
-                  onClick={() => (isAuthorsStep || (selected && selected.length > 0)) && setStep(step + 1)}
+                  onClick={() =>
+                    (isAuthorsStep || (selected && selected.length > 0)) &&
+                    setStep(step + 1)
+                  }
                   disabled={!isAuthorsStep && selected.length === 0}
-                  whileHover={(isAuthorsStep || selected.length > 0) ? { y: -2 } : {}}
+                  whileHover={
+                    isAuthorsStep || selected.length > 0 ? { y: -2 } : {}
+                  }
                   className={`px-6 py-1 tex-xs rounded-full border ${
-                    (isAuthorsStep || selected.length > 0)
+                    isAuthorsStep || selected.length > 0
                       ? "bg-green-700 text-white border-green-700"
                       : "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"
                   }`}
@@ -564,9 +567,11 @@ const OnboardingQuestions = ({ onComplete }) => {
                 <motion.button
                   type="submit"
                   disabled={!isAuthorsStep && selected.length === 0}
-                  whileHover={(isAuthorsStep || selected.length > 0) ? { y: -2 } : {}}
+                  whileHover={
+                    isAuthorsStep || selected.length > 0 ? { y: -2 } : {}
+                  }
                   className={`px-6 py-1 tex-xs rounded-full border ${
-                    (isAuthorsStep || selected.length > 0)
+                    isAuthorsStep || selected.length > 0
                       ? "bg-green-700 text-white border-green-700"
                       : "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"
                   }`}

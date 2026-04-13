@@ -26,8 +26,9 @@ export function middleware(req) {
 
   // Allow any direct static file requests (public/*) EXCEPT protected folders
   // Protect only book and cover files under `/books` and `/covers`.
-  // e.g. allow `/test-img.png`, `/images/logo.svg`, etc.
-  const isProtectedAssetFolder = pathname.startsWith("/books") || pathname.startsWith("/covers");
+  // e.g. allow `/test-img.jpg`, `/images/logo.svg`, etc.
+  const isProtectedAssetFolder =
+    pathname.startsWith("/books") || pathname.startsWith("/covers");
   const looksLikeFile = /\.[a-z0-9]+$/i.test(pathname);
   if (looksLikeFile && !isProtectedAssetFolder) {
     return NextResponse.next();
@@ -43,7 +44,7 @@ export function middleware(req) {
     "home",
     "/api/login",
     "/api/register",
-    "/api/author"
+    "/api/author",
   ]);
 
   // Allow public paths and onboarding routes

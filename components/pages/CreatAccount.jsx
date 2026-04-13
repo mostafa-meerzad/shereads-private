@@ -7,9 +7,7 @@ import logo from "@/assets/logo.png";
 const CreateAccount = ({ onContinue, buttonLabel }) => {
   return (
     <div className="grid grid-rows-[.8fr_1fr] md:grid-rows-[.7fr_1fr] bottom-0">
-
       <div className="row-start-1 flex flex-col lg:flex-row justify-between p-6 lg:p-10">
-
         {/* Logo */}
         <motion.div
           initial={{ opacity: 0, y: -15 }}
@@ -74,7 +72,7 @@ const CreateAccount = ({ onContinue, buttonLabel }) => {
         initial={{ opacity: 0, y: 25 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.3 }}
-        className="w-full object-cover object-center row-start-2  row-span-2  bg-[url(/create-account.png)] bg-top bg-no-repeat bg-cover"
+        className="w-full object-cover object-center row-start-2  row-span-2  bg-[url(/create-account.jpg)] bg-top bg-no-repeat bg-cover"
       />
     </div>
   );

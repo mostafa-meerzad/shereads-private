@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 
 // OPTIONAL illustration placeholder
 // replace later with real art
-import illustration from "@/assets/onboarding-img-7.png";
+import illustration from "@/assets/onboarding-img-7.jpg";
 
 const CATEGORIES = [
   {
@@ -62,7 +62,7 @@ export default function GetStartedPage() {
 
   const toggle = (id) => {
     setSelected((prev) =>
-      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id],
     );
   };
 
@@ -74,18 +74,18 @@ export default function GetStartedPage() {
 
   return (
     <div className="min-h-screen w-full bg-white grid lg:grid-cols-[45%_1fr]  items-start  h-screen">
-        {/* LEFT — Content */}
-          <div className="hidden lg:flex justify-center items-center overflow-hidden h-full max-w-5/6">
-            {/* <div className="max-w-md"> */}
-              <Image
-                src={illustration}
-                alt="Girl reading a book"
-                className="h-full w-full object-cover"
-                priority
-              />
-            {/* </div> */}
-          </div>
-      <div >
+      {/* LEFT — Content */}
+      <div className="hidden lg:flex justify-center items-center overflow-hidden h-full max-w-5/6">
+        {/* <div className="max-w-md"> */}
+        <Image
+          src={illustration}
+          alt="Girl reading a book"
+          className="h-full w-full object-cover"
+          priority
+        />
+        {/* </div> */}
+      </div>
+      <div>
         {/* Header */}
         <header className="flex items-center justify-between px-6 py-6 lg:px-0">
           <Image
@@ -98,8 +98,7 @@ export default function GetStartedPage() {
         </header>
         {/* Main */}
         <main className="px-6 lg:pr-12 lg:pl-0  ">
-          <div >
-        
+          <div>
             {/* RIGHT — Illustration */}
             <div className="flex flex-col gap-6">
               <div className="space-y-3 text-center lg:text-right">
@@ -108,7 +107,8 @@ export default function GetStartedPage() {
                 </h1>
                 <p className="text-sm text-gray-600 max-w-2xl mx-auto lg:mr-0">
                   انتخاب این دسته‌بندی‌ها به ما کمک می‌کند تا کتاب‌هایی مطابق
-                  سلیقه شما پیشنهاد دهیم. این انتخاب‌ها هر زمان قابل تغییر هستند.
+                  سلیقه شما پیشنهاد دهیم. این انتخاب‌ها هر زمان قابل تغییر
+                  هستند.
                 </p>
               </div>
               {/* Categories */}

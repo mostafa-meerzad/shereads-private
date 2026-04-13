@@ -38,17 +38,11 @@ export default function MultiSelectFilter({
             className="w-full border rounded-full p-2 flex flex-wrap gap-2 items-center justify-start cursor-pointer bg-green-600/20 border-emerald-700 text-emerald-700 text-sm px-6"
             onClick={() => setOpen(true)}
           >
-            {/*{values.length > 0*/}
-            {/*  ? options*/}
-            {/*      .filter((opt) => values.includes(opt.value))*/}
-            {/*      .map((opt) => opt.label)*/}
-            {/*      .join(", ")*/}
-            {/*  : label}*/}
             دسته‌بندی
           </div>
         </PopoverTrigger>
 
-        <PopoverContent className="w-[180px] p-2 space-y-0.5 ml-5" dir="rtl">
+        <PopoverContent className="w-[180px] p-1 space-y-0.5 ml-5" dir="rtl">
           {options.map((opt) => (
             <div
               key={opt.value}

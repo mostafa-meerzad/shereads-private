@@ -1,6 +1,6 @@
 "use client";
 
-import img from "@/assets/sign-up-img.png";
+import img from "@/assets/sign-up-img.jpg";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -76,7 +76,8 @@ export default function ClientRegister() {
     if (collectedAnswers) {
       try {
         const parsedData = JSON.parse(collectedAnswers);
-        ({ Age, Motivation, book_length, mood, author, categories } = parsedData);
+        ({ Age, Motivation, book_length, mood, author, categories } =
+          parsedData);
       } catch (e) {
         console.error("Invalid JSON in collectedAnswers", e);
       }
@@ -158,13 +159,13 @@ export default function ClientRegister() {
   return (
     <div className=" md:py-0 grid md:grid-cols-2 bg-white">
       <div className="hidden md:block h-full  overflow-hidden max-h-fit lg:max-h-screen">
-      <Image
-        src={img}
-        width={500}
-        height={900}
-        alt="stack of books"
-        className="hidden md:block h-full w-full object-cover object-top "
-      />
+        <Image
+          src={img}
+          width={500}
+          height={900}
+          alt="stack of books"
+          className="hidden md:block h-full w-full object-cover object-top "
+        />
       </div>
 
       <div className="w-full h-full flex items-center justify-center p-8  py-16 ">
@@ -297,8 +298,12 @@ export default function ClientRegister() {
                       <SelectValue placeholder="انتخاب جنسیت" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem className={"pr-3"} value="مذکر">مذکر</SelectItem>
-                      <SelectItem className={"pr-3"} value="مونث">مونث</SelectItem>
+                      <SelectItem className={"pr-3"} value="مذکر">
+                        مذکر
+                      </SelectItem>
+                      <SelectItem className={"pr-3"} value="مونث">
+                        مونث
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -314,7 +319,9 @@ export default function ClientRegister() {
             {/* Category Preference */}
 
             <div className="relative flex justify-between flex-row-reverse items-center">
-              <label className="text-sm text-gray-700 mb-1 block">دسته‌بندی مورد علاقه</label>
+              <label className="text-sm text-gray-700 mb-1 block">
+                دسته‌بندی مورد علاقه
+              </label>
 
               <Controller
                 name="categoryPreference"
@@ -330,7 +337,11 @@ export default function ClientRegister() {
                     </SelectTrigger>
                     <SelectContent>
                       {CATEGORIES.map((cat) => (
-                        <SelectItem className={"pr-3"} key={cat.id} value={cat.id}>
+                        <SelectItem
+                          className={"pr-3"}
+                          key={cat.id}
+                          value={cat.id}
+                        >
                           {cat.label}
                         </SelectItem>
                       ))}

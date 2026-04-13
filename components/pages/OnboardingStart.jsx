@@ -2,7 +2,7 @@
 
 import logo from "@/assets/logo.png";
 import mobileImg from "@/assets/onboarding-img-0.jpg";
-import desktopImg from "@/assets/onboarding-img-1.png";
+import desktopImg from "@/assets/onboarding-img-1.jpg";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import { motion } from "framer-motion";
@@ -14,7 +14,7 @@ const OnboardingStart = ({ onStart }) => {
   const { user } = useAuthClient();
   const router = useRouter();
   const handleSkip = () => {
-    if (!user)  router.push("/register");
+    if (!user) router.push("/register");
     router.push("/home");
   };
   return (

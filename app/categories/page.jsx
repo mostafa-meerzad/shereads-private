@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 
 // OPTIONAL illustration placeholder
 // replace later with real art
-import illustration from "@/assets/onboarding-img-7.png";
+import illustration from "@/assets/onboarding-img-7.jpg";
 
 const CATEGORIES = [
   {
@@ -53,7 +53,7 @@ export default function CategoriesPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    console.log("user data: ", user)
+    console.log("user data: ", user);
     // Initialize selection from backend-only `user.categories`.
     try {
       if (user && user.categories) {
@@ -79,7 +79,7 @@ export default function CategoriesPage() {
 
   const toggle = (id) => {
     setSelected((prev) =>
-      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id],
     );
   };
 
@@ -110,7 +110,8 @@ export default function CategoriesPage() {
       // navigate to home after confirming
       router.push("/home");
     } catch (err) {
-      const msg = err?.error || err?.message || "خطا در ذخیره‌سازی دسته‌بندی‌ها";
+      const msg =
+        err?.error || err?.message || "خطا در ذخیره‌سازی دسته‌بندی‌ها";
       toast.error(typeof msg === "string" ? msg : "خطا در ذخیره‌سازی");
     } finally {
       setSaving(false);

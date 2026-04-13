@@ -1,6 +1,6 @@
 "use client";
 
-import img from "@/assets/onboarding-img-2.png";
+import img from "@/assets/onboarding-img-2.jpg";
 import { Input } from "@/components/ui/input";
 import { useAuthClient } from "@/hooks/useAuthClient";
 // import { useAuth } from "@/hooks/useAuth";
