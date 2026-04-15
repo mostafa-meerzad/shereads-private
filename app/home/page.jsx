@@ -25,7 +25,7 @@ const tabs = [
 
 export default function Home() {
 
-  const [selected, setSelected] = useState("home");
+  const [selected, setSelected] = useState("mybooks");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openSettings, setOpenSettings] = useState(false);
@@ -43,7 +43,7 @@ export default function Home() {
           isCollapsed={isCollapsed}
           onOpenSettings={() => setOpenSettings(true)}
         />
-        <div className="flex-1 p-4 md:p-8 ">
+        <div className="flex-1 h-screen p-4 md:p-8 ">
           <header
             dir="rtl"
             className="flex items-center justify-start gap-5 mb-12"
@@ -65,7 +65,7 @@ export default function Home() {
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: -300, opacity: 0 }}
                 transition={{ duration: 0.25 }}
-                className="fixed inset-y-0 left-0 z-50 w-64 bg-white p-4 md:hidden shadow-lg"
+                className="fixed inset-y-0 left-0 z-50 w-64 bg-white p-4 md:hidden shadow-lg "
               >
                 <SidebarUi
                   selected={selected}
@@ -82,7 +82,7 @@ export default function Home() {
             )}
           </AnimatePresence>
 
-          <section>
+          <section className={"h-[90%]  overflow-y-auto scrollbar-hide [ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"}>
             { selected === "favorites" ? (
               <FavoriteBooks />
             ) : selected === "recommendations" ? (

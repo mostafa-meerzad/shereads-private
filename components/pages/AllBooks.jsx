@@ -158,7 +158,7 @@ const AllBooks = () => {
   const books = pages.flatMap((p) => p.books || []);
 
   return (
-    <div dir="rtl" className="space-y-10">
+    <div dir="rtl" className="space-y-5 h-full">
       <div className="flex justify-between flex-col lg:flex-row lg:items-center gap-2 w-full">
         <div className="flex flex-row-reverse gap-4 w-full">
           <div className="relative w-full">
@@ -224,34 +224,36 @@ const AllBooks = () => {
 
       {/* Book Grid */}
 
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.33 }}
-        className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))]  gap-4 min-h-screen"
-      >
-        {books.map((book) => (
-          <Book
-            key={book.id}
-            book={book}
-            favIds={favIds}
-            onToggleFav={onToggleFav}
-          />
-        ))}
+     <div className="max-h-[90%] overflow-y-auto">
+       <motion.div
+           initial={{ opacity: 0, y: 8 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ duration: 0.33 }}
+           className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))]  gap-4 "
+       >
+         {books.map((book) => (
+             <Book
+                 key={book.id}
+                 book={book}
+                 favIds={favIds}
+                 onToggleFav={onToggleFav}
+             />
+         ))}
 
-        {/* Infinite Scroll Sentinel */}
-        <div className="col-span-full flex justify-center py-8">
-          {isFetchingNextPage ? (
-            <Spinner className="size-10" />
-          ) : hasNextPage ? (
-            <div ref={ref} className="p-2 rounded text-gray-500">
-              بارگیری بیشتر...
-            </div>
-          ) : (
-            <div className="text-gray-400">به انتها رسیدید</div>
-          )}
-        </div>
-      </motion.div>
+         {/* Infinite Scroll Sentinel */}
+         <div className="col-span-full flex justify-center py-8">
+           {isFetchingNextPage ? (
+               <Spinner className="size-10" />
+           ) : hasNextPage ? (
+               <div ref={ref} className="p-2 rounded text-gray-500">
+                 بارگیری بیشتر...
+               </div>
+           ) : (
+               <div className="text-gray-400">به انتها رسیدید</div>
+           )}
+         </div>
+       </motion.div>
+     </div>
     </div>
   );
 };

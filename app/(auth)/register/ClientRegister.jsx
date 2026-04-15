@@ -338,7 +338,7 @@ export default function ClientRegister() {
                     <SelectContent>
                       {CATEGORIES.map((cat) => (
                         <SelectItem
-                          className={"pr-3"}
+                          className={"pr-3 "}
                           key={cat.id}
                           value={cat.id}
                         >
