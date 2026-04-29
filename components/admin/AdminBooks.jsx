@@ -232,7 +232,7 @@ export default function AdminBooks() {
                         >
                             {/* Cover */}
                             <div
-                                className="w-full h-56 bg-linear-to-b from-gray-500/20 to-gray-200 rounded-md  flex justify-center items-center overflow-hidden cursor-pointer">
+                                className="w-full aspect-[6/9] bg-linear-to-b from-gray-500/20 to-gray-200 rounded-md  flex justify-center items-center overflow-hidden cursor-pointer">
                                 {b.coverURL ? (
                                     <Image
                                         width={200}
@@ -641,10 +641,10 @@ function CreateBookModal({onClose, onCreated, book, onUpdated}) {
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <Image
                                     width={200}
-                                    height={200}
+                                    height={300}
                                     src={coverPreview}
                                     alt={book?.title || "cover preview"}
-                                    className="mt-2 h-40 w-auto  object-cover rounded-lg"
+                                    className="mt-2 w-32 aspect-[6/9] object-cover rounded-lg"
                                 />
                             )}
                         </div>

@@ -102,7 +102,7 @@ const Book = ({ book, favIds, onToggleFav }) => {
     >
       <div
         onClick={() => setModalOpen(true)}
-        className="w-full h-56 bg-linear-to-b from-gray-500/20 to-gray-200 rounded-md  flex justify-center items-center overflow-hidden cursor-pointer"
+        className="w-full aspect-[6/9] bg-linear-to-b from-gray-500/20 to-gray-200 rounded-md  flex justify-center items-center overflow-hidden cursor-pointer"
       >
         {coverUrl ? (
           // Using a plain <img> so relative public paths work out of the box
