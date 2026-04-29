@@ -74,12 +74,12 @@ const RecommendedBooks = () => {
   const books = pages.flatMap((p) => p.favorites || []);
 
   return (
-    <div dir="rtl" className="space-y-10">
+    <div dir="rtl" className="space-y-10 no-scrollbar">
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.33 }}
-        className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))]  gap-4 "
+        className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))]  gap-4 no-scrollbar"
       >
         {books.map((book) => (
           <Book

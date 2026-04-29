@@ -224,7 +224,7 @@ const AllBooks = () => {
 
       {/* Book Grid */}
 
-     <div className="max-h-[90%] overflow-y-auto">
+     <div className="max-h-[90%] overflow-y-auto no-scrollbar">
        <motion.div
            initial={{ opacity: 0, y: 8 }}
            animate={{ opacity: 1, y: 0 }}

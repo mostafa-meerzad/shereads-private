@@ -126,7 +126,7 @@ const MyBooks = () => {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.33 }}
-        className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4"
+        className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 no-scrollbar"
       >
         <AnimatePresence mode="popLayout">
           {filteredBooks.map((book) => (
