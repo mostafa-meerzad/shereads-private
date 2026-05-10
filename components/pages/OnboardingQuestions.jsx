@@ -290,11 +290,13 @@ const OnboardingQuestions = ({ onComplete }) => {
   const isAuthorsStep = formData[step]?.isAuthorsStep === true;
   const categoryAnswers =
     categories.length > 0
-      ? categories.map((cat) => ({
-          id: cat.id,
-          label: cat.name,
-          description: cat.parentId === null ? " " : "زیرشاخه",
-        }))
+      ? categories
+          .filter((cat) => cat.parentId === null)
+          .map((cat) => ({
+            id: cat.id,
+            label: cat.name,
+            description: cat.parentId === null ? " " : "زیرشاخه",
+          }))
       : formData[0].answers;
   const stepAnswers = step === 0 ? categoryAnswers : formData[step].answers;
 

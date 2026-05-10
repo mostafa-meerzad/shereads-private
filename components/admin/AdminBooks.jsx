@@ -1,5 +1,6 @@
 "use client";
 
+import { FaArrowTurnDown } from "react-icons/fa6";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -179,34 +180,6 @@ export default function AdminBooks() {
           </div>
 
           <div className="flex max-md:flex-wrap max-md:justify-center md:flex-row-reverse gap-2 md:justify-around ">
-            {/* Parent Categories */}
-            <Select
-              onValueChange={handleCategoryChange}
-              value={
-                filters.categoryId &&
-                parentCategories.some((c) => c.id === filters.categoryId)
-                  ? String(filters.categoryId)
-                  : "all"
-              }
-            >
-              <SelectTrigger
-                dir="rtl"
-                className="rounded-full w-40 border-2 border-emerald-700 text-emerald-700 text-sm py-2 px-7"
-              >
-                <SelectValue placeholder="دسته اصلی" />
-              </SelectTrigger>
-
-              <SelectContent dir="rtl">
-                <SelectItem value="all">همه دسته‌ها</SelectItem>
-
-                {parentCategories.map((cat) => (
-                  <SelectItem key={cat.id} value={String(cat.id)}>
-                    {cat.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
             {/* Sub Categories */}
             <Select
               onValueChange={handleCategoryChange}
@@ -228,6 +201,34 @@ export default function AdminBooks() {
                 <SelectItem value="all">همه زیر دسته‌ها</SelectItem>
 
                 {subCategories.map((cat) => (
+                  <SelectItem key={cat.id} value={String(cat.id)}>
+                    {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Parent Categories */}
+            <Select
+              onValueChange={handleCategoryChange}
+              value={
+                filters.categoryId &&
+                parentCategories.some((c) => c.id === filters.categoryId)
+                  ? String(filters.categoryId)
+                  : "all"
+              }
+            >
+              <SelectTrigger
+                dir="rtl"
+                className="rounded-full w-40 border-2 border-emerald-700 text-emerald-700 text-sm py-2 px-7"
+              >
+                <SelectValue placeholder="دسته اصلی" />
+              </SelectTrigger>
+
+              <SelectContent dir="rtl">
+                <SelectItem value="all">همه دسته‌ها</SelectItem>
+
+                {parentCategories.map((cat) => (
                   <SelectItem key={cat.id} value={String(cat.id)}>
                     {cat.name}
                   </SelectItem>
@@ -533,6 +534,7 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
           lg:max-w-[900px]
           xl:max-w-[1050px]
           overflow-y-scroll  max-h-[90%]
+          no-scrollbar
         "
       >
         {/* Header */}
@@ -623,7 +625,8 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
                   aria-required="true"
                 >
                   <SelectTrigger
-                    className={`rounded-full w-40 ${
+                    dir="rtl"
+                    className={`rounded-full lg:w-52 ${
                       showValidationErrors && !categoryId
                         ? "border-rose-600 border-2"
                         : ""
@@ -632,12 +635,37 @@ function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
                     <SelectValue placeholder="انتخاب دسته‌بندی" />
                   </SelectTrigger>
                   <SelectContent dir="rtl">
-                    {categoriesData.map((cat) => (
-                      <SelectItem key={cat.id} value={String(cat.id)} dir="rtl">
-                        {cat.parentId !== null ? "└ " : ""}
-                        {cat.name}
-                      </SelectItem>
-                    ))}
+                    {parentCategories.map((parent) => {
+                      const children = subCategories.filter(
+                        (sub) => sub.parentId === parent.id,
+                      );
+
+                      return (
+                        <div key={parent.id} dir="rtl">
+                          {/* Parent Category */}
+                          <SelectItem
+                            dir="rtl"
+                            value={String(parent.id)}
+                            className="font-bold text-emerald-700 -mr-2"
+                          >
+                            {parent.name}
+                          </SelectItem>
+
+                          {/* Children */}
+                          {children.map((child) => (
+                            <SelectItem
+                              dir="rtl"
+                              key={child.id}
+                              value={String(child.id)}
+                              className="pr-9 text-slate-600"
+                            >
+                              <FaArrowTurnDown className="rotate-90 size-3 text-green-600" />{" "}
+                              {child.name}
+                            </SelectItem>
+                          ))}
+                        </div>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
                 {showValidationErrors && !categoryId && (

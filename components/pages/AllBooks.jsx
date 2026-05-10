@@ -194,6 +194,27 @@ const AllBooks = () => {
         </div>
         <div className="flex flex-row-reverse gap-4 justify-end">
           <motion.div whileHover={{ scale: 1.02 }}>
+            {/* Sub Categories */}
+            <MultiSelectFilter
+              label="زیر دسته"
+              options={subCategories.map((cat) => ({
+                label: cat.name,
+                value: String(cat.id),
+              }))}
+              values={filters.categories.map((cat) => String(cat))}
+              onChange={(selected) => {
+                const parentIds = filters.categories.filter((id) =>
+                  parentCategories.some((parent) => parent.id === id),
+                );
+
+                handleCategoryChange([
+                  ...parentIds,
+                  ...selected.map((value) => Number(value)),
+                ]);
+              }}
+            />
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.02 }}>
             {/* Category Filter */}
             {/* Parent Categories */}
             <MultiSelectFilter
@@ -215,28 +236,7 @@ const AllBooks = () => {
               }}
             />
           </motion.div>
-          <motion.div whileHover={{ scale: 1.02 }}>
-            {" "}
-            {/* Sub Categories */}
-            <MultiSelectFilter
-              label="زیر دسته"
-              options={subCategories.map((cat) => ({
-                label: cat.name,
-                value: String(cat.id),
-              }))}
-              values={filters.categories.map((cat) => String(cat))}
-              onChange={(selected) => {
-                const parentIds = filters.categories.filter((id) =>
-                  parentCategories.some((parent) => parent.id === id),
-                );
 
-                handleCategoryChange([
-                  ...parentIds,
-                  ...selected.map((value) => Number(value)),
-                ]);
-              }}
-            />
-          </motion.div>
           {/* Search Scope Select (both/title/author) */}
           <motion.div whileHover={{ scale: 1.02 }} className="mr-2">
             <Select onValueChange={handleScopeChange} value={searchScope}>

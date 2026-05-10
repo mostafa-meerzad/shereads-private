@@ -9,6 +9,7 @@ import {
 import { X } from "lucide-react";
 
 export default function MultiSelectWithTags({
+  className,
   label,
   options,
   values,
@@ -30,7 +31,7 @@ export default function MultiSelectWithTags({
   };
 
   return (
-    <div className="space-y-1">
+    <div className={`space-y-1 ${className}`}>
       <label className="block text-sm text-slate-600">{label}</label>
 
       <Popover open={open} onOpenChange={setOpen}>
