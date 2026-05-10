@@ -28,9 +28,11 @@ export async function GET(req) {
 
     const category = url.searchParams.get("category");
     if (category) {
-      where.category = category;
+      const catId = parseInt(category);
+      if (!isNaN(catId)) where.categoryId = catId;
     } else if (categories && categories.length > 0) {
-      where.category = { in: categories };
+      const catIds = categories.map(Number).filter((n) => !isNaN(n) && n > 0);
+      if (catIds.length > 0) where.categoryId = { in: catIds };
     }
 
     if (author) {
@@ -50,7 +52,7 @@ export async function GET(req) {
       skip,
       take: limit,
       orderBy: { publish_date: "desc" },
-      include: { author: true },
+      include: { author: true, category: true },
     });
 
     return NextResponse.json({
@@ -89,7 +91,8 @@ export async function POST(req) {
       const title = form.get("title")?.toString() || "";
       const description = form.get("description")?.toString() || "";
       const authorName = form.get("authorName")?.toString() || form.get("author")?.toString() || "";
-      const category = form.get("category")?.toString() || undefined;
+      const categoryIdRaw = form.get("categoryId")?.toString() || undefined;
+      const categoryId = categoryIdRaw ? parseInt(categoryIdRaw) : undefined;
       const publish_date = form.get("publish_date")?.toString() || null;
 
       // Files
@@ -155,7 +158,7 @@ export async function POST(req) {
         mood: parseMaybeJSON(form.get("mood")) ?? undefined,
         Motivation: parseMaybeJSON(form.get("Motivation")) ?? undefined,
         Age: form.get("Age")?.toString() ?? undefined,
-        category: category ?? undefined,
+        categoryId: categoryId && !isNaN(categoryId) ? categoryId : undefined,
         // If client sent length keep it for compatibility, but prefer detectedLength when available
         length: detectedLength ?? (form.get("length") ? Number(form.get("length")) : undefined),
       };
@@ -233,12 +236,13 @@ export async function POST(req) {
         coverURL: data.coverURL,
         mood: data.mood,
         Motivation: data.Motivation,
-        category: data.category,
+        categoryId: data.categoryId ?? null,
         Age: data.Age,
         length: data.length,
       },
       include: {
         author: true,
+        category: true,
       },
     });
 

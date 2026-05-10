@@ -4,7 +4,6 @@ import {
   MotivationEnum,
   AgeEnum,
 } from "@/app/services/answersSchema";
-import { CategoryEnum } from "@/app/services/answersSchema";
 
 // Schema for author creation (name only)
 export const AddAuthorSchema = z.object({
@@ -25,7 +24,8 @@ export const AddBookSchema = z.object({
 
   mood: z.array(MoodEnum).optional().nullable(),
   Motivation: z.array(MotivationEnum).optional().nullable(),
-  category: CategoryEnum,
+  // categoryId is the integer FK to the Category table
+  categoryId: z.number().int().positive().optional().nullable(),
 
   Age: AgeEnum.optional().nullable(),
   length: z.number().int().positive().optional().nullable(),

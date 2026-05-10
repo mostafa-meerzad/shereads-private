@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { useInView } from "react-intersection-observer";
 
 import { useToggleFavorite } from "@/hooks/useAddFavorite";
+import useCategories from "@/hooks/useCategories";
 import useFavorites from "@/hooks/useFavorites";
 import useInfiniteBooks from "@/hooks/useInfiniteBooks";
 
@@ -25,17 +26,12 @@ import Book from "../Book";
 import { useAuthClient } from "@/hooks/useAuthClient";
 import MultiSelectFilter from "../MultiSelectFilter";
 
-// Categories matching getstarted page
-const CATEGORIES = [
-  { id: "educational", label: "تعلیمی" },
-  { id: "language", label: "زبان‌آموزی" },
-  { id: "life_skills", label: "مهارت‌های زندگی" },
-  { id: "self_growth", label: "رشد فردی" },
-  { id: "literature", label: "ادبیات" },
-];
-
 const AllBooks = () => {
   const { user } = useAuthClient();
+  const { data: categories = [] } = useCategories();
+  const parentCategories = categories.filter((cat) => cat.parentId === null);
+
+  const subCategories = categories.filter((cat) => cat.parentId !== null);
   const userId = user?.id;
   const [inputSearch, setInputSearch] = useState(""); // controlled input
   const [filters, setFilters] = useState({
@@ -49,12 +45,22 @@ const AllBooks = () => {
   const preferredCategories = useMemo(() => {
     if (!user?.categories) return [];
     try {
-      if (Array.isArray(user.categories)) return user.categories;
-      if (typeof user.categories === "string")
-        return JSON.parse(user.categories);
-      return [];
+      const rawCategories = Array.isArray(user.categories)
+        ? user.categories
+        : typeof user.categories === "string"
+          ? JSON.parse(user.categories)
+          : [];
+      return Array.isArray(rawCategories)
+        ? rawCategories.map((cat) =>
+            typeof cat === "string" && !isNaN(Number(cat)) ? Number(cat) : cat,
+          )
+        : [];
     } catch (e) {
-      return [user.categories].filter(Boolean);
+      return [user.categories]
+        .filter(Boolean)
+        .map((cat) =>
+          typeof cat === "string" && !isNaN(Number(cat)) ? Number(cat) : cat,
+        );
     }
   }, [user]);
   // If the user has preferred categories, set the default category filter
@@ -189,15 +195,46 @@ const AllBooks = () => {
         <div className="flex flex-row-reverse gap-4 justify-end">
           <motion.div whileHover={{ scale: 1.02 }}>
             {/* Category Filter */}
+            {/* Parent Categories */}
             <MultiSelectFilter
-              label="دسته‌بندی"
-              options={CATEGORIES.map((cat) => ({
-                label: cat.label,
-                value: cat.id,
+              label=" دسته‌بندی"
+              options={parentCategories.map((cat) => ({
+                label: cat.name,
+                value: String(cat.id),
               }))}
-              values={filters.categories}
-              onChange={handleCategoryChange}
-              // className="w-40 border-2 border-red-500"
+              values={filters.categories.map((cat) => String(cat))}
+              onChange={(selected) => {
+                const subIds = filters.categories.filter((id) =>
+                  subCategories.some((sub) => sub.id === id),
+                );
+
+                handleCategoryChange([
+                  ...subIds,
+                  ...selected.map((value) => Number(value)),
+                ]);
+              }}
+            />
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.02 }}>
+            {" "}
+            {/* Sub Categories */}
+            <MultiSelectFilter
+              label="زیر دسته"
+              options={subCategories.map((cat) => ({
+                label: cat.name,
+                value: String(cat.id),
+              }))}
+              values={filters.categories.map((cat) => String(cat))}
+              onChange={(selected) => {
+                const parentIds = filters.categories.filter((id) =>
+                  parentCategories.some((parent) => parent.id === id),
+                );
+
+                handleCategoryChange([
+                  ...parentIds,
+                  ...selected.map((value) => Number(value)),
+                ]);
+              }}
             />
           </motion.div>
           {/* Search Scope Select (both/title/author) */}
@@ -224,36 +261,36 @@ const AllBooks = () => {
 
       {/* Book Grid */}
 
-     <div className="max-h-[90%] overflow-y-auto no-scrollbar">
-       <motion.div
-           initial={{ opacity: 0, y: 8 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ duration: 0.33 }}
-           className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))]  gap-4 "
-       >
-         {books.map((book) => (
-             <Book
-                 key={book.id}
-                 book={book}
-                 favIds={favIds}
-                 onToggleFav={onToggleFav}
-             />
-         ))}
+      <div className="max-h-[90%] overflow-y-auto no-scrollbar">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.33 }}
+          className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))]  gap-4 "
+        >
+          {books.map((book) => (
+            <Book
+              key={book.id}
+              book={book}
+              favIds={favIds}
+              onToggleFav={onToggleFav}
+            />
+          ))}
 
-         {/* Infinite Scroll Sentinel */}
-         <div className="col-span-full flex justify-center py-8">
-           {isFetchingNextPage ? (
-               <Spinner className="size-10" />
-           ) : hasNextPage ? (
-               <div ref={ref} className="p-2 rounded text-gray-500">
-                 بارگیری بیشتر...
-               </div>
-           ) : (
-               <div className="text-gray-400">به انتها رسیدید</div>
-           )}
-         </div>
-       </motion.div>
-     </div>
+          {/* Infinite Scroll Sentinel */}
+          <div className="col-span-full flex justify-center py-8">
+            {isFetchingNextPage ? (
+              <Spinner className="size-10" />
+            ) : hasNextPage ? (
+              <div ref={ref} className="p-2 rounded text-gray-500">
+                بارگیری بیشتر...
+              </div>
+            ) : (
+              <div className="text-gray-400">به انتها رسیدید</div>
+            )}
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 };

@@ -6,53 +6,24 @@ import logo from "@/assets/logo.png";
 import CategoryCard from "@/components/pages/CategoryCard";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import useCategories from "@/hooks/useCategories";
 
 // OPTIONAL illustration placeholder
 // replace later with real art
 import illustration from "@/assets/onboarding-img-7.jpg";
 
-const CATEGORIES = [
-  {
-    id: "educational",
-    title: "کتاب‌های تعلیمی (درسی)",
-    description:
-      "شامل کتاب‌های درسی مکاتب (ریاضی، علوم، فزیک، کیمیا، بیولوژی) و مواد آمادگی کانکور.",
-  },
-  {
-    id: "language",
-    title: "کتاب‌های زبان‌آموزی",
-    description:
-      "برای یادگیری زبان‌های انگلیسی، دری و پشتو (گرامر، مکالمه و واژگان).",
-  },
-  {
-    id: "life_skills",
-    title: "کتاب‌های مهارت‌های زندگی و فنی",
-    description:
-      "شامل مهارت‌های حرفه‌ای (مثل دوخت‌ودوز، کامپیوتر، کارآفرینی) و مهارت‌های نرم (ارتباطات، مدیریت زمان).",
-  },
-  {
-    id: "self_growth",
-    title: "کتاب‌های رشد فردی و روان‌شناسی",
-    description: "برای تقویت اعتمادبه‌نفس، انگیزه و سلامت روان دختران.",
-  },
-  {
-    id: "literature",
-    title: "کتاب‌های ادبیات و فرهنگ",
-    description:
-      "شامل داستان‌ها، اشعار و متون الهام‌بخش از نویسندگان افغان و جهان.",
-  },
-];
-
 export default function GetStartedPage() {
   const router = useRouter();
-  const [selected, setSelected] = useState([]);
-
-  useEffect(() => {
+  const { data: categories = [], status } = useCategories();
+  const [selected, setSelected] = useState(() => {
+    if (typeof window === "undefined") return [];
     try {
       const saved = localStorage.getItem("preferredCategories");
-      if (saved) setSelected(JSON.parse(saved));
-    } catch {}
-  }, []);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
   useEffect(() => {
     try {
@@ -71,6 +42,12 @@ export default function GetStartedPage() {
     params.set("categories", JSON.stringify(selected));
     router.push(`/register?${params.toString()}`);
   };
+
+  const displayCategories = categories.map((cat) => ({
+    id: cat.id,
+    title: cat.name,
+    description: cat.parentId === null ? undefined : "زیرشاخه",
+  }));
 
   return (
     <div className="min-h-screen w-full bg-white grid lg:grid-cols-[45%_1fr]  items-start  h-screen">
@@ -113,15 +90,25 @@ export default function GetStartedPage() {
               </div>
               {/* Categories */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-10">
-                {CATEGORIES.map((cat) => (
-                  <CategoryCard
-                    key={cat.id}
-                    title={cat.title}
-                    description={cat.description}
-                    selected={selected.includes(cat.id)}
-                    onToggle={() => toggle(cat.id)}
-                  />
-                ))}
+                {status === "loading" ? (
+                  <div className="col-span-full text-center text-gray-600 py-10">
+                    در حال بارگیری دسته‌بندی‌ها...
+                  </div>
+                ) : displayCategories.length === 0 ? (
+                  <div className="col-span-full text-center text-gray-600 py-10">
+                    هیچ دسته‌بندی‌ای یافت نشد.
+                  </div>
+                ) : (
+                  displayCategories.map((cat) => (
+                    <CategoryCard
+                      key={cat.id}
+                      title={cat.title}
+                      description={cat.description}
+                      selected={selected.includes(cat.id)}
+                      onToggle={() => toggle(cat.id)}
+                    />
+                  ))
+                )}
               </div>
               {/* CTA */}
               <div className="pt-6 flex justify-center lg:justify-end">

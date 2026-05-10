@@ -1,497 +1,531 @@
 "use client";
 
-import {useMemo, useState, useEffect} from "react";
-import {useQuery, useMutation, useQueryClient} from "@tanstack/react-query";
-import api from "@/lib/apiClient";
-import toast from "react-hot-toast";
-import {Input} from "@/components/ui/input";
-import {Button} from "@/components/ui/button";
-import {Spinner} from "@/components/ui/shadcn-io/spinner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
-    Select,
-    SelectTrigger,
-    SelectValue,
-    SelectContent,
-    SelectItem,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
-import {Calendar} from "../ui/persian-calendar";
-import ToggleDatePicker from "../ui/toggle-date-picker";
-import MultiSelectWithTags from "../ui/multi-select-with-tags";
+import { Spinner } from "@/components/ui/shadcn-io/spinner";
+import api from "@/lib/apiClient";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Search } from "lucide-react";
 import Image from "next/image";
-import {Search} from "lucide-react";
-
+import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
+import MultiSelectWithTags from "../ui/multi-select-with-tags";
+import ToggleDatePicker from "../ui/toggle-date-picker";
 
 const MODES = [
-    "آرام",
-    "الهام_بخش",
-    "احساسی",
-    "معلوماتی",
-    "پرهیجان",
-    "احساس_خوب",
+  "آرام",
+  "الهام_بخش",
+  "احساسی",
+  "معلوماتی",
+  "پرهیجان",
+  "احساس_خوب",
 ];
 
 const AGES = ["۱۲–۱۷", "۱۸–۲۵", "۲۶–۳۵", "۳۶–۵۰", "۵۰+"];
 
-const MOTIVATIONS = [
-    "سرگرمی",
-    "یادگیری",
-    "رشد_فردی",
-    "بهبود_مهارت_ها",
-];
+const MOTIVATIONS = ["سرگرمی", "یادگیری", "رشد_فردی", "بهبود_مهارت_ها"];
 
-// Categories matching getstarted page
-const CATEGORIES = [
-    {id: "educational", label: "تعلیمی"},
-    {id: "language", label: "زبان‌آموزی"},
-    {id: "life_skills", label: "مهارت‌های زندگی"},
-    {id: "self_growth", label: "رشد فردی"},
-    {id: "literature", label: "ادبیات"},
-];
+function useCategories() {
+  return useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const { data } = await api.get("/category");
+      return data.categories; // flat array: [{ id, name, parentId }]
+    },
+  });
+}
 
-function useAdminBooks({page, filters}) {
-    return useQuery({
-        queryKey: ["admin", "books", {page, filters}],
-        queryFn: async () => {
-            const qs = new URLSearchParams();
-            qs.set("page", String(page || 1));
-            qs.set("limit", String(20));
-            // filters: { title?, author? }
-            if (filters?.title) qs.set("title", filters.title);
-            if (filters?.author) qs.set("author", filters.author);
-            if (filters?.category) qs.set("category", filters.category);
-            const {data} = await api.get(`/book?${qs.toString()}`);
-            return data; // { books, page, totalPages, total }
-        },
-    });
+function useAdminBooks({ page, filters }) {
+  return useQuery({
+    queryKey: ["admin", "books", { page, filters }],
+    queryFn: async () => {
+      const qs = new URLSearchParams();
+      qs.set("page", String(page || 1));
+      qs.set("limit", String(20));
+      if (filters?.title) qs.set("title", filters.title);
+      if (filters?.author) qs.set("author", filters.author);
+      if (filters?.categoryId) qs.set("category", String(filters.categoryId));
+      const { data } = await api.get(`/book?${qs.toString()}`);
+      return data; // { books, page, totalPages, total }
+    },
+  });
 }
 
 export default function AdminBooks() {
-    const qc = useQueryClient();
-    const [page, setPage] = useState(1);
-    // Search UI state (mirrors AllBooks)
-    const [inputSearch, setInputSearch] = useState(""); // controlled input
-    const [filters, setFilters] = useState({
-        title: "",
-        category: "",
-    });
-    // searchScope: 'title' | 'author'
-    const [searchScope, setSearchScope] = useState("title");
-    const [openCreate, setOpenCreate] = useState(false);
-    const [editBook, setEditBook] = useState(null);
+  const qc = useQueryClient();
+  const [page, setPage] = useState(1);
+  const [inputSearch, setInputSearch] = useState("");
+  const [filters, setFilters] = useState({
+    title: "",
+    categoryId: null,
+  });
 
-    const {data, status} = useAdminBooks({page, filters});
-    const books = data?.books || [];
+  const { data: categoriesData = [] } = useCategories();
+  const parentCategories = categoriesData.filter(
+    (cat) => cat.parentId === null,
+  );
 
-    const softDelete = useMutation({
-        mutationFn: async (bookId) => api.delete(`/book/${bookId}`),
-        onSuccess: () => {
-            toast.success("کتاب حذف شد");
-            qc.invalidateQueries({queryKey: ["admin", "books"]});
-        },
-        onError: (e) => toast.error(e?.error || "خطا در حذف کتاب"),
-    });
+  const subCategories = categoriesData.filter((cat) => cat.parentId !== null);
+  // searchScope: 'title' | 'author'
+  const [searchScope, setSearchScope] = useState("title");
+  const [openCreate, setOpenCreate] = useState(false);
+  const [editBook, setEditBook] = useState(null);
 
-    const confirmDelete = (book) => {
-        toast(
-            (t) => (
-                <div dir="rtl" className="p-2">
-                    <div className="text-sm">حذف «{book.title}»؟</div>
-                    <div className="mt-4 flex gap-2 justify-start">
-                        <button
-                            onClick={() => {
-                                softDelete.mutate(book.id);
-                                toast.dismiss(t.id);
-                            }}
-                            className="rounded-lg bg-rose-600 hover:bg-rose-700 text-white h-8 px-3 text-sm"
-                        >
-                            بله
-                        </button>
-                        <button
-                            onClick={() => toast.dismiss(t.id)}
-                            className="rounded-lg border px-3 h-8 text-sm"
-                        >
-                            خیر
-                        </button>
-                    </div>
-                </div>
-            ),
-            {duration: Infinity}
-        );
-    };
+  const { data, status } = useAdminBooks({ page, filters });
+  const books = data?.books || [];
 
-    // --- Search handlers (similar to AllBooks)
-    const applySearch = () => {
-        const q = inputSearch.trim();
-        setFilters((prev) => ({
-            ...prev,
-            title: searchScope === "author" ? "" : q,
-            author: searchScope === "title" ? "" : q,
-        }));
-        setPage(1);
-    };
+  const softDelete = useMutation({
+    mutationFn: async (bookId) => api.delete(`/book/${bookId}`),
+    onSuccess: () => {
+      toast.success("کتاب حذف شد");
+      qc.invalidateQueries({ queryKey: ["admin", "books"] });
+    },
+    onError: (e) => toast.error(e?.error || "خطا در حذف کتاب"),
+  });
 
-
-    const handleCategoryChange = (value) => {
-        setFilters((prev) => ({...prev, category: value === "all" ? "" : value}));
-    };
-
-    const handleScopeChange = (value) => {
-        setSearchScope(value);
-    };
-
-    return (
-        <div className="space-y-6" dir="rtl">
-            <div className="flex flex-col md:flex-row gap-3 md:items-center">
-                <Button
-                    className="rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs ml-4 !py-0"
-                    onClick={() => setOpenCreate(true)}
-                >
-                    افزودن کتاب
-                </Button>
-
-                <div className="flex flex-row gap-2  w-full ">
-                    <div className="flex flex-row-reverse gap-2 w-full">
-                        <div className="relative w-full">
-                            <Input
-                                dir="rtl"
-                                type="search"
-                                placeholder="جستجوی کتاب، نویسند..."
-                                value={inputSearch}
-                                onChange={(e) => {
-                                    const v = e.target.value;
-                                    setInputSearch(v);
-                                    if (v === "") {
-                                        setFilters((prev) => ({...prev, title: "", author: ""}));
-                                    }
-                                }}
-                                className="pl-5 pr-12 rounded-full w-full border-green-800"
-                            />
-                            <Search className="absolute right-5 top-2.5 h-4 w-4 text-muted-foreground"/>
-                        </div>
-                        <Button
-                            onClick={() => applySearch()}
-                            className="rounded-full  px-5 py-1 bg-emerald-700 text-white hover:bg-emerald-900"
-                        >
-                            جستجو
-                        </Button>
-                    </div>
-
-                    <div className="flex flex-row-reverse gap-2 justify-end ">
-                        <Select
-                            onValueChange={handleCategoryChange}
-                            value={filters.category === "" ? "all" : filters.category}
-                        >
-                            <SelectTrigger
-                                dir="rtl"
-                                className="rounded-full w-40  border-2 border-emerald-700 text-emerald-700 text-sm py-2 px-7"
-                            >
-                                <SelectValue placeholder="دسته‌بندی"/>
-                            </SelectTrigger>
-                            <SelectContent dir="rtl">
-                                <SelectItem value="all">همه دسته‌ها</SelectItem>
-                                {CATEGORIES.map((cat) => (
-                                    <SelectItem key={cat.id} value={cat.id}>
-                                        {cat.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-
-                        <div className="mr-2">
-                            <Select onValueChange={handleScopeChange} value={searchScope}>
-                                <SelectTrigger
-                                    dir="rtl"
-                                    className="rounded-full w-36 border-2 border-emerald-700 text-emerald-700 text-sm py-2 px-3"
-                                >
-                                    <SelectValue placeholder="جستجو در"/>
-                                </SelectTrigger>
-                                <SelectContent dir="rtl">
-                                    <SelectItem value="title">جستجوی عنوان</SelectItem>
-                                    <SelectItem value="author">جستجوی نویسنده</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {status === "loading" ? (
-                <div className="h-40 flex items-center justify-center">
-                    <Spinner className="size-10"/>
-                </div>
-            ) : status === "error" ? (
-                <div className="text-red-600 text-center">خطا در بارگذاری کتاب‌ها</div>
-            ) : books.length === 0 ? (
-                <div className="text-slate-600 text-center">کتابی یافت نشد.</div>
-            ) : (
-                <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))]  gap-4 min-h-screen">
-                    {books.map((b) => (
-                        <div
-                            key={b.id}
-                            className="bg-white max-w-80 h-fit dark:bg-slate-800 rounded-md shadow-md p-4 flex flex-col items-center"
-                        >
-                            {/* Cover */}
-                            <div
-                                className="w-full aspect-[6/9] bg-linear-to-b from-gray-500/20 to-gray-200 rounded-md  flex justify-center items-center overflow-hidden cursor-pointer">
-                                {b.coverURL ? (
-                                    <Image
-                                        width={200}
-                                        height={200}
-                                        src={`/api/files${b.coverURL}`}
-                                        alt={b.title}
-                                        className="w-full h-full object-cover"
-                                        loading="lazy"
-                                    />
-                                ) : (
-                                    <div className="text-slate-400 text-xs">بدون کاور</div>
-                                )}
-                            </div>
-
-                            {/* Title + Author */}
-                            <div className="flex flex-col items-start gap-2 w-full mt-1 mb-4">
-                                <h4 className="font-semibold text-sm text-emerald-700 break-words">
-                                    {b.title}
-                                </h4>
-
-                                <p className="text-xs text-gray-800">
-                                    <span className="text-gray-500">نویسنده:</span>{" "}
-                                    <span>{b.author?.name || "—"}</span>
-                                </p>
-                            </div>
-
-                            {/* Actions */}
-                            <div className="flex gap-2 w-full justify-start">
-                                <Button
-                                    size="sm"
-                                    className="rounded-full bg-rose-600 hover:bg-rose-700 text-white h-8 text-sm"
-                                    onClick={() => confirmDelete(b)}
-                                >
-                                    حذف
-                                </Button>
-                                <Button
-                                    size="sm"
-                                    className="rounded-full bg-amber-500 hover:bg-amber-600 text-white h-8 text-sm"
-                                    onClick={() => setEditBook(b)}
-                                >
-                                    ویرایش
-                                </Button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {data?.totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2">
-                    <Button
-                        variant="outline"
-                        className="rounded-full"
-                        disabled={page <= 1}
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    >
-                        قبلی
-                    </Button>
-                    <div className="text-sm text-slate-600">
-                        صفحه {data.page} از {data.totalPages}
-                    </div>
-                    <Button
-                        variant="outline"
-                        className="rounded-full"
-                        disabled={page >= data.totalPages}
-                        onClick={() => setPage((p) => p + 1)}
-                    >
-                        بعدی
-                    </Button>
-                </div>
-            )}
-
-            {openCreate && (
-                <CreateBookModal
-                    onClose={() => setOpenCreate(false)}
-                    onCreated={() => {
-                        setOpenCreate(false);
-                        qc.invalidateQueries({queryKey: ["admin", "books"]});
-                    }}
-                />
-            )}
-            {editBook && (
-                <CreateBookModal
-                    book={editBook}
-                    onClose={() => setEditBook(null)}
-                    onUpdated={() => {
-                        setEditBook(null);
-                        qc.invalidateQueries({queryKey: ["admin", "books"]});
-                    }}
-                />
-            )}
+  const confirmDelete = (book) => {
+    toast(
+      (t) => (
+        <div dir="rtl" className="p-2">
+          <div className="text-sm">حذف «{book.title}»؟</div>
+          <div className="mt-4 flex gap-2 justify-start">
+            <button
+              onClick={() => {
+                softDelete.mutate(book.id);
+                toast.dismiss(t.id);
+              }}
+              className="rounded-lg bg-rose-600 hover:bg-rose-700 text-white h-8 px-3 text-sm"
+            >
+              بله
+            </button>
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="rounded-lg border px-3 h-8 text-sm"
+            >
+              خیر
+            </button>
+          </div>
         </div>
+      ),
+      { duration: Infinity },
     );
+  };
+
+  // --- Search handlers (similar to AllBooks)
+  const applySearch = () => {
+    const q = inputSearch.trim();
+    setFilters((prev) => ({
+      ...prev,
+      title: searchScope === "author" ? "" : q,
+      author: searchScope === "title" ? "" : q,
+    }));
+    setPage(1);
+  };
+
+  const handleCategoryChange = (value) => {
+    setFilters((prev) => ({
+      ...prev,
+      categoryId: value === "all" ? null : Number(value),
+    }));
+    setPage(1);
+  };
+
+  const handleScopeChange = (value) => {
+    setSearchScope(value);
+  };
+
+  return (
+    <div className="space-y-6" dir="rtl">
+      <div className="flex flex-col md:flex-row gap-3 md:items-center">
+        <Button
+          className="rounded-full bg-emerald-700 hover:bg-emerald-800 text-white text-xs ml-4 !py-0"
+          onClick={() => setOpenCreate(true)}
+        >
+          افزودن کتاب
+        </Button>
+
+        <div className="flex flex-col lg:flex-row gap-2  w-full ">
+          <div className="flex flex-row-reverse gap-2 w-full">
+            <div className="relative w-full">
+              <Input
+                dir="rtl"
+                type="search"
+                placeholder="جستجوی کتاب، نویسند..."
+                value={inputSearch}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setInputSearch(v);
+                  if (v === "") {
+                    setFilters((prev) => ({ ...prev, title: "", author: "" }));
+                  }
+                }}
+                className="pl-5 pr-12 rounded-full w-full border-green-800"
+              />
+              <Search className="absolute right-5 top-2.5 h-4 w-4 text-muted-foreground" />
+            </div>
+            <Button
+              onClick={() => applySearch()}
+              className="rounded-full  px-5 py-1 bg-emerald-700 text-white hover:bg-emerald-900"
+            >
+              جستجو
+            </Button>
+          </div>
+
+          <div className="flex max-md:flex-wrap max-md:justify-center md:flex-row-reverse gap-2 md:justify-around ">
+            {/* Parent Categories */}
+            <Select
+              onValueChange={handleCategoryChange}
+              value={
+                filters.categoryId &&
+                parentCategories.some((c) => c.id === filters.categoryId)
+                  ? String(filters.categoryId)
+                  : "all"
+              }
+            >
+              <SelectTrigger
+                dir="rtl"
+                className="rounded-full w-40 border-2 border-emerald-700 text-emerald-700 text-sm py-2 px-7"
+              >
+                <SelectValue placeholder="دسته اصلی" />
+              </SelectTrigger>
+
+              <SelectContent dir="rtl">
+                <SelectItem value="all">همه دسته‌ها</SelectItem>
+
+                {parentCategories.map((cat) => (
+                  <SelectItem key={cat.id} value={String(cat.id)}>
+                    {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Sub Categories */}
+            <Select
+              onValueChange={handleCategoryChange}
+              value={
+                filters.categoryId &&
+                subCategories.some((c) => c.id === filters.categoryId)
+                  ? String(filters.categoryId)
+                  : "all"
+              }
+            >
+              <SelectTrigger
+                dir="rtl"
+                className="rounded-full w-48 border-2 border-emerald-700 text-emerald-700 text-sm py-2 px-7"
+              >
+                <SelectValue placeholder="زیر دسته" />
+              </SelectTrigger>
+
+              <SelectContent dir="rtl">
+                <SelectItem value="all">همه زیر دسته‌ها</SelectItem>
+
+                {subCategories.map((cat) => (
+                  <SelectItem key={cat.id} value={String(cat.id)}>
+                    {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <div className="mr-2">
+              <Select onValueChange={handleScopeChange} value={searchScope}>
+                <SelectTrigger
+                  dir="rtl"
+                  className="rounded-full w-36 border-2 border-emerald-700 text-emerald-700 text-sm py-2 px-3"
+                >
+                  <SelectValue placeholder="جستجو در" />
+                </SelectTrigger>
+                <SelectContent dir="rtl">
+                  <SelectItem value="title">جستجوی عنوان</SelectItem>
+                  <SelectItem value="author">جستجوی نویسنده</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {status === "loading" ? (
+        <div className="h-40 flex items-center justify-center">
+          <Spinner className="size-10" />
+        </div>
+      ) : status === "error" ? (
+        <div className="text-red-600 text-center">خطا در بارگذاری کتاب‌ها</div>
+      ) : books.length === 0 ? (
+        <div className="text-slate-600 text-center">کتابی یافت نشد.</div>
+      ) : (
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))]  gap-4 min-h-screen">
+          {books.map((b) => (
+            <div
+              key={b.id}
+              className="bg-white max-w-80 h-fit dark:bg-slate-800 rounded-md shadow-md p-4 flex flex-col items-center"
+            >
+              {/* Cover */}
+              <div className="w-full aspect-[6/9] bg-linear-to-b from-gray-500/20 to-gray-200 rounded-md  flex justify-center items-center overflow-hidden cursor-pointer">
+                {b.coverURL ? (
+                  <Image
+                    width={200}
+                    height={200}
+                    src={`/api/files${b.coverURL}`}
+                    alt={b.title}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="text-slate-400 text-xs">بدون کاور</div>
+                )}
+              </div>
+
+              {/* Title + Author */}
+              <div className="flex flex-col items-start gap-2 w-full mt-1 mb-4">
+                <h4 className="font-semibold text-sm text-emerald-700 break-words">
+                  {b.title}
+                </h4>
+
+                <p className="text-xs text-gray-800">
+                  <span className="text-gray-500">نویسنده:</span>{" "}
+                  <span>{b.author?.name || "—"}</span>
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2 w-full justify-start">
+                <Button
+                  size="sm"
+                  className="rounded-full bg-rose-600 hover:bg-rose-700 text-white h-8 text-sm"
+                  onClick={() => confirmDelete(b)}
+                >
+                  حذف
+                </Button>
+                <Button
+                  size="sm"
+                  className="rounded-full bg-amber-500 hover:bg-amber-600 text-white h-8 text-sm"
+                  onClick={() => setEditBook(b)}
+                >
+                  ویرایش
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {data?.totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            className="rounded-full"
+            disabled={page <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            قبلی
+          </Button>
+          <div className="text-sm text-slate-600">
+            صفحه {data.page} از {data.totalPages}
+          </div>
+          <Button
+            variant="outline"
+            className="rounded-full"
+            disabled={page >= data.totalPages}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            بعدی
+          </Button>
+        </div>
+      )}
+
+      {openCreate && (
+        <CreateBookModal
+          onClose={() => setOpenCreate(false)}
+          onCreated={() => {
+            setOpenCreate(false);
+            qc.invalidateQueries({ queryKey: ["admin", "books"] });
+          }}
+        />
+      )}
+      {editBook && (
+        <CreateBookModal
+          book={editBook}
+          onClose={() => setEditBook(null)}
+          onUpdated={() => {
+            setEditBook(null);
+            qc.invalidateQueries({ queryKey: ["admin", "books"] });
+          }}
+        />
+      )}
+    </div>
+  );
 }
 
-function CreateBookModal({onClose, onCreated, book, onUpdated}) {
-    const [title, setTitle] = useState(book?.title || "");
-    const [description, setDescription] = useState(book?.description || "");
-    const [publishDate, setPublishDate] = useState(
-        book?.publish_date ? new Date(book.publish_date).toISOString() : ""
+function CreateBookModal({ onClose, onCreated, book, onUpdated }) {
+  const { data: categoriesData = [] } = useCategories();
+  const parentCategories = categoriesData.filter(
+    (cat) => cat.parentId === null,
+  );
+
+  const subCategories = categoriesData.filter((cat) => cat.parentId !== null);
+  const [title, setTitle] = useState(book?.title || "");
+  const [description, setDescription] = useState(book?.description || "");
+  const [publishDate, setPublishDate] = useState(
+    book?.publish_date ? new Date(book.publish_date).toISOString() : "",
+  );
+  const [author, setAuthor] = useState(book?.author?.name || "");
+  const [cover, setCover] = useState(null);
+  const [pdf, setPdf] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [modes, setModes] = useState(book?.mood || []);
+  const [ageGroup, setAgeGroup] = useState(book?.Age || "");
+  const [motivations, setMotivations] = useState(book?.Motivation || []);
+  const [categoryId, setCategoryId] = useState(book?.categoryId || null);
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
+
+  const coverPreview = useMemo(() => {
+    if (cover) return URL.createObjectURL(cover);
+    if (book?.coverURL) return `/api/files${book.coverURL}`;
+    return null;
+  }, [cover, book]);
+
+  useEffect(() => {
+    // keep state in sync when switching edit targets
+    setTitle(book?.title || "");
+    setDescription(book?.description || "");
+    setPublishDate(
+      book?.publish_date ? new Date(book.publish_date).toISOString() : "",
     );
-    const [author, setAuthor] = useState(book?.author?.name || "");
-    const [cover, setCover] = useState(null);
-    const [pdf, setPdf] = useState(null);
-    const [submitting, setSubmitting] = useState(false);
+    setAuthor(book?.author?.name || "");
+    setModes(book?.mood || []);
+    setAgeGroup(book?.Age || "");
+    setMotivations(book?.Motivation || []);
+    setCategoryId(book?.categoryId || null);
+    setCover(null);
+    setPdf(null);
+    setShowValidationErrors(false);
+  }, [book]);
 
-    const [modes, setModes] = useState(book?.mood || []);
-    const [ageGroup, setAgeGroup] = useState(book?.Age || "");
-    const [motivations, setMotivations] = useState(book?.Motivation || []);
-    const [category, setCategory] = useState(book?.category || "");
-    const [showValidationErrors, setShowValidationErrors] = useState(false);
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!title || !description || !categoryId) {
+      setShowValidationErrors(true);
+      toast.error("عنوان، توضیحات و دسته‌بندی الزامی هستند");
+      return;
+    }
 
-    const coverPreview = useMemo(() => {
-        if (cover) return URL.createObjectURL(cover);
-        if (book?.coverURL) return `/api/files${book.coverURL}`;
-        return null;
-    }, [cover, book]);
+    try {
+      setSubmitting(true);
 
-    useEffect(() => {
-        // keep state in sync when switching edit targets
-        setTitle(book?.title || "");
-        setDescription(book?.description || "");
-        setPublishDate(
-            book?.publish_date ? new Date(book.publish_date).toISOString() : ""
-        );
-        setAuthor(book?.author?.name || "");
-        setModes(book?.mood || []);
-        setAgeGroup(book?.Age || "");
-        setMotivations(book?.Motivation || []);
-        setCategory(book?.category || "");
-        setCover(null);
-        setPdf(null);
-        setShowValidationErrors(false);
-    }, [book]);
+      // If editing an existing book -> PATCH flow
+      if (book && book.id) {
+        const payload = {};
+        if (title) payload.title = title;
+        if (description) payload.description = description;
+        if (publishDate)
+          payload.publish_date = new Date(publishDate).toISOString();
+        if (author) payload.authorName = author;
+        if (modes && modes.length) payload.mood = modes;
+        if (motivations && motivations.length) payload.Motivation = motivations;
+        if (ageGroup) payload.Age = ageGroup;
+        if (categoryId) payload.categoryId = Number(categoryId);
 
-    const submit = async (e) => {
-        e.preventDefault();
-        // Client-side validation: required fields
-        const validCategoryIds = CATEGORIES.map((c) => c.id);
-        if (!title || !description || !category) {
-            setShowValidationErrors(true);
-            toast.error("عنوان، توضیحات و دسته‌بندی الزامی هستند");
-            return;
+        // If new files selected, upload them first to `/api/upload`
+        if (cover || pdf) {
+          const uploadFd = new FormData();
+          if (cover) uploadFd.append("cover", cover);
+          if (pdf) uploadFd.append("pdf", pdf);
+
+          const uploadedRes = await fetch("/api/upload", {
+            method: "POST",
+            body: uploadFd,
+          });
+
+          if (!uploadedRes.ok) {
+            const err = await uploadedRes.json().catch(() => ({}));
+            throw err || new Error("آپلود ناموفق");
+          }
+
+          const uploaded = await uploadedRes.json();
+          if (uploaded?.coverPath) payload.coverURL = uploaded.coverPath;
+          if (uploaded?.pdfPath) payload.pdfURL = uploaded.pdfPath;
+          if (uploaded?.length) payload.length = uploaded.length;
         }
 
-        // Ensure selected category is one of allowed ids (prevent sending invalid enum value)
-        if (category && !validCategoryIds.includes(category)) {
-            setShowValidationErrors(true);
-            toast.error("دسته‌بندی نامعتبر است");
-            return;
-        }
+        // send PATCH
+        const updated = await api
+          .patch(`/book/${book.id}`, payload)
+          .then((r) => r.data || r)
+          .catch((err) => {
+            throw err?.response?.data || err;
+          });
 
-        try {
-            setSubmitting(true);
+        toast.success("کتاب با موفقیت به‌روز شد");
+        onUpdated && onUpdated(updated);
+        return;
+      }
 
-            // If editing an existing book -> PATCH flow
-            if (book && book.id) {
-                const payload = {};
-                if (title) payload.title = title;
-                if (description) payload.description = description;
-                if (publishDate)
-                    payload.publish_date = new Date(publishDate).toISOString();
-                if (author) payload.authorName = author;
-                if (modes && modes.length) payload.mood = modes;
-                if (motivations && motivations.length) payload.Motivation = motivations;
-                if (ageGroup) payload.Age = ageGroup;
-                if (category) payload.category = category;
+      // Create flow (existing behavior) - upload files and then create via API
+      if (!pdf) {
+        toast.error(" در هنگام ایجاد فایل  اجباری است,PDF");
+        return;
+      }
 
-                // If new files selected, upload them first to `/api/upload`
-                if (cover || pdf) {
-                    const uploadFd = new FormData();
-                    if (cover) uploadFd.append("cover", cover);
-                    if (pdf) uploadFd.append("pdf", pdf);
+      // 1) Upload files to public and get relative paths
+      const uploadFd = new FormData();
+      uploadFd.append("title", title);
+      if (cover) uploadFd.append("cover", cover);
+      uploadFd.append("pdf", pdf);
 
-                    const uploadedRes = await fetch("/api/upload", {
-                        method: "POST",
-                        body: uploadFd,
-                    });
+      const uploadedRes = await fetch("/api/upload", {
+        method: "POST",
+        body: uploadFd,
+      });
+      if (!uploadedRes.ok) {
+        const err = await uploadedRes.json().catch(() => ({}));
+        throw err || new Error("آپلود ناموفق");
+      }
+      const uploaded = await uploadedRes.json();
 
-                    if (!uploadedRes.ok) {
-                        const err = await uploadedRes.json().catch(() => ({}));
-                        throw err || new Error("آپلود ناموفق");
-                    }
+      // 2) Send JSON to backend with paths only
+      const payload = {
+        title,
+        description: description || undefined,
+        authorName: author,
+        publish_date: publishDate
+          ? new Date(publishDate).toISOString()
+          : undefined,
+        pdfURL: uploaded?.pdfPath || null,
+        coverURL: uploaded?.coverPath || null,
+        length: uploaded?.length || null,
+      };
 
-                    const uploaded = await uploadedRes.json();
-                    if (uploaded?.coverPath) payload.coverURL = uploaded.coverPath;
-                    if (uploaded?.pdfPath) payload.pdfURL = uploaded.pdfPath;
-                    if (uploaded?.length) payload.length = uploaded.length;
-                }
+      if (categoryId) payload.categoryId = Number(categoryId);
 
-                // send PATCH
-                const updated = await api
-                    .patch(`/book/${book.id}`, payload)
-                    .then((r) => r.data || r)
-                    .catch((err) => {
-                        throw err?.response?.data || err;
-                    });
+      if (modes && modes.length) payload.mood = modes;
+      if (motivations && motivations.length) payload.Motivation = motivations;
+      if (ageGroup) payload.Age = ageGroup;
 
-                toast.success("کتاب با موفقیت به‌روز شد");
-                onUpdated && onUpdated(updated);
-                return;
-            }
+      await api.post("/book", payload);
+      toast.success("کتاب با موفقیت افزوده شد");
+      onCreated && onCreated();
+    } catch (e) {
+      toast.error(e?.error || e?.message || "عدم موفقیت در عملیات");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-            // Create flow (existing behavior) - upload files and then create via API
-            if (!pdf) {
-                toast.error(" در هنگام ایجاد فایل  اجباری است,PDF");
-                return;
-            }
-
-            // 1) Upload files to public and get relative paths
-            const uploadFd = new FormData();
-            uploadFd.append("title", title);
-            if (cover) uploadFd.append("cover", cover);
-            uploadFd.append("pdf", pdf);
-
-            const uploadedRes = await fetch("/api/upload", {
-                method: "POST",
-                body: uploadFd,
-            });
-            if (!uploadedRes.ok) {
-                const err = await uploadedRes.json().catch(() => ({}));
-                throw err || new Error("آپلود ناموفق");
-            }
-            const uploaded = await uploadedRes.json();
-
-            // 2) Send JSON to backend with paths only
-            const payload = {
-                title,
-                description: description || undefined,
-                authorName: author,
-                publish_date: publishDate
-                    ? new Date(publishDate).toISOString()
-                    : undefined,
-                pdfURL: uploaded?.pdfPath || null,
-                coverURL: uploaded?.coverPath || null,
-                length: uploaded?.length || null,
-            };
-
-            if (category) payload.category = category;
-
-            if (modes && modes.length) payload.mood = modes;
-            if (motivations && motivations.length) payload.Motivation = motivations;
-            if (ageGroup) payload.Age = ageGroup;
-
-            await api.post("/book", payload);
-            toast.success("کتاب با موفقیت افزوده شد");
-            onCreated && onCreated();
-        } catch (e) {
-            toast.error(e?.error || e?.message || "عدم موفقیت در عملیات");
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
-    return (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-3">
-            {/* DESKTOP-WIDER MODAL */}
-            <div
-                className="
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-3">
+      {/* DESKTOP-WIDER MODAL */}
+      <div
+        className="
           bg-white rounded-2xl p-5 space-y-4 w-full 
           max-w-[90%]
           sm:max-w-[600px]
@@ -500,194 +534,195 @@ function CreateBookModal({onClose, onCreated, book, onUpdated}) {
           xl:max-w-[1050px]
           overflow-y-scroll  max-h-[90%]
         "
-            >
-                {/* Header */}
-                <div className="flex justify-between items-center">
-                    <div className="font-semibold text-emerald-800 text-lg">
-                        {book ? "ویرایش کتاب" : "افزودن کتاب"}
-                    </div>
-                    <button
-                        onClick={onClose}
-                        className="text-slate-500 hover:text-slate-700"
-                    >
-                        بستن
-                    </button>
-                </div>
+      >
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <div className="font-semibold text-emerald-800 text-lg">
+            {book ? "ویرایش کتاب" : "افزودن کتاب"}
+          </div>
+          <button
+            onClick={onClose}
+            className="text-slate-500 hover:text-slate-700"
+          >
+            بستن
+          </button>
+        </div>
 
-                {/* FORM - SCROLL ONLY ON MOBILE/TABLET */}
-                <form
-                    className="
+        {/* FORM - SCROLL ONLY ON MOBILE/TABLET */}
+        <form
+          className="
             space-y-4 
             max-h-[75vh] overflow-y-auto      /* mobile/tablet */
             md:max-h-none md:overflow-visible /* desktop */
             pr-1
           "
-                    onSubmit={submit}
-                >
-                    {/* Title */}
-                    <div>
-                        <label className="block text-sm text-slate-600">عنوان</label>
-                        <Input
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            className="rounded-full"
-                        />
-                    </div>
+          onSubmit={submit}
+        >
+          {/* Title */}
+          <div>
+            <label className="block text-sm text-slate-600">عنوان</label>
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="rounded-full"
+            />
+          </div>
 
-                    {/* Description */}
-                    <div>
-                        <label className="block text-sm text-slate-600">توضیحات</label>
-                        <textarea
-                            rows={3}
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            className="w-full border rounded-xl p-2"
-                        />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <ToggleDatePicker value={publishDate} onChange={setPublishDate}/>
+          {/* Description */}
+          <div>
+            <label className="block text-sm text-slate-600">توضیحات</label>
+            <textarea
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full border rounded-xl p-2"
+            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <ToggleDatePicker value={publishDate} onChange={setPublishDate} />
 
-                        {/* Author */}
-                        <div>
-                            <label className="block text-sm text-slate-600">نویسنده</label>
-                            <Input
-                                value={author}
-                                onChange={(e) => setAuthor(e.target.value)}
-                                className="rounded-xl p-5"
-                            />
-                        </div>
-
-                        <div className={" flex  justify-start gap-10 "}>
-                            {/* Age group */}
-                            <div><label className="block text-sm text-slate-600">گروه سنی</label>
-                                <Select value={ageGroup} onValueChange={setAgeGroup}>
-                                    <SelectTrigger className="rounded-full">
-                                        <SelectValue placeholder="انتخاب گروه سنی"/>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {AGES.map((a) => (
-                                            <SelectItem key={a} value={a}>
-                                                {a}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select></div>
-                            {/* Category (onboarding categories) */}
-                            <div>
-                                <label className="block text-sm text-slate-600">
-                                    دسته‌بندی <span className="text-rose-600">*</span>
-                                </label>
-                                <Select
-                                    value={category}
-                                    onValueChange={(v) => {
-                                        setCategory(v);
-                                        if (showValidationErrors) setShowValidationErrors(false);
-                                    }}
-                                    aria-required="true"
-                                >
-                                    <SelectTrigger
-                                        className={`rounded-full w-40 ${
-                                            showValidationErrors && !category
-                                                ? "border-rose-600 border-2"
-                                                : ""
-                                        }`}
-                                    >
-                                        <SelectValue placeholder="انتخاب دسته‌بندی"/>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {CATEGORIES.map((c) => (
-                                            <SelectItem key={c.id} value={c.id}>
-                                                {c.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {showValidationErrors && !category && (
-                                    <div className="text-rose-600 text-xs mt-1">دسته‌بندی الزامی است</div>
-                                )}
-                            </div>
-                        </div>
-
-                        <MultiSelectWithTags
-                            label="مود"
-                            options={MODES}
-                            values={modes}
-                            onChange={setModes}
-                        />
-
-
-
-
-
-                        <MultiSelectWithTags
-                            label="انگیزه"
-                            options={MOTIVATIONS}
-                            values={motivations}
-                            onChange={setMotivations}
-                        />
-                    </div>
-
-                    {/* File Uploads */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div>
-                            <label className="block text-sm text-slate-600">cover</label>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => setCover(e.target.files?.[0] || null)}
-                                className="border rounded-xl p-2"
-                            />
-                            {coverPreview && (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <Image
-                                    width={200}
-                                    height={300}
-                                    src={coverPreview}
-                                    alt={book?.title || "cover preview"}
-                                    className="mt-2 w-32 aspect-[6/9] object-cover rounded-lg"
-                                />
-                            )}
-                        </div>
-
-                        <div>
-                            <label className="block text-sm text-slate-600">PDF</label>
-                            <input
-                                type="file"
-                                accept="application/pdf"
-                                onChange={(e) => setPdf(e.target.files?.[0] || null)}
-                                className="border rounded-xl p-2"
-                            />
-                            {book?.pdfURL && !pdf && (
-                                <div className="text-xs text-slate-600 mt-2">
-                                    {book.pdfURL.split("/").pop()}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Footer */}
-                    <div className="flex justify-end gap-2 pt-2">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="rounded-full"
-                            onClick={onClose}
-                        >
-                            انصراف
-                        </Button>
-                        <Button
-                            disabled={submitting || !category}
-                            className="rounded-full bg-emerald-700 hover:bg-emerald-800 text-white"
-                        >
-                            {submitting
-                                ? "در حال ذخیره..."
-                                : book
-                                    ? "بروزرسانی"
-                                    : "ذخیره کتاب"}
-                        </Button>
-                    </div>
-                </form>
+            {/* Author */}
+            <div>
+              <label className="block text-sm text-slate-600">نویسنده</label>
+              <Input
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                className="rounded-xl p-5"
+              />
             </div>
-        </div>
-    );
+
+            <div className={" flex  justify-start gap-10 "}>
+              {/* Age group */}
+              <div>
+                <label className="block text-sm text-slate-600">گروه سنی</label>
+                <Select value={ageGroup} onValueChange={setAgeGroup}>
+                  <SelectTrigger className="rounded-full">
+                    <SelectValue placeholder="انتخاب گروه سنی" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AGES.map((a) => (
+                      <SelectItem key={a} value={a}>
+                        {a}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {/* Category */}
+              <div>
+                <label className="block text-sm text-slate-600">
+                  دسته‌بندی <span className="text-rose-600">*</span>
+                </label>
+                <Select
+                  dir="rtl"
+                  value={categoryId ? String(categoryId) : ""}
+                  onValueChange={(v) => {
+                    setCategoryId(v ? Number(v) : null);
+                    if (showValidationErrors) setShowValidationErrors(false);
+                  }}
+                  aria-required="true"
+                >
+                  <SelectTrigger
+                    className={`rounded-full w-40 ${
+                      showValidationErrors && !categoryId
+                        ? "border-rose-600 border-2"
+                        : ""
+                    }`}
+                  >
+                    <SelectValue placeholder="انتخاب دسته‌بندی" />
+                  </SelectTrigger>
+                  <SelectContent dir="rtl">
+                    {categoriesData.map((cat) => (
+                      <SelectItem key={cat.id} value={String(cat.id)} dir="rtl">
+                        {cat.parentId !== null ? "└ " : ""}
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {showValidationErrors && !categoryId && (
+                  <div className="text-rose-600 text-xs mt-1">
+                    دسته‌بندی الزامی است
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <MultiSelectWithTags
+              label="مود"
+              options={MODES}
+              values={modes}
+              onChange={setModes}
+            />
+
+            <MultiSelectWithTags
+              label="انگیزه"
+              options={MOTIVATIONS}
+              values={motivations}
+              onChange={setMotivations}
+            />
+          </div>
+
+          {/* File Uploads */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm text-slate-600">cover</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setCover(e.target.files?.[0] || null)}
+                className="border rounded-xl p-2"
+              />
+              {coverPreview && (
+                <Image
+                  width={200}
+                  height={300}
+                  src={coverPreview}
+                  alt={book?.title || "cover preview"}
+                  className="mt-2 w-32 aspect-[6/9] object-cover rounded-lg"
+                />
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm text-slate-600">PDF</label>
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={(e) => setPdf(e.target.files?.[0] || null)}
+                className="border rounded-xl p-2"
+              />
+              {book?.pdfURL && !pdf && (
+                <div className="text-xs text-slate-600 mt-2">
+                  {book.pdfURL.split("/").pop()}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-full"
+              onClick={onClose}
+            >
+              انصراف
+            </Button>
+            <Button
+              disabled={submitting || !categoryId}
+              className="rounded-full bg-emerald-700 hover:bg-emerald-800 text-white"
+            >
+              {submitting
+                ? "در حال ذخیره..."
+                : book
+                  ? "بروزرسانی"
+                  : "ذخیره کتاب"}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }

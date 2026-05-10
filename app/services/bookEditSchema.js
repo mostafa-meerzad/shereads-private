@@ -4,7 +4,6 @@ import {
   MotivationEnum,
   AgeEnum,
 } from "@/app/services/answersSchema";
-import { CategoryEnum } from "@/app/services/answersSchema";
 
 export const EditBookSchema = z.object({
   title: z.string().min(1).optional(),
@@ -18,7 +17,7 @@ export const EditBookSchema = z.object({
 
   mood: z.array(MoodEnum).optional().nullable(),
   Motivation: z.array(MotivationEnum).optional().nullable(),
-  category: CategoryEnum.optional().nullable(),
+  categoryId: z.number().int().positive().optional().nullable(),
 
   Age: AgeEnum.optional().nullable(),
   length: z.number().int().positive().optional().nullable(),

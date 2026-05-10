@@ -20,29 +20,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
-
-const CATEGORIES = [
-  {
-    id: "educational",
-    label: "تعلیمی",
-  },
-  {
-    id: "language",
-    label: "زبان‌آموزی",
-  },
-  {
-    id: "life_skills",
-    label: "مهارت‌های زندگی",
-  },
-  {
-    id: "self_growth",
-    label: "رشد فردی",
-  },
-  {
-    id: "literature",
-    label: "ادبیات",
-  },
-];
+import useCategories from "@/hooks/useCategories";
 
 export default function ClientRegister() {
   const { user, login } = useAuthClient();
@@ -52,6 +30,7 @@ export default function ClientRegister() {
   const searchParams = useSearchParams();
   const collectedAnswers = searchParams.get("data");
   const categoriesParam = searchParams.get("categories");
+  const { data: categories = [] } = useCategories();
 
   const {
     register,
@@ -83,25 +62,44 @@ export default function ClientRegister() {
       }
     }
 
-    // If categories param exists, parse it and normalize to an array
+    // If categories param exists, parse it and normalize to an array of IDs
     let finalCategories = categories;
     if (categoriesParam) {
       try {
         const parsedCats = JSON.parse(categoriesParam);
         finalCategories = Array.isArray(parsedCats) ? parsedCats : [parsedCats];
       } catch (e) {
-        // If it's not valid JSON treat it as a single category string
         finalCategories = [categoriesParam];
       }
     }
 
-    // Add selected category from dropdown if present and not already in finalCategories
-    if (data.categoryPreference) {
-      if (!finalCategories) {
-        finalCategories = [data.categoryPreference];
-      } else if (!finalCategories.includes(data.categoryPreference)) {
-        finalCategories = [...finalCategories, data.categoryPreference];
+    const normalizeCategoryId = (value) => {
+      if (typeof value === "number") return value;
+      if (
+        typeof value === "string" &&
+        value.trim() !== "" &&
+        !isNaN(Number(value))
+      ) {
+        return Number(value);
       }
+      return value;
+    };
+
+    if (data.categoryPreference) {
+      const normalized = normalizeCategoryId(data.categoryPreference);
+      if (!finalCategories) {
+        finalCategories = [normalized];
+      } else if (
+        !finalCategories.some((c) => normalizeCategoryId(c) === normalized)
+      ) {
+        finalCategories = [...finalCategories, normalized];
+      }
+    }
+
+    if (Array.isArray(finalCategories)) {
+      finalCategories = finalCategories
+        .map(normalizeCategoryId)
+        .filter((value) => typeof value === "number");
     }
 
     try {
@@ -336,13 +334,13 @@ export default function ClientRegister() {
                       <SelectValue placeholder="انتخاب دسته‌بندی" />
                     </SelectTrigger>
                     <SelectContent>
-                      {CATEGORIES.map((cat) => (
+                      {categories.map((cat) => (
                         <SelectItem
                           className={"pr-3 "}
                           key={cat.id}
-                          value={cat.id}
+                          value={String(cat.id)}
                         >
-                          {cat.label}
+                          {cat.name}
                         </SelectItem>
                       ))}
                     </SelectContent>

@@ -35,10 +35,10 @@ export default function MultiSelectFilter({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger ref={triggerRef} className="w-full">
           <div
-            className="w-full border rounded-full p-2 flex flex-wrap gap-2 items-center justify-start cursor-pointer bg-green-600/20 border-emerald-700 text-emerald-700 text-sm px-6"
+            className="w-full border rounded-full p-2 flex flex-wrap gap-2 items-center justify-start cursor-pointer bg-green-600/20 border-emerald-700 text-emerald-700 text-sm px-6 min-w-32"
             onClick={() => setOpen(true)}
           >
-            دسته‌بندی
+            {label}
           </div>
         </PopoverTrigger>
 

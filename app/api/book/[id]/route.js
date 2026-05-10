@@ -96,7 +96,7 @@ export async function PATCH(req, { params }) {
       ...(data.coverURL !== undefined && { coverURL: data.coverURL }),
       ...(data.mood !== undefined && { mood: data.mood }),
       ...(data.Motivation !== undefined && { Motivation: data.Motivation }),
-      ...(data.category !== undefined && { category: data.category }),
+      ...(data.categoryId !== undefined && { categoryId: data.categoryId }),
       ...(data.Age !== undefined && { Age: data.Age }),
       ...(data.length !== undefined && { length: data.length }),
       authorId,
@@ -105,7 +105,7 @@ export async function PATCH(req, { params }) {
     const updatedBook = await prisma.book.update({
       where: { id },
       data: updateData,
-      include: { author: true },
+      include: { author: true, category: true },
     });
 
     if (previousAuthorId !== authorId) {
@@ -140,7 +140,7 @@ export async function GET(req, { params }) {
 
     const book = await prisma.book.findUnique({
       where: { id },
-      include: { author: true },
+      include: { author: true, category: true },
     });
 
     if (!book) {

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import usePaginatedAuthors from "@/hooks/usePaginatedAuthors"; // adjust path if needed
 import { useAuthClient } from "@/hooks/useAuthClient";
+import useCategories from "@/hooks/useCategories";
 
 // Image imports placeholder (user will replace)
 import img2 from "@/assets/onboarding-img-2.jpg";
@@ -20,28 +21,7 @@ import CategoryCard from "./CategoryCard";
 const formData = [
   {
     question: " کدام دسته‌بندی‌ها را بیشتر دوست دارید ؟",
-    answers: [
-      {
-        id: "educational",
-        label: "کتاب‌های تعلیمی (درسی)",
-      },
-      {
-        id: "language",
-        label: "کتاب‌های زبان‌آموزی",
-      },
-      {
-        id: "life_skills",
-        label: "کتاب‌های مهارت‌های زندگی و فنی",
-      },
-      {
-        id: "self_growth",
-        label: "کتاب‌های رشد فردی و روان‌شناسی",
-      },
-      {
-        id: "literature",
-        label: "کتاب‌های ادبیات و فرهنگ",
-      },
-    ],
+    answers: [],
     img: img6,
   },
   {
@@ -111,6 +91,7 @@ const backendKeys = {
 
 const OnboardingQuestions = ({ onComplete }) => {
   const { user } = useAuthClient();
+  const { data: categories = [], status: categoriesStatus } = useCategories();
   const totalQuestions = formData.length; // now includes authors
   const finalStepIndex = totalQuestions; // final screen after all questions
   const { control, handleSubmit, reset } = useForm({
@@ -123,8 +104,8 @@ const OnboardingQuestions = ({ onComplete }) => {
       const initialAnswers = {};
 
       Object.keys(backendKeys).forEach((stepIndex) => {
-        const key = backendKeys[stepIndex];
-        let val = user[key];
+        const backendKey = backendKeys[stepIndex];
+        let val = user[backendKey];
 
         if (val) {
           // If it's a string that looks like JSON, parse it (categories, author, etc. might be stored as strings in some DB setups)
@@ -138,7 +119,16 @@ const OnboardingQuestions = ({ onComplete }) => {
           }
 
           if (Array.isArray(val)) {
-            initialAnswers[stepIndex] = val;
+            if (backendKey === "categories") {
+              initialAnswers[stepIndex] = val.map((entry) => {
+                if (typeof entry === "string" && !isNaN(Number(entry))) {
+                  return Number(entry);
+                }
+                return entry;
+              });
+            } else {
+              initialAnswers[stepIndex] = val;
+            }
           } else {
             // Single select values (mood, Age) should be wrapped in an array for the form
             initialAnswers[stepIndex] = [val];
@@ -298,6 +288,15 @@ const OnboardingQuestions = ({ onComplete }) => {
 
   // helper: is current step the authors step?
   const isAuthorsStep = formData[step]?.isAuthorsStep === true;
+  const categoryAnswers =
+    categories.length > 0
+      ? categories.map((cat) => ({
+          id: cat.id,
+          label: cat.name,
+          description: cat.parentId === null ? " " : "زیرشاخه",
+        }))
+      : formData[0].answers;
+  const stepAnswers = step === 0 ? categoryAnswers : formData[step].answers;
 
   return (
     <form
@@ -305,7 +304,7 @@ const OnboardingQuestions = ({ onComplete }) => {
       className="grid w-full  max-md:max-w-4xl bg-white p-10  md:grid-cols-[1fr_1fr] gap-20 lg:gap-40 md:items-center md:p-0 md:pr-8 "
     >
       {/* Left image */}
-      <div className="hidden col-start-1 md:block relative h-full min-h-screen">
+      <div className="hidden col-start-1 md:block relative h-full min-h-screen ">
         <AnimatePresence mode="wait">
           <motion.div
             key={formData[step].img.src + String(step)} // ensure unique key when authors step updates
@@ -483,11 +482,11 @@ const OnboardingQuestions = ({ onComplete }) => {
                 return (
                   <div
                     dir="rtl"
-                    className={`grid px-8 md:px-0 items-end md:ml-auto gap-4 mb-0 mt-10 ${
+                    className={`grid px-8 md:px-0 items-end md:ml-auto gap-4 mb-0 mt-10 max-h-[55vh] overflow-y-auto no-scrollbar p-3 ${
                       step === 0 ? "grid-cols-1" : "md:grid-cols-2"
                     }`}
                   >
-                    {formData[step].answers.map((answer, idx) => {
+                    {stepAnswers.map((answer, idx) => {
                       const isObj =
                         typeof answer === "object" && answer !== null;
                       const answerValue = isObj ? answer.id : answer;

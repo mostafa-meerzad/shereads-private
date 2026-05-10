@@ -32,6 +32,15 @@ model User {
   readingProgress Reading_Progress[]
 }
 
+model Category {
+  id       Int        @id @default(autoincrement())
+  name     String
+  parentId Int?
+  parent   Category?  @relation("SubCategory", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("SubCategory")
+  books    Book[]
+}
+
 model Book {
   id           Int       @id @default(autoincrement())
   title        String
@@ -46,10 +55,12 @@ model Book {
   Motivation Json? // MotivationType[]
 
   // Single enums stored as strings
-  Age      String? // ENUM
-  length   Int? // ENUM
-  // primary category for the book - one of CategoryEnum values (stored as string)
-  category String?
+  Age    String? // ENUM
+  length Int?
+
+  // Category relation (replaces old category String field)
+  categoryId Int?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   // Relations
   author      Author             @relation(fields: [authorId], references: [id])

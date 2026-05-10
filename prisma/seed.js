@@ -2,17 +2,33 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
-
 const SALT_ROUNDS = Number(process.env.SALT_ROUNDS) || 10;
+const ADMIN_EMAIL = "admin@gmail.com";
+const ADMIN_PASSWORD = "admin123";
 
 async function hashPassword(password) {
   return bcrypt.hash(password, SALT_ROUNDS);
 }
 
-const ADMIN_EMAIL = "admin@gmail.com";
-const ADMIN_PASSWORD = "admin123";
+const categorySeed = [
+  { name: "تعلیمی", parentId: null },
+  { name: "زبان‌آموزی", parentId: null },
+  { name: "مهارت‌های زندگی", parentId: null },
+  { name: "رشد فردی", parentId: null },
+  { name: "ادبیات", parentId: null },
+];
 
-async function seedAdmin() {
+async function seedCategories() {
+  await prisma.category.createMany({
+    data: categorySeed,
+    skipDuplicates: true,
+  });
+
+  const categories = await prisma.category.findMany();
+  return Object.fromEntries(categories.map((cat) => [cat.name, cat.id]));
+}
+
+async function seedAdmin(categoryIds) {
   const existingAdmin = await prisma.user.findUnique({
     where: { email: ADMIN_EMAIL },
   });
@@ -23,14 +39,12 @@ async function seedAdmin() {
   }
 
   const hashed = await hashPassword(ADMIN_PASSWORD);
-
   await prisma.user.create({
     data: {
       name: "admin",
       email: ADMIN_EMAIL,
       passwordHash: hashed,
       role: "admin",
-
       gender: "مذکر",
       mood: null,
       Motivation: [],
@@ -38,10 +52,9 @@ async function seedAdmin() {
       author: [],
       book_length: [],
       recommendedBooksIds: [],
-      categories: ["educational"],
+      categories: [categoryIds["تعلیمی"]],
     },
   });
-
   console.log("✅ Admin user created.");
 }
 
@@ -49,16 +62,14 @@ async function main() {
   console.log("🌱 Seeding database...");
   console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
 
-  // 🔑 ALWAYS seed admin (both prod & dev)
-  await seedAdmin();
+  const categoryIds = await seedCategories();
+  await seedAdmin(categoryIds);
 
-  // 🚀 PRODUCTION → STOP HERE
   if (process.env.NODE_ENV === "production") {
     console.log("🚀 Production mode — only admin seeded.");
     return;
   }
 
-  // 🛠 DEVELOPMENT → FULL SEED
   console.log("🛠 Development mode — full seed.");
 
   const authorsData = [
@@ -75,10 +86,42 @@ async function main() {
   ];
 
   const booksData = [
-    { id: 1, title: "بوف کور", description: "رمانی نمادین و فلسفی درباره تاریکی ذهن انسان.", authorId: 2, publish_date: new Date("1937-01-01"), category: "literature", mood: ["احساسی"], Motivation: ["سرگرمی"], Age: "۱۲–۱۷", length: 220 },
-    { id: 2, title: "کلیدر", description: "حماسه‌ای ایرانی.", authorId: 3, publish_date: new Date("1978-01-01"), category: "literature", mood: ["پرهیجان"], Motivation: ["یادگیری"], Age: "۱۲–۱۷", length: 1200 },
-    { id: 3, title: "کیمیایی", description: "رمانی الهام‌بخش.", authorId: 6, publish_date: new Date("1988-01-01"), category: "self_growth", mood: ["الهام_بخش"], Motivation: ["رشد_فردی"], Age: "۱۸–۲۵", length: 200 },
-    // ... (rest unchanged)
+    {
+      id: 1,
+      title: "بوف کور",
+      description: "رمانی نمادین و فلسفی درباره تاریکی ذهن انسان.",
+      authorId: 2,
+      publish_date: new Date("1937-01-01"),
+      categoryId: categoryIds["ادبیات"],
+      mood: ["احساسی"],
+      Motivation: ["سرگرمی"],
+      Age: "۱۲–۱۷",
+      length: 220,
+    },
+    {
+      id: 2,
+      title: "کلیدر",
+      description: "حماسه‌ای ایرانی.",
+      authorId: 3,
+      publish_date: new Date("1978-01-01"),
+      categoryId: categoryIds["ادبیات"],
+      mood: ["پرهیجان"],
+      Motivation: ["یادگیری"],
+      Age: "۱۲–۱۷",
+      length: 1200,
+    },
+    {
+      id: 3,
+      title: "کیمیایی",
+      description: "رمانی الهام‌بخش.",
+      authorId: 6,
+      publish_date: new Date("1988-01-01"),
+      categoryId: categoryIds["رشد فردی"],
+      mood: ["الهام_بخش"],
+      Motivation: ["رشد_فردی"],
+      Age: "۱۸–۲۵",
+      length: 200,
+    },
   ];
 
   const usersData = [
@@ -89,7 +132,7 @@ async function main() {
       email: "elyas@example.com",
       passwordHash: await hashPassword("pass1"),
       role: "user",
-      categories: ["literature"],
+      categories: [categoryIds["ادبیات"]],
       mood: "آرام",
       Motivation: ["یادگیری"],
       Age: "۱۸–۲۵",
@@ -111,10 +154,7 @@ async function main() {
   await prisma.book.createMany({ data: booksData, skipDuplicates: true });
   await prisma.user.createMany({ data: usersData, skipDuplicates: true });
   await prisma.favorite.createMany({ data: favoritesData, skipDuplicates: true });
-  await prisma.reading_Progress.createMany({
-    data: readingProgressData,
-    skipDuplicates: true,
-  });
+  await prisma.reading_Progress.createMany({ data: readingProgressData, skipDuplicates: true });
 
   console.log("🌱 Full development seed complete!");
 }
