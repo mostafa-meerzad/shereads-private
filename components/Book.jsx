@@ -10,7 +10,7 @@ import Image from "next/image";
 
 const Book = ({ book, favIds, onToggleFav }) => {
   const router = useRouter();
-  
+
   // Resolve first available value among multiple possible backend field names
   const pickPath = (obj, keys) => {
     for (const k of keys) {
@@ -67,16 +67,16 @@ const Book = ({ book, favIds, onToggleFav }) => {
       const key = `reading-meta:${String(user.id)}:${String(book.id)}`;
       const val = localStorage.getItem(key);
       if (!val) {
-        const reset = async()=>setReadingMeta(null)
-        reset()
+        const reset = async () => setReadingMeta(null);
+        reset();
         return;
       }
       const obj = JSON.parse(val);
-      const setMetadata = async ()=>setReadingMeta(obj || null);
-      setMetadata()
+      const setMetadata = async () => setReadingMeta(obj || null);
+      setMetadata();
     } catch {
-      const setReading = async ()=>setReadingMeta(null);
-      setReading()
+      const setReading = async () => setReadingMeta(null);
+      setReading();
     }
   }, [user?.id, book?.id]);
 
@@ -86,7 +86,6 @@ const Book = ({ book, favIds, onToggleFav }) => {
     if (!lp || !np || np <= 0) return 0;
     return Math.min(100, Math.max(0, Math.round((lp / np) * 100)));
   })();
-
 
   const handleRead = () => {
     // Pass the raw path to the reader page; the reader will prefix it with /api/files if needed
@@ -108,8 +107,8 @@ const Book = ({ book, favIds, onToggleFav }) => {
           // Using a plain <img> so relative public paths work out of the box
           // If you prefer next/image, ensure the domain/config allows external hosts
           <Image
-          width={200}
-          height={200}
+            width={350}
+            height={450}
             src={coverUrl}
             alt={book.title || "book cover"}
             className="w-full h-full object-cover"
@@ -132,7 +131,9 @@ const Book = ({ book, favIds, onToggleFav }) => {
           </div>
           {/*<div className="mt-1 text-[10px] text-gray-600">{progressPercent}% خوانده شده</div>*/}
         </div>
-      ): <div className="h-4"></div>}
+      ) : (
+        <div className="h-4"></div>
+      )}
 
       <div className="flex flex-col items-start gap-2 w-full mt-1 mb-4">
         <h4 className="font-semibold text-sm text-emerald-700">{book.title}</h4>
@@ -163,7 +164,6 @@ const Book = ({ book, favIds, onToggleFav }) => {
         >
           <Heart className="size-[.9rem]" />
         </motion.button>
-
       </div>
     </motion.div>
   );

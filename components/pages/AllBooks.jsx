@@ -33,13 +33,21 @@ const AllBooks = () => {
 
   const subCategories = categories.filter((cat) => cat.parentId !== null);
   const userId = user?.id;
-  const [inputSearch, setInputSearch] = useState(""); // controlled input
-  const [filters, setFilters] = useState({
-    title: "",
-    categories: [],
-  });
-  // searchScope: 'both' | 'title' | 'author'
-  const [searchScope, setSearchScope] = useState("title");
+
+  const CATEGORY_STORAGE_KEY = "allBooksCategoryFilters";
+
+  const parseStoredCategories = (value) => {
+    if (!value) return null;
+    try {
+      const parsed = JSON.parse(value);
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .map((cat) => (typeof cat === "string" ? Number(cat) : cat))
+        .filter((cat) => !isNaN(Number(cat)));
+    } catch {
+      return [];
+    }
+  };
 
   // Prefer books that match user's selected categories (if any)
   const preferredCategories = useMemo(() => {
@@ -63,17 +71,23 @@ const AllBooks = () => {
         );
     }
   }, [user]);
-  // If the user has preferred categories, set the default category filter
-  // to the first preferred category, but only when the user hasn't
-  // already selected a category (so we don't override manual selection).
-  useEffect(() => {
-    if (preferredCategories && preferredCategories.length > 0) {
-      setFilters((prev) => ({
-        ...prev,
-        categories: preferredCategories,
-      }));
+
+  const [inputSearch, setInputSearch] = useState(""); // controlled input
+  const [filters, setFilters] = useState(() => {
+    if (typeof window === "undefined") {
+      return { title: "", categories: [] };
     }
-  }, [preferredCategories]); // Reset filters when user preference changes (e.g. login/logout)
+
+    const rawStored = localStorage.getItem(CATEGORY_STORAGE_KEY);
+    if (rawStored !== null) {
+      return { title: "", categories: parseStoredCategories(rawStored) };
+    }
+
+    return { title: "", categories: preferredCategories };
+  });
+  // searchScope: 'both' | 'title' | 'author'
+  const [searchScope, setSearchScope] = useState("title");
+
   const applySearch = () => {
     const q = inputSearch.trim();
     setFilters((prev) => ({
@@ -89,6 +103,10 @@ const AllBooks = () => {
       ...prev,
       categories: selected,
     }));
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem(CATEGORY_STORAGE_KEY, JSON.stringify(selected));
+    }
   };
 
   const handleScopeChange = (value) => {

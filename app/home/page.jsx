@@ -1,37 +1,36 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import AllBooks from "@/components/pages/AllBooks";
-import MyBooks from "@/components/pages/MyBooks";
 import FavoriteBooks from "@/components/pages/FavoriteBooks";
+import MyBooks from "@/components/pages/MyBooks";
 import RecommendedBooks from "@/components/pages/RecommendedBooks";
+import SettingsModal from "@/components/SettingsModal";
 import SidebarUi from "@/components/SideBar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useRequireAuth } from "@/hooks/useRequireAuth";
-import { BookMarked, Component, Heart, Library, UserCheck } from "lucide-react";
-import { useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
-import SettingsModal from "@/components/SettingsModal";
+import { Component, Heart, Library, UserCheck } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const tabs = [
-  { key: "home", label: "کتاب‌ها ", icon: Component },
+  { key: "all", label: "کتاب‌ها ", icon: Component },
   { key: "mybooks", label: "کتاب‌های من", icon: UserCheck },
   { key: "recommendations", label: "پیشنهادی", icon: Library },
   { key: "favorites", label: "موردعلاقه‌", icon: Heart },
 ];
 
-
 export default function Home() {
-
-  const [selected, setSelected] = useState("mybooks");
+  const searchParams = useSearchParams();
+  const [selected, setSelected] = useState(
+    searchParams.get("page") || "mybooks",
+  );
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openSettings, setOpenSettings] = useState(false);
-  const router = useRouter()
+  const router = useRouter();
   const { user } = useRequireAuth();
-
 
   return (
     <SidebarProvider>
@@ -39,7 +38,10 @@ export default function Home() {
         <SidebarUi
           tabs={tabs}
           selected={selected}
-          onSelect={setSelected}
+          onSelect={(k) => {
+            setSelected(k);
+            router.push(`/home?page=${k}`);
+          }}
           isCollapsed={isCollapsed}
           onOpenSettings={() => setOpenSettings(true)}
         />
@@ -70,6 +72,7 @@ export default function Home() {
                 <SidebarUi
                   selected={selected}
                   onSelect={(k) => {
+                    router.push(`/home?page=${k}`);
                     setSelected(k);
                     setMobileOpen(false);
                   }}
@@ -82,8 +85,12 @@ export default function Home() {
             )}
           </AnimatePresence>
 
-          <section className={"h-[90%]  overflow-y-auto scrollbar-hide [ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"}>
-            { selected === "favorites" ? (
+          <section
+            className={
+              "h-[90%]  overflow-y-auto scrollbar-hide [ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            }
+          >
+            {selected === "favorites" ? (
               <FavoriteBooks />
             ) : selected === "recommendations" ? (
               <RecommendedBooks />

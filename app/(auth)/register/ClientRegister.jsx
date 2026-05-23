@@ -316,7 +316,7 @@ export default function ClientRegister() {
 
             {/* Category Preference */}
 
-            <div className="relative flex justify-between flex-row-reverse items-center">
+            <div className="relative flex justify-between flex-row-reverse items-center hidden">
               <label className="text-sm text-gray-700 mb-1 block">
                 دسته‌بندی مورد علاقه
               </label>

@@ -49,7 +49,7 @@ const Onboarding = () => {
             setUser({ ...user, ...userRes.data });
           }
           // In edit mode, do not go to auth. Return to home instead after recommendations updated.
-          router.push("/home");
+          router.push("/home?page=recommendations");
         })
         .catch((error) => {
           console.error("There was an error updating user preferences:", error);
