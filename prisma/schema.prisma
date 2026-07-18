@@ -66,6 +66,8 @@ model Book {
   author      Author             @relation(fields: [authorId], references: [id])
   favoritedBy Favorite[]
   readBy      Reading_Progress[]
+
+  @@index([publish_date])
 }
 
 model Favorite {

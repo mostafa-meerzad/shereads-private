@@ -45,15 +45,16 @@ export async function GET(req) {
       where.title = { contains: title };
     }
 
-    const total = await prisma.book.count({ where });
-
-    const books = await prisma.book.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: { publish_date: "desc" },
-      include: { author: true, category: true },
-    });
+    const [total, books] = await Promise.all([
+      prisma.book.count({ where }),
+      prisma.book.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { publish_date: "desc" },
+        include: { author: true, category: true },
+      }),
+    ]);
 
     return NextResponse.json({
       page,

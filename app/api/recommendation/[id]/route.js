@@ -108,8 +108,10 @@ export async function POST(req, { params }) {
 
     const data = parsed.data;
 
-    // Fetch ALL books
-    const books = await prisma.book.findMany();
+    // Fetch only the fields needed by scoreBook
+    const books = await prisma.book.findMany({
+      select: { id: true, mood: true, Motivation: true, authorId: true, length: true, Age: true, categoryId: true },
+    });
 
     // Scoring logic (reusing helper)
     const scoredBooks = books.map((book) => {
@@ -135,10 +137,8 @@ export async function POST(req, { params }) {
       },
     });
 
-    // Now fetch the actual books to return to the frontend
-    const booksFinal = await prisma.book.findMany({
-      where: { id: { in: recommendedIds } },
-    });
+    // Filter from in-memory results — no second DB round-trip needed
+    const booksFinal = books.filter((b) => recommendedIds.includes(b.id));
 
     return NextResponse.json(
       {

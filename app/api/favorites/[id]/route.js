@@ -20,22 +20,16 @@ export async function GET(req, { params }) {
 
     const skip = (page - 1) * limit;
 
-    // Count total favorites for pagination
-    const total = await prisma.favorite.count({
-      where: { userId },
-    });
-
-    // Fetch paginated favorites
-    const favorites = await prisma.favorite.findMany({
-      where: { userId },
-      include: { book: {
-      include: {
-        author: true,   // <-- include author here
-      }}},
-      skip,
-      take: limit,
-      orderBy: { id: "desc" }, // optional: newest favorites first
-    });
+    const [total, favorites] = await Promise.all([
+      prisma.favorite.count({ where: { userId } }),
+      prisma.favorite.findMany({
+        where: { userId },
+        include: { book: { include: { author: true } } },
+        skip,
+        take: limit,
+        orderBy: { id: "desc" },
+      }),
+    ]);
 
     const favoriteBooks = favorites.map((f) => f.book);
 

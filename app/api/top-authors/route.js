@@ -14,21 +14,18 @@ export async function GET() {
       take: 10,
     });
 
-    // Fetch author names for each ID
-    const authors = await Promise.all(
-      grouped.map(async (item) => {
-        const author = await prisma.author.findUnique({
-          where: { id: item.authorId },
-          select: { name: true },
-        });
+    const authorIds = grouped.map((item) => item.authorId);
+    const authorRecords = await prisma.author.findMany({
+      where: { id: { in: authorIds } },
+      select: { id: true, name: true },
+    });
+    const authorMap = new Map(authorRecords.map((a) => [a.id, a.name]));
 
-        return {
-          authorId: item.authorId,
-          authorName: author?.name || "Unknown",
-          booksCount: item._count.id,
-        };
-      })
-    );
+    const authors = grouped.map((item) => ({
+      authorId: item.authorId,
+      authorName: authorMap.get(item.authorId) || "Unknown",
+      booksCount: item._count.id,
+    }));
 
     return NextResponse.json({ topAuthors: authors }, { status: 200 });
   } catch (error) {

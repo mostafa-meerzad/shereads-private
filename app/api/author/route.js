@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 import { verifyApiRequest } from "@/lib/serverAuth";
 
 export async function GET(req) {
-    verifyApiRequest();
+  const auth = await verifyApiRequest();
+  if (auth instanceof NextResponse) return auth;
   try {
     const { searchParams } = new URL(req.url);
 
@@ -31,7 +32,7 @@ export async function GET(req) {
       take: limit,
       orderBy: { id: "desc" },
       include: {
-        books: true, 
+        _count: { select: { books: true } },
       },
     });
 
