@@ -199,6 +199,9 @@ const AllBooks = () => {
                   setFilters((prev) => ({ ...prev, title: "", author: "" }));
                 }
               }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") applySearch();
+              }}
               className="pl-5 pr-12 rounded-full w-full border-green-800"
             />
             <Search className="absolute right-5 top-2.5 h-4 w-4 text-muted-foreground" />

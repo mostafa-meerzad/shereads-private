@@ -5,7 +5,7 @@ import { AddBookSchema, AddAuthorSchema } from "@/app/services/bookSchema";
 import { enforceAdminApi } from "@/lib/adminAuth";
 import fs from "fs/promises";
 import path from "path";
-import { convertPdfToImages, pagesExist } from "@/lib/convertPdfToImages";
+import { convertPdfToImages, pagesExist, getPdfPageCountFromBuffer } from "@/lib/convertPdfToImages";
 
 // Ensure we run on the Node.js runtime (needed for fs access)
 export const runtime = "nodejs";

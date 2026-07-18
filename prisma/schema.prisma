@@ -68,6 +68,9 @@ model Book {
   readBy      Reading_Progress[]
 
   @@index([publish_date])
+  @@index([title])
+  @@index([authorId])
+  @@index([categoryId])
 }
 
 model Favorite {
