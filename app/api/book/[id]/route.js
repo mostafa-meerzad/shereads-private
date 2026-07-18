@@ -3,6 +3,11 @@ import prisma from "@/lib/prisma";
 import { EditBookSchema } from "@/app/services/bookEditSchema";
 import { AddAuthorSchema } from "@/app/services/bookSchema";
 import { enforceAdminApi } from "@/lib/adminAuth";
+import { convertPdfToImages } from "@/lib/convertPdfToImages";
+import fs from "fs/promises";
+import path from "path";
+
+export const runtime = "nodejs";
 
 export async function PATCH(req, { params }) {
   const admin = await enforceAdminApi();
@@ -118,6 +123,23 @@ export async function PATCH(req, { params }) {
           where: { id: previousAuthorId },
         });
       }
+    }
+
+    // When PDF changes: remove stale pages and regenerate
+    if (data.pdfURL) {
+      const oldPagesDir = path.join(
+        process.cwd(),
+        "uploads",
+        "books",
+        String(id),
+        "pages"
+      );
+      fs.rm(oldPagesDir, { recursive: true, force: true }).catch(() => {});
+      convertPdfToImages(id, data.pdfURL)
+        .then((numPages) =>
+          prisma.book.update({ where: { id }, data: { length: numPages } })
+        )
+        .catch((err) => console.error(`[PDF Conversion] Book ${id}:`, err));
     }
 
     return NextResponse.json(updatedBook, { status: 200 });

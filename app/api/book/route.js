@@ -5,6 +5,7 @@ import { AddBookSchema, AddAuthorSchema } from "@/app/services/bookSchema";
 import { enforceAdminApi } from "@/lib/adminAuth";
 import fs from "fs/promises";
 import path from "path";
+import { convertPdfToImages } from "@/lib/convertPdfToImages";
 
 // Ensure we run on the Node.js runtime (needed for fs access)
 export const runtime = "nodejs";
@@ -246,6 +247,17 @@ export async function POST(req) {
         category: true,
       },
     });
+
+    // Fire-and-forget PDF → image conversion; updates length when done
+    if (data.pdfURL) {
+      convertPdfToImages(newBook.id, data.pdfURL)
+        .then((numPages) =>
+          prisma.book.update({ where: { id: newBook.id }, data: { length: numPages } })
+        )
+        .catch((err) =>
+          console.error(`[PDF Conversion] Book ${newBook.id}:`, err)
+        );
+    }
 
     return NextResponse.json(newBook, { status: 201 });
   } catch (error) {

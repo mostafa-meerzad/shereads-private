@@ -1,279 +1,220 @@
 "use client";
 
-import { Document, Page } from "react-pdf";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useReadingProgress } from "@/hooks/useReadingProgress";
 import { useSaveProgress } from "@/hooks/useSaveProgress";
-import { pdfjs } from "react-pdf";
-import { Button } from "./ui/button";
-import { Spinner } from "./ui/shadcn-io/spinner";
 import { motion, AnimatePresence } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js"
+const pageUrl = (bookId, n) =>
+  `/api/files/books/${bookId}/pages/page-${String(n).padStart(3, "0")}.webp`;
 
-export default function PdfReaders({ userId, bookId, pdfUrl }) {
+export default function PdfReader({ userId, bookId, numPages }) {
   const { data: progress } = useReadingProgress(userId);
   const saveProgress = useSaveProgress(userId);
 
-  const savedPage = progress?.find((p) => p.bookId === bookId)?.lastPage || 1;
+  const savedPage = progress?.find((p) => p.bookId === bookId)?.lastPage ?? 1;
+  const syncedRef = useRef(false);
 
-  const [page, setPage] = useState(savedPage);
-  const [numPages, setNumPages] = useState(null);
-  const [error, setError] = useState(null);
-  const containerRef = useRef(null);
-  const [pageWidth, setPageWidth] = useState(undefined);
-  const [pageHeight, setPageHeight] = useState(undefined);
-  const [direction, setDirection] = useState(0); // 1 for next, -1 for prev
+  const [page, setPage] = useState(1);
+  const [direction, setDirection] = useState(0);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [editingPage, setEditingPage] = useState(false);
+  const [pageInput, setPageInput] = useState("");
+  const touchRef = useRef(null);
 
-  // refs for touch handling
-  const touchStartRef = useRef({ x: 0, y: 0, t: 0 });
+  // Sync to server-saved page once on first load
   useEffect(() => {
-    if (savedPage !== page) {
-      const setPageAsync = async () => setPage(savedPage);
-      setPageAsync();
+    if (!syncedRef.current && savedPage > 1) {
+      syncedRef.current = true;
+      setPage(savedPage);
     }
   }, [savedPage]);
 
+  // Debounced progress save + localStorage sync
   useEffect(() => {
     if (!page) return;
-
-    const timer = setTimeout(() => {
+    const t = setTimeout(() => {
       saveProgress.mutate({ bookId, lastPage: page });
       try {
-        if (typeof window !== "undefined") {
-          const key = `reading-meta:${String(userId)}:${String(bookId)}`;
-          const prev = (() => {
-            try {
-              return JSON.parse(localStorage.getItem(key));
-            } catch {
-              return null;
-            }
-          })();
-          const payload = {
-            ...(prev || {}),
-            lastPage: page,
-            updatedAt: Date.now(),
-          };
-          localStorage.setItem(key, JSON.stringify(payload));
-        }
+        const key = `reading-meta:${userId}:${bookId}`;
+        const prev = JSON.parse(localStorage.getItem(key) || "{}");
+        localStorage.setItem(
+          key,
+          JSON.stringify({ ...prev, lastPage: page, numPages, updatedAt: Date.now() })
+        );
       } catch {}
     }, 500);
-
-    return () => clearTimeout(timer);
+    return () => clearTimeout(t);
   }, [page]);
 
-  // Measure container width and viewport height to make PDF responsive and fit within browser height
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const el = containerRef.current;
-
-    const update = () => {
-      // account for padding inside the card (p-3 ~ 0.75rem each side)
-      const computedWidth = el.clientWidth;
-      const paddingX = 12; // px on each side (approx Tailwind p-3)
-      const targetWidth = Math.max(200, computedWidth - paddingX * 2);
-
-      // Calculate available height: viewport height minus some space for header/toolbar
-      // Header in ClientReader is ~60px, Toolbar in PdfReader is ~100px with margins.
-      // We want some margin so it doesn't touch the edges.
-      const viewportHeight = window.innerHeight;
-      const occupiedHeight = 250; // approximate height for header, margins, and toolbar
-      const targetHeight = Math.max(300, viewportHeight - occupiedHeight);
-
-      setPageWidth(targetWidth);
-      setPageHeight(targetHeight);
-    };
-
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    window.addEventListener("resize", update);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", update);
-    };
-  }, []);
-
-  // Swipe handling: left -> previous, right -> next (for all touch-enabled devices)
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const el = containerRef.current;
-
-    function onPointerDown(e) {
-      // Only handle touch pointers (or all if we want mouse swipe too, but the issue mentions touch devices)
-      // Usually, it's safer to check e.pointerType === 'touch' if we only want touch, 
-      // but 'mouse' with swipe can also be useful. 
-      // The issue specifically says "touch devices no matter if it's a desktop, laptop, tablet or phone".
-      touchStartRef.current = { x: e.clientX, y: e.clientY, t: Date.now() };
-    }
-
-    function onPointerUp(e) {
-      const start = touchStartRef.current;
-      const dx = e.clientX - start.x;
-      const dy = e.clientY - start.y;
-      const dt = Date.now() - start.t;
-
-      const minDistance = 40; // px
-      const maxVertical = 100; // px - allow slight diagonal
-      const maxTime = 1000; // ms - allow slower swipes
-
-      if (
-        Math.abs(dx) > minDistance &&
-        Math.abs(dy) < maxVertical &&
-        dt < maxTime
-      ) {
-        // dx < 0 => finger moved left => user swiped left -> go to previous page
-        if (dx < 0) {
-          // previous
-          setDirection(-1);
-          setPage((p) => (p > 1 ? Math.max(1, p - 1) : p));
-        } else {
-          // next
-          setDirection(1);
-          setPage((p) =>
-            numPages && p < numPages ? Math.min(numPages, p + 1) : p
-          );
-        }
-      }
-    }
-
-    el.addEventListener("pointerdown", onPointerDown);
-    el.addEventListener("pointerup", onPointerUp);
-    el.addEventListener("pointercancel", onPointerUp);
-
-    // Prevent default touch actions like scrolling when swiping horizontally
-    el.style.touchAction = "pan-y"; 
-
-    return () => {
-      el.removeEventListener("pointerdown", onPointerDown);
-      el.removeEventListener("pointerup", onPointerUp);
-      el.removeEventListener("pointercancel", onPointerUp);
-    };
-  }, [numPages]);
-
-  const getNormalizedFileUrl = (url) => {
-    if (!url) return undefined;
-    if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/api/files")) {
-      return url;
-    }
-    return `/api/files${url.startsWith("/") ? "" : "/"}${url}`;
+  const goTo = (next) => {
+    if (next < 1 || (numPages && next > numPages) || next === page) return;
+    setDirection(next > page ? 1 : -1);
+    setImgLoaded(false);
+    setPage(next);
   };
 
-  const normalizedPdfUrl = getNormalizedFileUrl(pdfUrl);
+  // Keyboard navigation
+  useEffect(() => {
+    const onKey = (e) => {
+      if (editingPage) return;
+      if (e.key === "ArrowLeft") goTo(page + 1);
+      if (e.key === "ArrowRight") goTo(page - 1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [page, numPages, editingPage]);
+
+  // Swipe handling
+  const onTouchStart = (e) => {
+    touchRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  };
+  const onTouchEnd = (e) => {
+    if (!touchRef.current) return;
+    const dx = e.changedTouches[0].clientX - touchRef.current.x;
+    const dy = Math.abs(e.changedTouches[0].clientY - touchRef.current.y);
+    touchRef.current = null;
+    if (Math.abs(dx) < 40 || dy > 80) return;
+    // RTL: swipe left = next page, swipe right = previous page
+    goTo(dx < 0 ? page + 1 : page - 1);
+  };
+
+  const commitPageInput = () => {
+    const n = parseInt(pageInput, 10);
+    if (!isNaN(n)) goTo(n);
+    setEditingPage(false);
+  };
+
+  const progressPct = numPages ? (page / numPages) * 100 : 0;
 
   return (
     <div
-      className="flex flex-col items-center py-4 md:py-8 select-none"
+      className="flex flex-col h-full bg-stone-100 select-none"
       dir="rtl"
       onContextMenu={(e) => e.preventDefault()}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
     >
-      {/* PDF Card */}
-      <div
-        ref={containerRef}
-        className="w-full max-w-full md:max-w-3xl lg:max-w-4xl rounded-xl border bg-neutral-50 p-3 shadow "
-      >
-        <Document
-          file={normalizedPdfUrl}
-          loading={
-            <div className="flex  items-center justify-center">
-              <Spinner variant="circle" className="size-12 text-gray-500" />
-            </div>
-          }
-          onLoadSuccess={({ numPages }) => {
-            setNumPages(numPages);
-            setError(null);
-            try {
-              // Persist total pages locally so book cards can compute a progress bar
-              if (typeof window !== "undefined") {
-                const key = `reading-meta:${String(userId)}:${String(bookId)}`;
-                const prev = (() => {
-                  try {
-                    return JSON.parse(localStorage.getItem(key));
-                  } catch {
-                    return null;
-                  }
-                })();
-                const payload = {
-                  ...(prev || {}),
-                  numPages,
-                  updatedAt: Date.now(),
-                };
-                localStorage.setItem(key, JSON.stringify(payload));
-              }
-            } catch {}
-          }}
-          onLoadError={(err) => {
-            console.error("PDF load error", err);
-            setError("خطا در بارگیری فایل PDF. لطفاً بعداً دوباره تلاش کنید.");
-          }}
-          className="flex justify-center items-center overflow-hidden"
-        >
-          <AnimatePresence initial={false} custom={direction} mode="wait">
-            <motion.div
-              key={page}
-              custom={direction}
-              initial={{ x: direction > 0 ? -100 : 100, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: direction > 0 ? 100 : -100, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="w-full flex justify-center "
-            >
-              <Page
-                pageNumber={page}
-                renderAnnotationLayer={false}
-                renderTextLayer={false}
-                width={pageWidth}
-                height={pageHeight}
+      {/* Page area */}
+      <div className="flex-1 relative overflow-hidden flex items-center justify-center p-3 md:p-6">
+        <AnimatePresence initial={false} custom={direction} mode="wait">
+          <motion.div
+            key={page}
+            custom={direction}
+            initial={{ x: direction > 0 ? -50 : 50, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: direction > 0 ? 50 : -50, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 380, damping: 32 }}
+            className="relative w-full h-full max-w-2xl mx-auto"
+          >
+            <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-white">
+              {/* Skeleton while loading */}
+              {!imgLoaded && (
+                <div className="absolute inset-0 bg-gray-100 animate-pulse rounded-2xl" />
+              )}
+              <Image
+                src={pageUrl(bookId, page)}
+                alt={`صفحه ${page}`}
+                fill
+                className={`object-contain transition-opacity duration-200 ${
+                  imgLoaded ? "opacity-100" : "opacity-0"
+                }`}
+                onLoad={() => setImgLoaded(true)}
+                priority
+                unoptimized
               />
-            </motion.div>
-          </AnimatePresence>
-        </Document>
-
-        {error && (
-          <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        {/* Bottom Toolbar: next/previous controls moved below the document */}
-        <div className="mt-4 flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-3 rounded-xl border bg-white px-3 py-2 shadow-sm">
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={() => {
-                  setDirection(-1);
-                  setPage((p) => Math.max(1, p - 1));
-                }}
-                disabled={page <= 1}
-                className="rounded-full bg-emerald-700 text-white hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                قبلی
-              </Button>
-              <Button
-                onClick={() => {
-                  setDirection(1);
-                  setPage((p) => Math.min(numPages || p + 1, p + 1));
-                }}
-                disabled={!numPages || page >= numPages}
-                className="rounded-full bg-emerald-700 text-white hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                بعدی
-              </Button>
             </div>
-            <div className="text-sm text-slate-700">
-              صفحه{" "}
-              <span className="font-semibold text-emerald-700">{page}</span>
-              {numPages ? (
-                <span className="text-slate-500"> از {numPages}</span>
-              ) : null}
-            </div>
-          </div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Invisible tap zones */}
+        <button
+          className="absolute right-0 top-0 w-1/5 h-full z-10"
+          onClick={() => goTo(page - 1)}
+          aria-label="صفحه قبلی"
+        />
+        <button
+          className="absolute left-0 top-0 w-1/5 h-full z-10"
+          onClick={() => goTo(page + 1)}
+          aria-label="صفحه بعدی"
+        />
+      </div>
+
+      {/* Preload adjacent pages */}
+      {page > 1 && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={pageUrl(bookId, page - 1)} alt="" className="hidden" />
+      )}
+      {numPages && page < numPages && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={pageUrl(bookId, page + 1)} alt="" className="hidden" />
+      )}
+
+      {/* Bottom toolbar */}
+      <div className="bg-white border-t border-gray-100 shadow-[0_-2px_12px_rgba(0,0,0,0.06)]">
+        {/* Progress bar */}
+        <div className="h-1 bg-gray-100">
+          <div
+            className="h-full bg-emerald-500 transition-all duration-500 ease-out"
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
+
+        <div className="flex items-center justify-between px-6 py-3">
+          {/* Previous (right side in RTL) */}
+          <button
+            onClick={() => goTo(page - 1)}
+            disabled={page <= 1}
+            className="p-2.5 rounded-full text-emerald-700 hover:bg-emerald-50 active:bg-emerald-100 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
+            aria-label="صفحه قبلی"
+          >
+            <ChevronRight className="size-5" />
+          </button>
+
+          {/* Page indicator — tap to jump */}
+          {editingPage ? (
+            <input
+              autoFocus
+              type="number"
+              value={pageInput}
+              onChange={(e) => setPageInput(e.target.value)}
+              onBlur={commitPageInput}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitPageInput();
+                if (e.key === "Escape") setEditingPage(false);
+              }}
+              className="w-20 text-center text-sm border border-emerald-400 rounded-lg py-1 outline-none focus:ring-2 focus:ring-emerald-300"
+              min={1}
+              max={numPages || undefined}
+            />
+          ) : (
+            <button
+              onClick={() => {
+                setPageInput(String(page));
+                setEditingPage(true);
+              }}
+              className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
+              title="برو به صفحه"
+            >
+              <span className="font-bold text-emerald-700 text-base">{page}</span>
+              <span className="text-gray-300">/</span>
+              <span className="text-gray-500">{numPages ?? "…"}</span>
+            </button>
+          )}
+
+          {/* Next (left side in RTL) */}
+          <button
+            onClick={() => goTo(page + 1)}
+            disabled={!!numPages && page >= numPages}
+            className="p-2.5 rounded-full text-emerald-700 hover:bg-emerald-50 active:bg-emerald-100 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
+            aria-label="صفحه بعدی"
+          >
+            <ChevronLeft className="size-5" />
+          </button>
         </div>
       </div>
     </div>
   );
 }
-
-
