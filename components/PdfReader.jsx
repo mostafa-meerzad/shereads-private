@@ -7,6 +7,8 @@ import { useSaveProgress } from "@/hooks/useSaveProgress";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+const ZOOM_IN = 2;
+
 const pageUrl = (bookId, n) =>
   `/api/files/books/${bookId}/pages/page-${String(n).padStart(3, "0")}.webp`;
 
@@ -22,7 +24,14 @@ export default function PdfReader({ userId, bookId, numPages }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [editingPage, setEditingPage] = useState(false);
   const [pageInput, setPageInput] = useState("");
+
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+
   const touchRef = useRef(null);
+  const containerRef = useRef(null);
+  const lastTapRef = useRef(0);
 
   // Sync to server-saved page once on first load
   useEffect(() => {
@@ -31,6 +40,12 @@ export default function PdfReader({ userId, bookId, numPages }) {
       setPage(savedPage);
     }
   }, [savedPage]);
+
+  // Reset zoom on page change
+  useEffect(() => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  }, [page]);
 
   // Debounced progress save + localStorage sync
   useEffect(() => {
@@ -48,6 +63,15 @@ export default function PdfReader({ userId, bookId, numPages }) {
     }, 500);
     return () => clearTimeout(t);
   }, [page]);
+
+  // Non-passive touchmove listener to prevent scroll while panning
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || zoom <= 1) return;
+    const prevent = (e) => { if (touchRef.current) e.preventDefault(); };
+    el.addEventListener("touchmove", prevent, { passive: false });
+    return () => el.removeEventListener("touchmove", prevent);
+  }, [zoom]);
 
   const goTo = (next) => {
     if (next < 1 || (numPages && next > numPages) || next === page) return;
@@ -67,18 +91,79 @@ export default function PdfReader({ userId, bookId, numPages }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [page, numPages, editingPage]);
 
-  // Swipe handling
-  const onTouchStart = (e) => {
-    touchRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  const clampPan = (x, y, z) => {
+    const el = containerRef.current;
+    if (!el) return { x, y };
+    const { width: w, height: h } = el.getBoundingClientRect();
+    const maxX = (w * (z - 1)) / 2;
+    const maxY = (h * (z - 1)) / 2;
+    return {
+      x: Math.max(-maxX, Math.min(maxX, x)),
+      y: Math.max(-maxY, Math.min(maxY, y)),
+    };
   };
+
+  const handleDoubleTap = (clientX, clientY) => {
+    if (zoom > 1) {
+      setZoom(1);
+      setPan({ x: 0, y: 0 });
+      return;
+    }
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const dx = clientX - rect.left - rect.width / 2;
+    const dy = clientY - rect.top - rect.height / 2;
+    setPan(clampPan(dx * (1 - ZOOM_IN), dy * (1 - ZOOM_IN), ZOOM_IN));
+    setZoom(ZOOM_IN);
+  };
+
+  const onTouchStart = (e) => {
+    touchRef.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+      panX: pan.x,
+      panY: pan.y,
+      moved: false,
+    };
+  };
+
+  const onTouchMove = (e) => {
+    if (!touchRef.current || zoom <= 1) return;
+    const dx = e.touches[0].clientX - touchRef.current.x;
+    const dy = e.touches[0].clientY - touchRef.current.y;
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+      touchRef.current.moved = true;
+      setIsPanning(true);
+    }
+    setPan(clampPan(touchRef.current.panX + dx, touchRef.current.panY + dy, zoom));
+  };
+
   const onTouchEnd = (e) => {
     if (!touchRef.current) return;
-    const dx = e.changedTouches[0].clientX - touchRef.current.x;
-    const dy = Math.abs(e.changedTouches[0].clientY - touchRef.current.y);
+    const { x: startX, y: startY, moved } = touchRef.current;
+    const touch = e.changedTouches[0];
+    const dx = touch.clientX - startX;
+    const absDy = Math.abs(touch.clientY - startY);
     touchRef.current = null;
-    if (Math.abs(dx) < 40 || dy > 80) return;
-    // RTL: swipe left = next page, swipe right = previous page
-    goTo(dx < 0 ? page + 1 : page - 1);
+    setIsPanning(false);
+
+    const isTap = !moved && Math.abs(dx) < 15 && absDy < 15;
+    if (isTap) {
+      const now = Date.now();
+      if (now - lastTapRef.current < 300) {
+        lastTapRef.current = 0;
+        handleDoubleTap(touch.clientX, touch.clientY);
+      } else {
+        lastTapRef.current = now;
+      }
+      return;
+    }
+
+    // Page swipe — only when not zoomed
+    if (zoom <= 1 && Math.abs(dx) >= 40 && absDy <= 80) {
+      goTo(dx < 0 ? page + 1 : page - 1);
+    }
   };
 
   const commitPageInput = () => {
@@ -95,6 +180,7 @@ export default function PdfReader({ userId, bookId, numPages }) {
       dir="rtl"
       onContextMenu={(e) => e.preventDefault()}
       onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
     >
       {/* Page area */}
@@ -109,37 +195,63 @@ export default function PdfReader({ userId, bookId, numPages }) {
             transition={{ type: "spring", stiffness: 380, damping: 32 }}
             className="relative w-full h-full max-w-2xl mx-auto"
           >
-            <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-white">
-              {/* Skeleton while loading */}
-              {!imgLoaded && (
-                <div className="absolute inset-0 bg-gray-100 animate-pulse rounded-2xl" />
+            <div
+              ref={containerRef}
+              className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-white"
+              onDoubleClick={(e) => handleDoubleTap(e.clientX, e.clientY)}
+            >
+              {/* Zoom / pan wrapper */}
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+                  transformOrigin: "50% 50%",
+                  transition: isPanning ? "none" : "transform 0.2s ease-out",
+                  willChange: "transform",
+                }}
+              >
+                {!imgLoaded && (
+                  <div className="absolute inset-0 bg-gray-100 animate-pulse rounded-2xl" />
+                )}
+                <Image
+                  src={pageUrl(bookId, page)}
+                  alt={`صفحه ${page}`}
+                  fill
+                  className={`object-contain transition-opacity duration-200 ${
+                    imgLoaded ? "opacity-100" : "opacity-0"
+                  }`}
+                  onLoad={() => setImgLoaded(true)}
+                  priority
+                  unoptimized
+                />
+              </div>
+
+              {/* Zoom level badge */}
+              {zoom > 1 && (
+                <div className="absolute top-2 left-2 bg-black/25 text-white text-[10px] px-2 py-0.5 rounded-full pointer-events-none select-none">
+                  {ZOOM_IN}×
+                </div>
               )}
-              <Image
-                src={pageUrl(bookId, page)}
-                alt={`صفحه ${page}`}
-                fill
-                className={`object-contain transition-opacity duration-200 ${
-                  imgLoaded ? "opacity-100" : "opacity-0"
-                }`}
-                onLoad={() => setImgLoaded(true)}
-                priority
-                unoptimized
-              />
             </div>
           </motion.div>
         </AnimatePresence>
 
-        {/* Invisible tap zones */}
-        <button
-          className="absolute right-0 top-0 w-1/5 h-full z-10"
-          onClick={() => goTo(page - 1)}
-          aria-label="صفحه قبلی"
-        />
-        <button
-          className="absolute left-0 top-0 w-1/5 h-full z-10"
-          onClick={() => goTo(page + 1)}
-          aria-label="صفحه بعدی"
-        />
+        {/* Invisible tap zones — disabled while zoomed */}
+        {zoom <= 1 && (
+          <>
+            <button
+              className="absolute right-0 top-0 w-1/5 h-full z-10"
+              onClick={() => goTo(page - 1)}
+              aria-label="صفحه قبلی"
+            />
+            <button
+              className="absolute left-0 top-0 w-1/5 h-full z-10"
+              onClick={() => goTo(page + 1)}
+              aria-label="صفحه بعدی"
+            />
+          </>
+        )}
       </div>
 
       {/* Preload adjacent pages */}
