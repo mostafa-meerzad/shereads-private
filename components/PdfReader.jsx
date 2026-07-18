@@ -30,10 +30,9 @@ export default function PdfReader({ userId, bookId, numPages }) {
   const [isPanning, setIsPanning] = useState(false);
 
   const touchRef = useRef(null);
-  const containerRef = useRef(null);
+  const containerRef = useRef(null); // full reader area — used for clamp + tap coords
   const lastTapRef = useRef(0);
 
-  // Sync to server-saved page once on first load
   useEffect(() => {
     if (!syncedRef.current && savedPage > 1) {
       syncedRef.current = true;
@@ -41,13 +40,12 @@ export default function PdfReader({ userId, bookId, numPages }) {
     }
   }, [savedPage]);
 
-  // Reset zoom on page change
+  // Reset zoom whenever the page changes
   useEffect(() => {
     setZoom(1);
     setPan({ x: 0, y: 0 });
   }, [page]);
 
-  // Debounced progress save + localStorage sync
   useEffect(() => {
     if (!page) return;
     const t = setTimeout(() => {
@@ -64,7 +62,7 @@ export default function PdfReader({ userId, bookId, numPages }) {
     return () => clearTimeout(t);
   }, [page]);
 
-  // Non-passive touchmove listener to prevent scroll while panning
+  // Prevent browser scroll while the user is panning a zoomed page
   useEffect(() => {
     const el = containerRef.current;
     if (!el || zoom <= 1) return;
@@ -80,7 +78,6 @@ export default function PdfReader({ userId, bookId, numPages }) {
     setPage(next);
   };
 
-  // Keyboard navigation
   useEffect(() => {
     const onKey = (e) => {
       if (editingPage) return;
@@ -160,7 +157,7 @@ export default function PdfReader({ userId, bookId, numPages }) {
       return;
     }
 
-    // Page swipe — only when not zoomed
+    // Swipe to navigate — only when not zoomed
     if (zoom <= 1 && Math.abs(dx) >= 40 && absDy <= 80) {
       goTo(dx < 0 ? page + 1 : page - 1);
     }
@@ -173,18 +170,22 @@ export default function PdfReader({ userId, bookId, numPages }) {
   };
 
   const progressPct = numPages ? (page / numPages) * 100 : 0;
+  const zoomed = zoom > 1;
 
   return (
     <div
       className="flex flex-col h-full bg-stone-100 select-none"
       dir="rtl"
       onContextMenu={(e) => e.preventDefault()}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
     >
-      {/* Page area */}
-      <div className="flex-1 relative overflow-hidden flex items-center justify-center p-3 md:p-6">
+      {/* Page area — touch handlers live here, not on the toolbar */}
+      <div
+        ref={containerRef}
+        className="flex-1 relative overflow-hidden"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div
             key={page}
@@ -193,11 +194,14 @@ export default function PdfReader({ userId, bookId, numPages }) {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: direction > 0 ? 50 : -50, opacity: 0 }}
             transition={{ type: "spring", stiffness: 380, damping: 32 }}
-            className="relative w-full h-full max-w-2xl mx-auto"
+            // When not zoomed: center the card with padding + max-width.
+            // When zoomed: fill the full reader area so 2× scales relative to the whole screen.
+            className={`absolute inset-0 flex items-center justify-center ${zoomed ? "" : "p-3 md:p-6"}`}
           >
             <div
-              ref={containerRef}
-              className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl bg-white"
+              className={`relative w-full h-full bg-white ${
+                zoomed ? "" : "max-w-2xl mx-auto rounded-2xl overflow-hidden shadow-2xl"
+              }`}
               onDoubleClick={(e) => handleDoubleTap(e.clientX, e.clientY)}
             >
               {/* Zoom / pan wrapper */}
@@ -212,7 +216,7 @@ export default function PdfReader({ userId, bookId, numPages }) {
                 }}
               >
                 {!imgLoaded && (
-                  <div className="absolute inset-0 bg-gray-100 animate-pulse rounded-2xl" />
+                  <div className="absolute inset-0 bg-gray-100 animate-pulse" />
                 )}
                 <Image
                   src={pageUrl(bookId, page)}
@@ -227,8 +231,7 @@ export default function PdfReader({ userId, bookId, numPages }) {
                 />
               </div>
 
-              {/* Zoom level badge */}
-              {zoom > 1 && (
+              {zoomed && (
                 <div className="absolute top-2 left-2 bg-black/25 text-white text-[10px] px-2 py-0.5 rounded-full pointer-events-none select-none">
                   {ZOOM_IN}×
                 </div>
@@ -237,8 +240,8 @@ export default function PdfReader({ userId, bookId, numPages }) {
           </motion.div>
         </AnimatePresence>
 
-        {/* Invisible tap zones — disabled while zoomed */}
-        {zoom <= 1 && (
+        {/* Tap zones — disabled while zoomed so they don't conflict with pan */}
+        {!zoomed && (
           <>
             <button
               className="absolute right-0 top-0 w-1/5 h-full z-10"
@@ -266,7 +269,6 @@ export default function PdfReader({ userId, bookId, numPages }) {
 
       {/* Bottom toolbar */}
       <div className="bg-white border-t border-gray-100 shadow-[0_-2px_12px_rgba(0,0,0,0.06)]">
-        {/* Progress bar */}
         <div className="h-1 bg-gray-100">
           <div
             className="h-full bg-emerald-500 transition-all duration-500 ease-out"
@@ -275,7 +277,6 @@ export default function PdfReader({ userId, bookId, numPages }) {
         </div>
 
         <div className="flex items-center justify-between px-6 py-3">
-          {/* Previous (right side in RTL) */}
           <button
             onClick={() => goTo(page - 1)}
             disabled={page <= 1}
@@ -285,7 +286,6 @@ export default function PdfReader({ userId, bookId, numPages }) {
             <ChevronRight className="size-5" />
           </button>
 
-          {/* Page indicator — tap to jump */}
           {editingPage ? (
             <input
               autoFocus
@@ -316,7 +316,6 @@ export default function PdfReader({ userId, bookId, numPages }) {
             </button>
           )}
 
-          {/* Next (left side in RTL) */}
           <button
             onClick={() => goTo(page + 1)}
             disabled={!!numPages && page >= numPages}
