@@ -3,160 +3,93 @@ import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 const SALT_ROUNDS = Number(process.env.SALT_ROUNDS) || 10;
-const ADMIN_EMAIL = "admin@gmail.com";
-const ADMIN_PASSWORD = "admin123";
-
-async function hashPassword(password) {
-  return bcrypt.hash(password, SALT_ROUNDS);
-}
-
-const categorySeed = [
-  { name: "تعلیمی", parentId: null },
-  { name: "زبان‌آموزی", parentId: null },
-  { name: "مهارت‌های زندگی", parentId: null },
-  { name: "رشد فردی", parentId: null },
-  { name: "ادبیات", parentId: null },
-];
 
 async function seedCategories() {
-  await prisma.category.createMany({
-    data: categorySeed,
-    skipDuplicates: true,
-  });
+  const parents = [
+    { name: "کتاب‌های تعلیمی" },
+    { name: "آمادگی کانکور" },
+    { name: "کتاب‌های زبان آموزی" },
+    { name: "مهارت‌های زندگی و فنی" },
+    { name: "رشد فردی و روان‌شناسی" },
+    { name: "ادبیات و فرهنگ" },
+  ];
 
-  const categories = await prisma.category.findMany();
-  return Object.fromEntries(categories.map((cat) => [cat.name, cat.id]));
+  const subCategories = {
+    "کتاب‌های تعلیمی": [
+      "صنف اول",
+      "صنف دوم",
+      "صنف سوم",
+      "صنف چهارم",
+      "صنف پنجم",
+      "صنف ششم",
+      "صنف هفتم",
+      "صنف هشتم",
+      "صنف نهم",
+      "صنف دهم",
+      "صنف یازدهم",
+      "صنف دوازدهم",
+    ],
+    "رشد فردی و روان‌شناسی": [
+      "رشد فردی و موفقیت",
+      "سلامت روان",
+      "روابط و ارتباطات",
+    ],
+    "ادبیات و فرهنگ": [
+      "رمان و داستان",
+      "شعر",
+      "ادبیات کلاسیک و معاصر",
+    ],
+  };
+
+  for (const parent of parents) {
+    const existing = await prisma.category.findFirst({ where: { name: parent.name, parentId: null } });
+    if (existing) continue;
+
+    const created = await prisma.category.create({ data: { name: parent.name } });
+
+    const subs = subCategories[parent.name];
+    if (subs) {
+      await prisma.category.createMany({
+        data: subs.map((name) => ({ name, parentId: created.id })),
+        skipDuplicates: true,
+      });
+    }
+  }
+
+  console.log("✅ Categories seeded.");
 }
 
-async function seedAdmin(categoryIds) {
-  const existingAdmin = await prisma.user.findUnique({
-    where: { email: ADMIN_EMAIL },
-  });
-
-  if (existingAdmin) {
-    console.log("⚠️ Admin already exists. Skipping.");
+async function seedAdmin() {
+  const existing = await prisma.user.findUnique({ where: { email: "admin@shereads.af" } });
+  if (existing) {
+    console.log("⚠️  Admin already exists. Skipping.");
     return;
   }
 
-  const hashed = await hashPassword(ADMIN_PASSWORD);
+  const passwordHash = await bcrypt.hash("shereads@admin", SALT_ROUNDS);
   await prisma.user.create({
     data: {
-      name: "admin",
-      email: ADMIN_EMAIL,
-      passwordHash: hashed,
+      name: "Admin",
+      email: "admin@shereads.af",
+      passwordHash,
       role: "admin",
       gender: "مذکر",
-      mood: null,
+      categories: [],
       Motivation: [],
-      Age: "۱۸–۲۵",
       author: [],
       book_length: [],
       recommendedBooksIds: [],
-      categories: [categoryIds["تعلیمی"]],
     },
   });
+
   console.log("✅ Admin user created.");
 }
 
 async function main() {
   console.log("🌱 Seeding database...");
-  console.log(`🌍 Environment: ${process.env.NODE_ENV}`);
-
-  const categoryIds = await seedCategories();
-  await seedAdmin(categoryIds);
-
-  if (process.env.NODE_ENV === "production") {
-    console.log("🚀 Production mode — only admin seeded.");
-    return;
-  }
-
-  console.log("🛠 Development mode — full seed.");
-
-  const authorsData = [
-    { id: 1, name: "جلال آل‌احمد" },
-    { id: 2, name: "صادق هدایت" },
-    { id: 3, name: "محمود دولت‌آبادی" },
-    { id: 4, name: "احمد شاملو" },
-    { id: 5, name: "ژان پل سارتر" },
-    { id: 6, name: "پائولو کوئیلو" },
-    { id: 7, name: "داستايفسکی" },
-    { id: 8, name: "اورول" },
-    { id: 9, name: "نیل گیمن" },
-    { id: 10, name: "جین آستن" },
-  ];
-
-  const booksData = [
-    {
-      id: 1,
-      title: "بوف کور",
-      description: "رمانی نمادین و فلسفی درباره تاریکی ذهن انسان.",
-      authorId: 2,
-      publish_date: new Date("1937-01-01"),
-      categoryId: categoryIds["ادبیات"],
-      mood: ["احساسی"],
-      Motivation: ["سرگرمی"],
-      Age: "۱۲–۱۷",
-      length: 220,
-    },
-    {
-      id: 2,
-      title: "کلیدر",
-      description: "حماسه‌ای ایرانی.",
-      authorId: 3,
-      publish_date: new Date("1978-01-01"),
-      categoryId: categoryIds["ادبیات"],
-      mood: ["پرهیجان"],
-      Motivation: ["یادگیری"],
-      Age: "۱۲–۱۷",
-      length: 1200,
-    },
-    {
-      id: 3,
-      title: "کیمیایی",
-      description: "رمانی الهام‌بخش.",
-      authorId: 6,
-      publish_date: new Date("1988-01-01"),
-      categoryId: categoryIds["رشد فردی"],
-      mood: ["الهام_بخش"],
-      Motivation: ["رشد_فردی"],
-      Age: "۱۸–۲۵",
-      length: 200,
-    },
-  ];
-
-  const usersData = [
-    {
-      id: 1,
-      name: "الیاس",
-      gender: "مذکر",
-      email: "elyas@example.com",
-      passwordHash: await hashPassword("pass1"),
-      role: "user",
-      categories: [categoryIds["ادبیات"]],
-      mood: "آرام",
-      Motivation: ["یادگیری"],
-      Age: "۱۸–۲۵",
-      author: [1, 6],
-      book_length: ["کوتاه"],
-      recommendedBooksIds: [1, 3],
-    },
-  ];
-
-  const favoritesData = [
-    { id: 1, userId: 1, bookId: 1 },
-  ];
-
-  const readingProgressData = [
-    { id: 1, userId: 1, bookId: 1, lastPage: 50 },
-  ];
-
-  await prisma.author.createMany({ data: authorsData, skipDuplicates: true });
-  await prisma.book.createMany({ data: booksData, skipDuplicates: true });
-  await prisma.user.createMany({ data: usersData, skipDuplicates: true });
-  await prisma.favorite.createMany({ data: favoritesData, skipDuplicates: true });
-  await prisma.reading_Progress.createMany({ data: readingProgressData, skipDuplicates: true });
-
-  console.log("🌱 Full development seed complete!");
+  await seedCategories();
+  await seedAdmin();
+  console.log("✅ Seed complete.");
 }
 
 main()
@@ -164,6 +97,4 @@ main()
     console.error("❌ Seed error:", e);
     process.exit(1);
   })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  .finally(() => prisma.$disconnect());
