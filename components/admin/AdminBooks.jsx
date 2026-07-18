@@ -15,7 +15,7 @@ import api from "@/lib/apiClient";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import MultiSelectWithTags from "../ui/multi-select-with-tags";
 import ToggleDatePicker from "../ui/toggle-date-picker";
@@ -81,6 +81,30 @@ export default function AdminBooks() {
 
   const { data, status } = useAdminBooks({ page, filters });
   const books = data?.books || [];
+
+  // Auto-poll while any book is still converting; toast when one finishes
+  const prevConvertingRef = useRef(new Set());
+  useEffect(() => {
+    const nowConverting = new Set(
+      books.filter((b) => b.pdfURL && b.pagesReady === false).map((b) => b.id),
+    );
+
+    // Toast for books that just finished
+    for (const id of prevConvertingRef.current) {
+      if (!nowConverting.has(id)) {
+        const book = books.find((b) => b.id === id);
+        if (book) toast.success(`کتاب «${book.title}» آماده شد`);
+      }
+    }
+    prevConvertingRef.current = nowConverting;
+
+    if (nowConverting.size === 0) return;
+    const timer = setTimeout(
+      () => qc.invalidateQueries({ queryKey: ["admin", "books"] }),
+      5000,
+    );
+    return () => clearTimeout(timer);
+  }, [books, qc]);
 
   const softDelete = useMutation({
     mutationFn: async (bookId) => api.delete(`/book/${bookId}`),
@@ -270,7 +294,7 @@ export default function AdminBooks() {
               className="bg-white max-w-80 h-fit dark:bg-slate-800 rounded-md shadow-md p-4 flex flex-col items-center"
             >
               {/* Cover */}
-              <div className="w-full aspect-[6/9] bg-linear-to-b from-gray-500/20 to-gray-200 rounded-md  flex justify-center items-center overflow-hidden cursor-pointer">
+              <div className="relative w-full aspect-6/9 bg-linear-to-b from-gray-500/20 to-gray-200 rounded-md flex justify-center items-center overflow-hidden cursor-pointer">
                 {b.coverURL ? (
                   <Image
                     width={200}
@@ -282,6 +306,12 @@ export default function AdminBooks() {
                   />
                 ) : (
                   <div className="text-slate-400 text-xs">بدون کاور</div>
+                )}
+                {b.pdfURL && b.pagesReady === false && (
+                  <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] flex flex-col items-center justify-center gap-2 rounded-md">
+                    <Spinner className="size-5 text-white" />
+                    <span className="text-xs text-white font-medium">در حال پردازش...</span>
+                  </div>
                 )}
               </div>
 

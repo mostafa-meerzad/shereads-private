@@ -5,7 +5,7 @@ import { AddBookSchema, AddAuthorSchema } from "@/app/services/bookSchema";
 import { enforceAdminApi } from "@/lib/adminAuth";
 import fs from "fs/promises";
 import path from "path";
-import { convertPdfToImages } from "@/lib/convertPdfToImages";
+import { convertPdfToImages, pagesExist } from "@/lib/convertPdfToImages";
 
 // Ensure we run on the Node.js runtime (needed for fs access)
 export const runtime = "nodejs";
@@ -57,12 +57,17 @@ export async function GET(req) {
       }),
     ]);
 
+    const booksWithStatus = books.map((b) => ({
+      ...b,
+      pagesReady: b.pdfURL ? pagesExist(b.id) : true,
+    }));
+
     return NextResponse.json({
       page,
       limit,
       total,
       totalPages: Math.ceil(total / limit),
-      books,
+      books: booksWithStatus,
     });
   } catch (err) {
     console.error("GET Books Error:", err);
