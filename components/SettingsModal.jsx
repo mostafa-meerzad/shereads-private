@@ -16,6 +16,7 @@ export default function SettingsModal({ open, onOpenChange }) {
 
   const [form, setForm] = useState({ name: "", email: "", password: "", gender: "", Age: "" });
   const [saving, setSaving] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
     if (user) {
@@ -35,7 +36,19 @@ export default function SettingsModal({ open, onOpenChange }) {
   async function onSubmit(e) {
     e.preventDefault();
     if (!user?.id) return;
+
+    // Client-side validation
+    const clientErrors = {};
+    if (form.password !== "" && form.password.length < 6) {
+      clientErrors.password = "رمز عبور باید حداقل ۶ حرف باشد";
+    }
+    if (Object.keys(clientErrors).length > 0) {
+      setFieldErrors(clientErrors);
+      return;
+    }
+
     setSaving(true);
+    setFieldErrors({});
     try {
       const payload = {};
       if (form.name !== "") payload.name = form.name;
@@ -47,12 +60,24 @@ export default function SettingsModal({ open, onOpenChange }) {
 
       const { data } = await api.patch(`/user/${user.id}`, payload);
       toast.success("پروفایل با موفقیت به‌روزرسانی شد");
-      // update client user (if hook supports it)
       try {
         setUser && setUser({ ...user, ...data });
       } catch {}
       onOpenChange && onOpenChange(false);
     } catch (err) {
+      const details = err?.details;
+      if (details) {
+        const mapped = {};
+        const fieldKeys = ["name", "email", "password", "gender", "Age"];
+        for (const field of fieldKeys) {
+          const msgs = details[field]?._errors;
+          if (msgs?.length) mapped[field] = msgs[0];
+        }
+        if (Object.keys(mapped).length > 0) {
+          setFieldErrors(mapped);
+          return;
+        }
+      }
       const msg = err?.error || err?.message || "خطا در به‌روزرسانی";
       toast.error(typeof msg === "string" ? msg : "خطا در به‌روزرسانی");
     } finally {
@@ -71,16 +96,19 @@ export default function SettingsModal({ open, onOpenChange }) {
           <div>
             <label className="block mb-1 text-sm text-slate-500">نام کامل</label>
             <Input value={form.name} onChange={updateField("name")} className="rounded-full" />
+            {fieldErrors.name && <p className="text-red-600 text-xs mt-1">{fieldErrors.name}</p>}
           </div>
 
           <div>
             <label className="block mb-1 text-sm text-slate-500">ایمیل</label>
             <Input type="email" value={form.email} onChange={updateField("email")} className="rounded-full" />
+            {fieldErrors.email && <p className="text-red-600 text-xs mt-1">{fieldErrors.email}</p>}
           </div>
 
           <div>
             <label className="block mb-1 text-sm text-slate-500">رمز عبور جدید</label>
             <Input type="password" value={form.password} onChange={updateField("password")} className="rounded-full" placeholder="اختیاری" />
+            {fieldErrors.password && <p className="text-red-600 text-xs mt-1">{fieldErrors.password}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-3">

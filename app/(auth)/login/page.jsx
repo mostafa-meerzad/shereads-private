@@ -23,6 +23,7 @@ export default function Login() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm();
 
@@ -56,7 +57,18 @@ export default function Login() {
 
       // Zod validation error
       if (status === 422) {
-        toast.error("ورودی‌ها معتبر نیستند");
+        const details = result?.details;
+        let hasFieldError = false;
+        if (details) {
+          for (const field of ["email", "password"]) {
+            const msgs = details[field]?._errors;
+            if (msgs?.length) {
+              setError(field, { type: "server", message: msgs[0] });
+              hasFieldError = true;
+            }
+          }
+        }
+        if (!hasFieldError) toast.error("ورودی‌ها معتبر نیستند");
         return;
       }
 

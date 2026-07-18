@@ -52,7 +52,10 @@ export async function PATCH(req, { params }) {
     // Validate only provided fields
     const parsed = UserEditSchema.safeParse(body);
     if (!parsed.success) {
-      return Response.json({ error: parsed.error.format() }, { status: 400 });
+      return Response.json(
+        { error: "Validation failed", details: parsed.error.format() },
+        { status: 422 }
+      );
     }
 
     const dataToUpdate = {};

@@ -38,6 +38,7 @@ export default function ClientRegister() {
     watch,
     setValue,
     control,
+    setError,
     formState: { errors },
   } = useForm();
 
@@ -138,7 +139,20 @@ export default function ClientRegister() {
 
       // Zod validation error
       if (status === 422) {
-        toast.error("ورودی‌ها معتبر نیستند");
+        const details = result?.details;
+        // server field "name" maps to form field "fullName"
+        const fieldMap = { name: "fullName", email: "email", password: "password", gender: "gender" };
+        let hasFieldError = false;
+        if (details) {
+          for (const [serverField, formField] of Object.entries(fieldMap)) {
+            const msgs = details[serverField]?._errors;
+            if (msgs?.length) {
+              setError(formField, { type: "server", message: msgs[0] });
+              hasFieldError = true;
+            }
+          }
+        }
+        if (!hasFieldError) toast.error("ورودی‌ها معتبر نیستند");
         return;
       }
 

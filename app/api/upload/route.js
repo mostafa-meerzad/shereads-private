@@ -35,6 +35,29 @@ export async function POST(req) {
     const cover = form.get("cover");
     const title = form.get("title")?.toString() || "book";
 
+    const MAX_PDF_SIZE = 50 * 1024 * 1024; // 50 MB
+    const MAX_COVER_SIZE = 5 * 1024 * 1024; // 5 MB
+    const ALLOWED_PDF_TYPES = ["application/pdf"];
+    const ALLOWED_COVER_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
+    if (pdf && typeof pdf === "object" && pdf.arrayBuffer) {
+      if (!ALLOWED_PDF_TYPES.includes(pdf.type)) {
+        return NextResponse.json({ error: "فایل PDF باید با فرمت .pdf باشد", field: "pdf" }, { status: 400 });
+      }
+      if (pdf.size > MAX_PDF_SIZE) {
+        return NextResponse.json({ error: "حجم فایل PDF نباید بیشتر از ۵۰ مگابایت باشد", field: "pdf" }, { status: 400 });
+      }
+    }
+
+    if (cover && typeof cover === "object" && cover.arrayBuffer) {
+      if (!ALLOWED_COVER_TYPES.includes(cover.type)) {
+        return NextResponse.json({ error: "تصویر جلد باید با فرمت JPG، PNG، WebP یا GIF باشد", field: "cover" }, { status: 400 });
+      }
+      if (cover.size > MAX_COVER_SIZE) {
+        return NextResponse.json({ error: "حجم تصویر جلد نباید بیشتر از ۵ مگابایت باشد", field: "cover" }, { status: 400 });
+      }
+    }
+
     // Build unique, related base name for files
     const baseSafe = (str) =>
       str

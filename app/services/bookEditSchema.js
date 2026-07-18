@@ -6,8 +6,8 @@ import {
 } from "@/app/services/answersSchema";
 
 export const EditBookSchema = z.object({
-  title: z.string().min(1).optional(),
-  description: z.string().min(1).optional(),
+  title: z.string().min(1, "عنوان کتاب نمی‌تواند خالی باشد").optional(),
+  description: z.string().min(1, "توضیحات نمی‌تواند خالی باشد").optional(),
 
   authorName: z.string().optional().nullable(),
 

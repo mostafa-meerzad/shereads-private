@@ -10,10 +10,10 @@ import {
 import { CategoryEnum } from '@/app/services/answersSchema';
 
 export const RegisterSchema = z.object({
-  name: z.string().min(1),
+  name: z.string().min(1, "نام الزامی است"),
   gender: GenderEnum, // uses your zod enum
-  email: z.string().email(),
-  password: z.string().min(6),
+  email: z.string().email("ایمیل معتبر نیست"),
+  password: z.string().min(6, "رمز عبور باید حداقل ۶ حرف باشد"),
 
   // optional role but validate if provided
   role: RoleEnum.optional().default('user'),

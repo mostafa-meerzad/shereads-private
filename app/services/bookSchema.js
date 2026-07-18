@@ -12,8 +12,8 @@ export const AddAuthorSchema = z.object({
 
 // Schema for adding a book (author NAME instead of authorId)
 export const AddBookSchema = z.object({
-  title: z.string().min(1),
-  description: z.string().min(1),
+  title: z.string().min(1, "عنوان کتاب الزامی است"),
+  description: z.string().min(1, "توضیحات کتاب الزامی است"),
 
   // Instead of authorId we take name
   authorName: z.string().optional().nullable(),
