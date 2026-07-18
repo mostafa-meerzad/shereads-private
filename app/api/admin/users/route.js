@@ -2,8 +2,11 @@ import { RegisterSchema } from "@/app/services/registerSchema";
 import { hashPassword } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { enforceAdminApi } from "@/lib/adminAuth";
 
 export async function POST(req) {
+  const auth = await enforceAdminApi();
+  if (auth instanceof NextResponse) return auth;
   try {
     const body = await req.json();
     const parsed = RegisterSchema.safeParse(body);
@@ -67,4 +70,3 @@ export async function POST(req) {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
-409

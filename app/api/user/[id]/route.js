@@ -42,6 +42,8 @@ export async function GET(req, { params }) {
 }
 
 export async function PATCH(req, { params }) {
+  const auth = await verifyApiRequest();
+  if (auth instanceof NextResponse) return auth;
   try {
     const awaitedParams = await params;
     const id = awaitedParams.id;
@@ -56,9 +58,7 @@ export async function PATCH(req, { params }) {
     const dataToUpdate = {};
 
     const { name, gender, email, password, Age, isActive, role, categories } = parsed.data;
-    console.log("current user's role: ", role)
-console.log("current user's name: ", name)
-console.log("current user's email: ", email)
+
     // --- Conditionally add fields to update ----
     if (name !== undefined) dataToUpdate.name = name;
     if (gender !== undefined) dataToUpdate.gender = gender;

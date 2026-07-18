@@ -6,7 +6,7 @@ export async function POST() {
     // Destroy JWT cookie
     response.cookies.set("token", "", {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       path: "/",
       expires: new Date(0),
@@ -15,7 +15,7 @@ export async function POST() {
     // If you have refreshToken cookie:
     response.cookies.set("refreshToken", "", {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       path: "/",
       expires: new Date(0),
@@ -24,7 +24,7 @@ export async function POST() {
     // If you use session cookies:
     response.cookies.set("session", "", {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       path: "/",
       expires: new Date(0),

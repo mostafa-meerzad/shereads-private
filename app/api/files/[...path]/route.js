@@ -6,10 +6,20 @@ export async function GET(request, { params }) {
   try {
     const paramsObj = await params;
     const filenameParts = paramsObj.path;
-    let filePath = path.join(process.cwd(), "uploads", ...filenameParts);
+
+    const uploadsBase = path.resolve(process.cwd(), "uploads");
+    const publicBase = path.resolve(process.cwd(), "public");
+
+    let filePath = path.resolve(uploadsBase, ...filenameParts);
+    if (!filePath.startsWith(uploadsBase + path.sep) && filePath !== uploadsBase) {
+      return new Response("Forbidden", { status: 403 });
+    }
 
     if (!fs.existsSync(filePath)) {
-      filePath = path.join(process.cwd(), "public", ...filenameParts);
+      filePath = path.resolve(publicBase, ...filenameParts);
+      if (!filePath.startsWith(publicBase + path.sep) && filePath !== publicBase) {
+        return new Response("Forbidden", { status: 403 });
+      }
     }
 
     if (!fs.existsSync(filePath)) {

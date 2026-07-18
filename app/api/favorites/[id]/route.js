@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { verifyApiRequest } from "@/lib/serverAuth";
 
 export async function GET(req, { params }) {
+  const auth = await verifyApiRequest();
+  if (auth instanceof NextResponse) return auth;
   try {
     const awaitedParams = await params;
     const userId = Number(awaitedParams.id);
@@ -53,6 +56,8 @@ export async function GET(req, { params }) {
 }
 
 export async function POST(req, { params }) {
+  const auth = await verifyApiRequest();
+  if (auth instanceof NextResponse) return auth;
   try {
     const awaitedParams = await params;
     const userId = Number(awaitedParams.id);
@@ -94,6 +99,8 @@ export async function POST(req, { params }) {
 }
 
 export async function DELETE(req, { params }) {
+  const auth = await verifyApiRequest();
+  if (auth instanceof NextResponse) return auth;
   try {
     const awaitedParams = await params;
     const userId = Number(awaitedParams.id);

@@ -31,6 +31,8 @@ export async function GET(req, { params }) {
 }
 
 export async function POST(req, { params }) {
+  const auth = await verifyApiRequest();
+  if (auth instanceof NextResponse) return auth;
   try {
     const awaitedParams = await params;
     const userId = Number(awaitedParams.id);
@@ -59,7 +61,7 @@ export async function POST(req, { params }) {
       );
     }
 
-    if (lastPage > book.length) {
+    if (book.length !== null && lastPage > book.length) {
       return Response.json(
         { error: `Last page (${lastPage}) cannot be greater than total book length (${book.length}).` },
         { status: 400 }
