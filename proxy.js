@@ -10,7 +10,7 @@ import { NextResponse } from "next/server";
  * If you need full JWT verification here, validate on the server (API) side or use a Node middleware.
  */
 
-export function middleware(req) {
+export function proxy(req) {
   const { pathname } = req.nextUrl;
 
   // Allow Next.js internals and static assets

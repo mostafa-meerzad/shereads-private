@@ -1,4 +1,11 @@
+import { fileURLToPath } from 'url';
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url));
+
 const nextConfig = {
+  turbopack: {
+    root: __dirname,
+  },
   images: {
     remotePatterns: [
       {
@@ -13,6 +20,9 @@ const nextConfig = {
   },
   experimental: {
     proxyClientMaxBodySize: '100mb',
+    outputFileTracingExcludes: {
+      '*': ['uploads/**'],
+    },
   },
 };
 
